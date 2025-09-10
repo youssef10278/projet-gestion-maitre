@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Menu Hamburger - Écrans 15 Pouces</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .screen-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 2000;
+            max-width: 350px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .screen-type {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .resolution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .resolution-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .resolution-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        .resolution-item.active {
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-active { background: #10b981; }
+        .status-inactive { background: #ef4444; }
+        .test-controls {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .test-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Panel d'information écran -->
+    <div class="screen-info">
+        <div class="screen-type" id="screen-type">🖥️ Détection...</div>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div><strong>Largeur actuelle:</strong> <span id="current-width">0</span>px</div>
+            <div><strong>Hauteur:</strong> <span id="current-height">0</span>px</div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <div>
+                <span class="status-indicator" id="hamburger-indicator"></span>
+                <strong>Menu Hamburger:</strong> <span id="hamburger-status">Inactif</span>
+            </div>
+            <div style="margin-top: 5px;">
+                <span class="status-indicator" id="menu-indicator"></span>
+                <strong>Menu Ouvert:</strong> <span id="menu-status">Non</span>
+            </div>
+        </div>
+        
+        <div><strong>Résolutions de test:</strong></div>
+        <div class="resolution-grid">
+            <div class="resolution-item" onclick="setResolution(1920, 1080)">
+                <div>1920×1080</div>
+                <div style="font-size: 11px; opacity: 0.8;">Full HD</div>
+            </div>
+            <div class="resolution-item" onclick="setResolution(1600, 900)">
+                <div>1600×900</div>
+                <div style="font-size: 11px; opacity: 0.8;">HD+</div>
+            </div>
+            <div class="resolution-item" onclick="setResolution(1440, 900)">
+                <div>1440×900</div>
+                <div style="font-size: 11px; opacity: 0.8;">WXGA+</div>
+            </div>
+            <div class="resolution-item" onclick="setResolution(1366, 768)">
+                <div>1366×768</div>
+                <div style="font-size: 11px; opacity: 0.8;">HD</div>
+            </div>
+            <div class="resolution-item" onclick="setResolution(1280, 720)">
+                <div>1280×720</div>
+                <div style="font-size: 11px; opacity: 0.8;">HD Ready</div>
+            </div>
+            <div class="resolution-item" onclick="setResolution(1024, 768)">
+                <div>1024×768</div>
+                <div style="font-size: 11px; opacity: 0.8;">XGA</div>
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" onclick="testMenuToggle()">🔄 Toggle Menu</button>
+            <button class="test-btn" onclick="resetSize()">📐 Taille Réelle</button>
+            <button class="test-btn" onclick="simulate15inch()">💻 Simuler 15"</button>
+            <button class="test-btn" onclick="simulateLarge()">🖥️ Grand Écran</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-xl font-bold border-b border-gray-700">
+            💻 Test Écrans 15"
+        </div>
+        <nav class="flex-grow p-4">
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🏠 Dashboard
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💰 Caisse
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📦 Produits
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                👥 Clients
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📄 Factures
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                ⚙️ Paramètres
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <h1 class="text-3xl font-bold mb-6">Test Menu Hamburger - Écrans 15 Pouces et Moins</h1>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4">🎯 Nouveau Breakpoint : 1440px</h2>
+            <p class="text-blue-700 mb-4">
+                Le menu hamburger s'active maintenant sur tous les écrans de <strong>1440px de largeur et moins</strong>, 
+                couvrant ainsi la majorité des écrans 15 pouces et les ordinateurs portables.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-blue-800 mb-2">✅ Écrans Couverts</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-1">
+                        <li>Laptops 15" (1366×768, 1440×900)</li>
+                        <li>Laptops 14" et 13"</li>
+                        <li>Tablettes en mode paysage</li>
+                        <li>Smartphones</li>
+                        <li>Écrans compacts</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-blue-800 mb-2">🖥️ Écrans Exclus</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-1">
+                        <li>Écrans 17" et plus</li>
+                        <li>Moniteurs 1920×1080 et plus</li>
+                        <li>Écrans ultra-larges</li>
+                        <li>Configurations multi-écrans</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-green-800 mb-4">🧪 Instructions de Test</h2>
+            <ol class="list-decimal list-inside text-green-700 space-y-2">
+                <li><strong>Testez votre résolution actuelle</strong> - Vérifiez si le menu hamburger s'affiche</li>
+                <li><strong>Utilisez les boutons de résolution</strong> - Testez différentes tailles d'écran 15"</li>
+                <li><strong>Simulez un écran 15"</strong> - Cliquez sur "Simuler 15"" pour tester</li>
+                <li><strong>Testez un grand écran</strong> - Cliquez sur "Grand Écran" pour désactiver</li>
+                <li><strong>Vérifiez la navigation</strong> - Ouvrez/fermez le menu plusieurs fois</li>
+            </ol>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">📊 Statistiques d'Écrans</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span>Laptops 13-15":</span>
+                        <span class="font-mono text-green-600">✅ Supportés</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tablettes:</span>
+                        <span class="font-mono text-green-600">✅ Supportées</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Smartphones:</span>
+                        <span class="font-mono text-green-600">✅ Supportés</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Écrans 17"+:</span>
+                        <span class="font-mono text-blue-600">🖥️ Sidebar fixe</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Moniteurs 4K:</span>
+                        <span class="font-mono text-blue-600">🖥️ Sidebar fixe</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">🎨 Améliorations Visuelles</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 text-sm">
+                    <li><strong>Bouton hamburger agrandi</strong> sur écrans moyens (52×52px)</li>
+                    <li><strong>Bordure distinctive</strong> pour meilleure visibilité</li>
+                    <li><strong>Sidebar élargie</strong> (280px) sur laptops</li>
+                    <li><strong>Bouton fermeture agrandi</strong> (36×36px)</li>
+                    <li><strong>Animations améliorées</strong> avec scale 1.08</li>
+                    <li><strong>Détection intelligente</strong> du type d'écran</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('current-width').textContent = width;
+            document.getElementById('current-height').textContent = height;
+            
+            // Déterminer le type d'écran
+            let screenType = '🖥️ Grand Écran';
+            let screenClass = '';
+            
+            if (width <= 768) {
+                screenType = '📱 Mobile/Tablette';
+                screenClass = 'mobile';
+            } else if (width <= 1024) {
+                screenType = '📱 Tablette/Petit Laptop';
+                screenClass = 'tablet';
+            } else if (width <= 1440) {
+                screenType = '💻 Laptop 15" ou moins';
+                screenClass = 'laptop15';
+            } else {
+                screenType = '🖥️ Grand Écran (>15")';
+                screenClass = 'large';
+            }
+            
+            document.getElementById('screen-type').textContent = screenType;
+            
+            // Vérifier l'état du menu hamburger
+            const hamburgerBtn = document.getElementById('hamburger-menu-btn');
+            const hamburgerActive = hamburgerBtn && !hamburgerBtn.classList.contains('hidden');
+            
+            document.getElementById('hamburger-status').textContent = hamburgerActive ? 'Actif' : 'Inactif';
+            document.getElementById('hamburger-indicator').className = 'status-indicator ' + (hamburgerActive ? 'status-active' : 'status-inactive');
+            
+            // Vérifier l'état du menu
+            const menuOpen = document.body.classList.contains('menu-open');
+            document.getElementById('menu-status').textContent = menuOpen ? 'Oui' : 'Non';
+            document.getElementById('menu-indicator').className = 'status-indicator ' + (menuOpen ? 'status-active' : 'status-inactive');
+            
+            // Mettre à jour les résolutions actives
+            updateActiveResolution(width, height);
+        }
+
+        function updateActiveResolution(currentWidth, currentHeight) {
+            const resolutions = document.querySelectorAll('.resolution-item');
+            resolutions.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Trouver la résolution la plus proche
+            const tolerance = 50;
+            resolutions.forEach(item => {
+                const text = item.querySelector('div').textContent;
+                const [w, h] = text.split('×').map(Number);
+                
+                if (Math.abs(currentWidth - w) < tolerance && Math.abs(currentHeight - h) < tolerance) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function setResolution(width, height) {
+            // Simuler la résolution en ajustant la taille de la fenêtre
+            document.body.style.maxWidth = width + 'px';
+            document.body.style.height = height + 'px';
+            
+            // Déclencher l'événement resize
+            window.dispatchEvent(new Event('resize'));
+            
+            setTimeout(updateScreenInfo, 100);
+            
+            console.log(`📐 Résolution simulée: ${width}×${height}`);
+        }
+
+        function resetSize() {
+            document.body.style.maxWidth = '';
+            document.body.style.height = '';
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(updateScreenInfo, 100);
+            console.log('📐 Taille réelle restaurée');
+        }
+
+        function simulate15inch() {
+            setResolution(1366, 768); // Résolution typique laptop 15"
+        }
+
+        function simulateLarge() {
+            setResolution(1920, 1080); // Résolution grand écran
+        }
+
+        function testMenuToggle() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.toggleMenu();
+                setTimeout(updateScreenInfo, 100);
+            }
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            setTimeout(updateScreenInfo, 1000);
+        });
+
+        window.addEventListener('resize', () => {
+            setTimeout(updateScreenInfo, 100);
+        });
+
+        // Observer les changements de menu
+        const observer = new MutationObserver(() => {
+            setTimeout(updateScreenInfo, 50);
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        // Mise à jour initiale
+        updateScreenInfo();
+    </script>
+</body>
+</html>

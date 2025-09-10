@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="cash_register_page_title">Caisse - Système de Gestion</title>
+
+    <!-- Pré-chargement des traductions pour éviter le flash -->
+    <script src="./js/lang-preloader.js"></script>
+
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        .search-results-container { position: absolute; z-index: 20; width: 100%; max-height: 150px; overflow-y: auto; background-color: white; border: 1px solid #d1d5db; border-radius: 0 0 0.5rem 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dark .search-results-container { background-color: #374151; border-color: #4b5563; }
+        .search-result-item { padding: 0.5rem; cursor: pointer; }
+        .search-result-item:hover { background-color: #f3f4f6; }
+        .dark .search-result-item:hover { background-color: #4b5563; }
+        #product-grid, .overflow-y-auto { scrollbar-width: thin; scrollbar-color: #9ca3af #f3f4f6; }
+        .dark #product-grid, .dark .overflow-y-auto { scrollbar-color: #4b5563 #1f2937; }
+
+        /* Troncature des noms de produits dans les cartes */
+        .product-name-truncate-card {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            max-height: 2.4em; /* 2 lignes * 1.2 line-height */
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        /* Amélioration du curseur pour indiquer qu'il y a un tooltip */
+        .product-name-truncate-card:hover {
+            cursor: help;
+        }
+
+        /* Assurer une hauteur minimale constante pour les cartes */
+        .product-card-content {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Styles pour la gestion des colonnes du tableau du panier */
+        .cart-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        /* Largeurs fixes des colonnes pour le panier */
+        .col-product-cart { width: 35%; }
+        .col-quantity-cart { width: 15%; }
+        .col-price-cart { width: 20%; }
+        .col-total-cart { width: 20%; }
+        .col-actions-cart { width: 10%; }
+
+        /* Troncature du nom du produit dans le panier */
+        .product-name-truncate-cart {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        /* Force la largeur maximale pour la colonne produit du panier */
+        .col-product-cart {
+            max-width: 0; /* Force le respect de la largeur définie */
+        }
+
+        /* Amélioration du curseur pour indiquer qu'il y a un tooltip */
+        .product-name-truncate-cart:hover {
+            cursor: help;
+        }
+
+        /* Dropdown catégories moderne */
+        #category-dropdown-menu {
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar pour la liste des catégories */
+        #category-dropdown-list {
+            scrollbar-width: thin;
+            scrollbar-color: #9ca3af #f3f4f6;
+        }
+        .dark #category-dropdown-list {
+            scrollbar-color: #4b5563 #1f2937;
+        }
+
+        /* Items de catégorie */
+        .category-dropdown-item {
+            transition: all 0.15s ease-in-out;
+        }
+        .category-dropdown-item:hover {
+            background-color: #f9fafb;
+        }
+        .dark .category-dropdown-item:hover {
+            background-color: #4b5563;
+        }
+        .category-dropdown-item.selected {
+            background-color: #ebf8ff;
+            color: #1e40af;
+        }
+        .dark .category-dropdown-item.selected {
+            background-color: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        /* Animation du chevron */
+        #dropdown-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        /* Focus et accessibilité */
+        .category-dropdown-item:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+        }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen font-sans">
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 flex p-4 gap-4 overflow-hidden main-container landscape-optimized">
+        <div class="w-1/2 flex flex-col gap-4">
+            <div class="flex-shrink-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <!-- Scanner Code-Barres -->
+                <div class="mb-4">
+                    <label for="barcodeInput" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="barcode_scanner_label">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h5m0 0v5m0 0h5m0 0V4m0 0h5m0 5v5"></path>
+                        </svg>
+                        Scanner Code-Barres
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="barcodeInput" class="barcode-input touch-target interactive-element w-full p-3 border-2 border-blue-300 rounded-lg dark:bg-gray-700 dark:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all" data-i18n-placeholder="barcode_scanner_placeholder" placeholder="Scannez ou tapez le code-barres..." autocomplete="off">
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div id="scannerStatus" class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400" data-i18n="scanner_ready">Prêt</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="scannerFeedback" class="mt-2 text-sm hidden">
+                        <div class="flex items-center gap-2 p-2 rounded-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span id="scannerMessage"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recherche Manuelle -->
+                <div>
+                    <label for="productSearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="search_product_label">Rechercher un produit</label>
+                    <input type="text" id="productSearch" class="touch-target interactive-element mt-1 w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600" data-i18n-placeholder="search_product_placeholder">
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="categories_label">Catégories</label>
+                    <div class="relative mt-1">
+                        <!-- Bouton principal du dropdown -->
+                        <button type="button" id="category-dropdown-button"
+                                class="touch-target interactive-element w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200">
+                            <span id="selected-category-text" class="text-gray-700 dark:text-gray-300 font-medium" data-i18n="all_categories">Toutes les catégories</span>
+                            <svg id="dropdown-chevron" class="w-6 h-6 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Menu déroulant -->
+                        <div id="category-dropdown-menu"
+                             class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 hidden">
+
+                            <!-- Champ de recherche -->
+                            <div class="p-3 border-b border-gray-200 dark:border-gray-600">
+                                <div class="relative">
+                                    <input type="text" id="category-search-input"
+                                           class="touch-target w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                           placeholder="Rechercher une catégorie..." data-i18n-placeholder="search_category_placeholder">
+                                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                    <button type="button" id="clear-search" class="touch-target absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 hidden">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Liste des catégories -->
+                            <div id="category-dropdown-list" class="max-h-64 overflow-y-auto">
+                                <!-- Les catégories seront générées dynamiquement ici -->
+                            </div>
+
+                            <!-- Message aucun résultat -->
+                            <div id="no-results-message" class="hidden p-4 text-center text-gray-500 dark:text-gray-400">
+                                <span data-i18n="no_categories_found">Aucune catégorie trouvée</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="p-4 overflow-y-auto h-full" id="product-grid"></div>
+            </div>
+        </div>
+
+        <div class="w-1/2 flex flex-col gap-4 min-h-0">
+            <div id="lastSalePanel" class="hidden bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-lg shadow flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-yellow-800 dark:text-yellow-200"><span data-i18n="last_sale_panel_title">Dernière Vente:</span> <span id="lastSaleId"></span></p>
+                        <p class="text-xs text-yellow-700 dark:text-yellow-300"><span data-i18n="time_left_to_edit">Temps restant pour modifier:</span> <span id="countdownSpan" class="font-semibold">5:00</span></p>
+                    </div>
+                    <button id="editSaleBtn" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" data-i18n="edit_sale_button">Modifier</button>
+                </div>
+            </div>
+
+            <div id="clientSearchContainer" class="flex-shrink-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow relative">
+                <label for="clientSearchInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="client_label">Client</label>
+                <div class="flex items-center gap-4 mt-1">
+                    <div class="relative flex-grow">
+                        <input type="text" id="clientSearchInput" class="touch-target interactive-element w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600" autocomplete="off" data-i18n-placeholder="search_client_placeholder">
+                        <div id="clientSearchResults" class="search-results-container hidden"></div>
+                    </div>
+                    <button id="quickAddClientBtn" class="touch-target touch-feedback bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold hover:bg-blue-600 flex-shrink-0" data-i18n-title="quick_add_client_button" title="Ajouter un nouveau client">+</button>
+                    <div id="selectedClientContainer" class="flex-shrink-0 text-center bg-blue-50 dark:bg-blue-900/60 p-3 rounded-lg min-w-[150px] transition-colors duration-200">
+                        <div class="flex items-center justify-between gap-2">
+                            <p id="selectedClientDisplay" class="font-bold text-blue-800 dark:text-blue-200 truncate flex-1" data-i18n="default_client">Client de passage</p>
+                            <span id="clientCreditBadge" class="hidden text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden min-h-0">
+                <div class="flex-1 overflow-y-auto p-2">
+                    <table class="cart-table min-w-full">
+                        <thead class="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                                <th class="col-product-cart px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" data-i18n="product_header">Produit</th>
+                                <th class="col-quantity-cart px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" data-i18n="quantity_header">Qté</th>
+                                <th class="col-price-cart px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" data-i18n="unit_price_header">Prix U.</th>
+                                <th class="col-total-cart px-2 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" data-i18n="total_header">Total</th>
+                                <th class="col-actions-cart"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-items"></tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t dark:border-gray-700 flex-shrink-0">
+                    <div class="flex justify-between items-center text-2xl font-bold">
+                        <span data-i18n="total_amount">TOTAL</span>
+                        <span><span id="total-amount">0.00</span> MAD</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <!-- Étape 1: Boutons principaux -->
+                <div id="payment-step-1" class="flex gap-2 mb-4">
+                    <button id="validate-payment-btn" class="touch-target touch-feedback w-1/2 bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 font-bold text-lg transition-colors" data-i18n="validate_payment_button">
+                        ✓ Valider Paiement
+                    </button>
+                    <button id="cancel-sale-btn" class="touch-target touch-feedback w-1/2 bg-red-600 text-white py-4 rounded-lg hover:bg-red-700 font-bold text-lg transition-colors" data-i18n="cancel_sale_button">
+                        ✗ Annuler la Vente
+                    </button>
+                </div>
+
+                <!-- Bouton Bon de Livraison (affiché après validation) -->
+                <div id="delivery-note-section" class="hidden mb-4">
+                    <button id="generate-delivery-note-btn" class="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 font-bold text-lg transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        📦 Générer Bon de Livraison
+                    </button>
+                </div>
+
+                <!-- Boutons d'impression et bon de livraison (affichés après vente réussie) -->
+                <div id="print-section" class="hidden mt-4 space-y-3">
+                    <!-- Bouton impression ticket -->
+                    <button id="print-ticket-btn" class="touch-target touch-feedback w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 font-bold text-lg transition-colors flex items-center justify-center gap-2" data-i18n="print_ticket_button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        🖨️ Imprimer Ticket
+                    </button>
+
+                    <!-- Bouton bon de livraison -->
+                    <button id="delivery-note-btn" class="touch-target touch-feedback w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 font-bold text-lg transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        📄 Bon de Livraison
+                    </button>
+                </div>
+
+
+                <!-- Étape 2: Choix du type de paiement (masqué par défaut) -->
+                <div id="payment-step-2" class="hidden">
+                    <div class="mb-3">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="choose_payment_type">Choisissez le type de paiement :</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 mb-4">
+                        <button id="cash-payment-btn" class="touch-target touch-feedback w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 font-bold text-lg transition-colors flex items-center justify-center" data-i18n="cash_payment_button">
+                            💰 Paiement Comptant
+                        </button>
+                        <button id="check-payment-btn" class="touch-target touch-feedback w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 font-bold text-lg transition-colors flex items-center justify-center" data-i18n="check_payment_button">
+                            📄 Paiement Chèque
+                        </button>
+                        <button id="credit-payment-btn" class="touch-target touch-feedback w-full bg-orange-600 text-white py-4 rounded-lg hover:bg-orange-700 font-bold text-lg transition-colors flex items-center justify-center" data-i18n="credit_payment_button">
+                            💳 Crédit / Partiel
+                        </button>
+                    </div>
+                    <button id="back-to-step1-btn" class="touch-target touch-feedback w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 font-medium transition-colors" data-i18n="back_button">
+                        ← Retour
+                    </button>
+                </div>
+
+                <!-- Étape 2.5: Calcul de rendu pour paiement comptant (masqué par défaut) -->
+                <div id="payment-step-cash" class="hidden">
+                    <div class="mb-3">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="cash_payment_details">Détails du paiement comptant :</p>
+                    </div>
+
+                    <!-- Affichage du total à payer -->
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg mb-4 border-2 border-blue-200 dark:border-blue-700">
+                        <div class="text-center">
+                            <p class="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1" data-i18n="total_to_pay">TOTAL À PAYER</p>
+                            <p id="cash-total-display" class="text-3xl font-bold text-blue-800 dark:text-blue-200">0.00 MAD</p>
+                        </div>
+                    </div>
+
+                    <!-- Saisie du montant reçu -->
+                    <div class="mb-4">
+                        <label for="amount-received" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="amount_received">Montant reçu du client :</label>
+                        <div class="relative">
+                            <input type="number" id="amount-received" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-xl font-bold text-center dark:bg-gray-700 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all"
+                                   min="0" step="0.01" placeholder="0.00" autocomplete="off">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">MAD</span>
+                            </div>
+                        </div>
+                        <!-- Bouton montant exact -->
+                        <div class="mt-2">
+                            <button type="button" id="exact-amount-btn" class="w-full bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-3 py-2 rounded text-sm font-medium transition-colors" data-i18n="exact_amount">Exact</button>
+                        </div>
+                    </div>
+
+                    <!-- Affichage du rendu -->
+                    <div id="change-display-container" class="mb-4">
+                        <div id="change-display-positive" class="hidden bg-green-50 dark:bg-green-900/30 p-4 rounded-lg border-2 border-green-200 dark:border-green-700">
+                            <div class="text-center">
+                                <p class="text-sm text-green-600 dark:text-green-400 font-medium mb-1" data-i18n="change_to_give">MONTANT À RENDRE</p>
+                                <p id="change-amount-display" class="text-2xl font-bold text-green-800 dark:text-green-200">0.00 MAD</p>
+                                <div class="flex items-center justify-center mt-2">
+                                    <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm text-green-600 dark:text-green-400" data-i18n="payment_valid">Paiement valide</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="change-display-exact" class="hidden bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                            <div class="text-center">
+                                <p class="text-lg font-bold text-blue-800 dark:text-blue-200" data-i18n="exact_payment">MONTANT EXACT</p>
+                                <div class="flex items-center justify-center mt-2">
+                                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm text-blue-600 dark:text-blue-400" data-i18n="no_change_needed">Pas de rendu nécessaire</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="change-display-insufficient" class="hidden bg-red-50 dark:bg-red-900/30 p-4 rounded-lg border-2 border-red-200 dark:border-red-700">
+                            <div class="text-center">
+                                <p class="text-sm text-red-600 dark:text-red-400 font-medium mb-1" data-i18n="insufficient_amount">MONTANT INSUFFISANT</p>
+                                <p id="missing-amount-display" class="text-xl font-bold text-red-800 dark:text-red-200">0.00 MAD</p>
+                                <div class="flex items-center justify-center mt-2">
+                                    <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <span class="text-sm text-red-600 dark:text-red-400" data-i18n="add_more_money">Ajouter plus d'argent</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="flex gap-2">
+                        <button id="confirm-cash-payment-btn" class="w-1/2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled data-i18n="confirm_payment">
+                            ✓ Confirmer Paiement
+                        </button>
+                        <button id="back-to-payment-types-btn" class="w-1/2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 font-medium transition-colors" data-i18n="back_button">
+                            ← Retour
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Étape 3: Détails pour crédit/partiel (masqué par défaut) -->
+                <div id="payment-step-3" class="hidden">
+                    <div class="mb-3">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="partial_payment_details">Détails du paiement partiel :</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600 dark:text-gray-400" data-i18n="total_amount">Montant Total :</span>
+                            <span id="total-display" class="font-bold text-gray-800 dark:text-white">0.00 MAD</span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount-paid" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="amount_paid">Montant Payé :</label>
+                            <div class="relative">
+                                <input type="number" id="amount-paid" class="w-full p-2 border rounded-lg text-lg dark:bg-gray-700 dark:border-gray-600 pr-16" min="0" step="0.01" value="0">
+                                <button id="set-total-btn" class="absolute inset-y-0 right-0 px-3 flex items-center bg-gray-200 dark:bg-gray-600 rounded-r-lg font-bold text-sm hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors" data-i18n-title="set_total_amount_button" title="Remplir avec le total">
+                                    Total
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400" data-i18n="credit_amount">Crédit :</span>
+                            <span id="credit-display" class="font-bold text-orange-600">0.00 MAD</span>
+                        </div>
+                    </div>
+
+                    <!-- Affichage des informations de crédit et rendu (seulement dans cette étape) -->
+                    <div class="text-right mb-3">
+                        <p id="credit-info" class="text-lg font-medium text-orange-600 hidden">Crédit: 0.00 MAD</p>
+                        <p id="change-info" class="text-lg font-medium text-green-600 hidden">Rendu: 0.00 MAD</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="confirm-partial-btn" class="w-1/2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold text-lg transition-colors" data-i18n="confirm_button">
+                            ✓ Confirmer
+                        </button>
+                        <button id="back-to-step2-btn" class="w-1/2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 font-medium transition-colors" data-i18n="back_button">
+                            ← Retour
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="addClientModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-40">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-lg z-50">
+            <h2 class="text-2xl font-bold mb-6" data-i18n="add_client_modal_title">Ajouter un Nouveau Client</h2>
+            <form id="addClientForm">
+                <div class="space-y-4">
+                    <div>
+                        <label for="modal_client_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="client_name_label">Nom complet</label>
+                        <input type="text" id="modal_client_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2" required>
+                    </div>
+                    <div>
+                        <label for="modal_client_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="client_phone_label">Téléphone</label>
+                        <input type="tel" id="modal_client_phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                    </div>
+                    <div>
+                        <label for="modal_client_ice" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="client_ice_label">ICE</label>
+                        <input type="text" id="modal_client_ice" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                    </div>
+                    <div>
+                        <label for="modal_client_address" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="client_address_label">Adresse</label>
+                        <textarea id="modal_client_address" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2"></textarea>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-4">
+                    <button type="button" id="cancelAddClientBtn" class="bg-gray-200 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-300" data-i18n="cancel_button">Annuler</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" data-i18n="save_button">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-50">
+        </div>
+
+    <!-- Modal de Choix d'Impression -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" style="display: none; align-items: center; justify-content: center;">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2" data-i18n="print_options_title">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        Options d'Impression
+                    </h3>
+                    <button id="closePrintModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm" data-i18n="print_options_description">
+                        Choisissez comment vous souhaitez imprimer le ticket :
+                    </p>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <!-- Option PDF -->
+                        <button id="exportPdfBtn" class="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                            <div class="flex-shrink-0">
+                                <svg class="w-8 h-8 text-red-600 group-hover:text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white" data-i18n="export_pdf_title">Exporter en PDF</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="export_pdf_description">Télécharger le ticket au format PDF</p>
+                            </div>
+                        </button>
+
+                        <!-- Option Impression Directe -->
+                        <button id="directPrintBtn" class="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all group">
+                            <div class="flex-shrink-0">
+                                <svg class="w-8 h-8 text-green-600 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white" data-i18n="direct_print_title">Impression Directe</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="direct_print_description">Imprimer directement sur l'imprimante thermique</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="cancelPrintBtn" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors" data-i18n="cancel_button">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Sélection Client pour Bon de Livraison -->
+    <div id="deliveryClientModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" style="display: none; align-items: center; justify-content: center;">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Bon de Livraison
+                    </h3>
+                    <button id="closeDeliveryClientModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Sélectionnez un client pour générer le bon de livraison :
+                    </p>
+
+                    <!-- Recherche de client -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Client (obligatoire)
+                        </label>
+                        <div class="relative">
+                            <input type="text"
+                                   id="deliveryClientSearch"
+                                   placeholder="Tapez pour rechercher un client..."
+                                   class="w-full px-3 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   autocomplete="off">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Liste déroulante des résultats -->
+                            <div id="deliveryClientDropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                                <!-- Résultats de recherche -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client sélectionné -->
+                    <div id="deliverySelectedClientDisplay" class="hidden p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold text-green-900 dark:text-green-100" id="deliverySelectedClientName">Client sélectionné</p>
+                                <p class="text-sm text-green-700 dark:text-green-300" id="deliverySelectedClientDetails">Détails</p>
+                            </div>
+                            <button type="button" onclick="clearDeliveryClientSelection()" class="text-green-600 hover:text-green-800 dark:text-green-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Date de livraison -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Date de livraison prévue
+                        </label>
+                        <input type="date"
+                               id="deliveryDate"
+                               class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+
+                    <!-- Notes de livraison -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Notes de livraison (optionnel)
+                        </label>
+                        <textarea id="deliveryNotes"
+                                  rows="3"
+                                  placeholder="Instructions spéciales, adresse de livraison..."
+                                  class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="cancelDeliveryBtn" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                        Annuler
+                    </button>
+                    <button id="confirmDeliveryBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                        Créer Bon de Livraison
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/i18n.js"></script>
+    <script src="./js/preloader.js"></script>
+    <script src="./js/page-initializer.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/ticket-printer.js"></script>
+    <script src="./js/touch-interface.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/client-validation.js"></script>
+    <script src="./js/caisse.js"></script>
+</body>
+</html>

@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="main_menu_products">Produits - Système de Gestion</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        .category-results-container { position: absolute; z-index: 60; width: 100%; max-height: 160px; overflow-y: auto; background-color: white; border: 1px solid #d1d5db; border-radius: 0.375rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+        .dark .category-results-container { background-color: #374151; border-color: #4b5563; }
+        .category-result-item { padding: 0.75rem; cursor: pointer; }
+        .category-result-item:hover { background-color: #f3f4f6; }
+        .dark .category-result-item:hover { background-color: #4b5563; }
+
+        /* Styles pour les badges de stock */
+        .stock-badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .stock-badge.in-stock { background-color: #dcfce7; color: #166534; }
+        .stock-badge.alert { background-color: #fef3c7; color: #92400e; }
+        .stock-badge.out-of-stock { background-color: #fee2e2; color: #991b1b; }
+        .dark .stock-badge.in-stock { background-color: #14532d; color: #bbf7d0; }
+        .dark .stock-badge.alert { background-color: #451a03; color: #fde68a; }
+        .dark .stock-badge.out-of-stock { background-color: #450a0a; color: #fecaca; }
+
+        /* Styles pour les filtres */
+        .filter-btn.active { background-color: #dbeafe !important; color: #1d4ed8 !important; border-color: #3b82f6 !important; }
+        .dark .filter-btn.active { background-color: #1e3a8a !important; color: #93c5fd !important; border-color: #3b82f6 !important; }
+
+        /* Styles pour le modal des lots */
+        .tabs-container {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .dark .tabs-container {
+            border-bottom-color: #374151;
+        }
+
+        .tabs-nav {
+            display: flex;
+            gap: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab-btn:hover {
+            color: #3b82f6;
+            background-color: #f3f4f6;
+        }
+
+        .tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .dark .tab-btn {
+            color: #9ca3af;
+        }
+
+        .dark .tab-btn:hover {
+            color: #60a5fa;
+            background-color: #374151;
+        }
+
+        .dark .tab-btn.active {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa;
+            background-color: #1f2937;
+        }
+
+        .tab-pane {
+            padding-top: 24px;
+        }
+
+        .tab-pane.hidden {
+            display: none;
+        }
+
+        /* Styles pour les cartes de lots */
+        .lot-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .lot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .dark .lot-card {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        .dark .lot-card:hover {
+            border-color: #60a5fa;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .lot-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .lot-status.available {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .lot-status.sold-out {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .lot-status.expired {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .dark .lot-status.available {
+            background-color: #14532d;
+            color: #bbf7d0;
+        }
+
+        .dark .lot-status.sold-out {
+            background-color: #450a0a;
+            color: #fecaca;
+        }
+
+        .dark .lot-status.expired {
+            background-color: #451a03;
+            color: #fde68a;
+        }
+
+        /* Styles pour les mouvements */
+        .movement-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #6b7280;
+        }
+
+        .movement-card.in {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .movement-card.out {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .movement-card.adjustment {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+
+        .dark .movement-card {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        .dark .movement-card.in {
+            background-color: #064e3b;
+        }
+
+        .dark .movement-card.out {
+            background-color: #450a0a;
+        }
+
+        .dark .movement-card.adjustment {
+            background-color: #451a03;
+        }
+
+        /* Animation pour les lignes du tableau */
+        tbody tr { transition: all 0.2s ease-in-out; }
+        tbody tr:hover { background-color: #f8fafc; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dark tbody tr:hover { background-color: #1e293b; }
+
+        /* Styles pour les boutons d'action */
+        .action-btn { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500; transition: all 0.2s ease-in-out; }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1); }
+        .action-btn.edit { background-color: #dbeafe; color: #1d4ed8; }
+        .action-btn.edit:hover { background-color: #bfdbfe; }
+        .action-btn.delete { background-color: #fee2e2; color: #991b1b; }
+        .action-btn.delete:hover { background-color: #fecaca; }
+        .dark .action-btn.edit { background-color: #1e3a8a; color: #93c5fd; }
+        .dark .action-btn.edit:hover { background-color: #1e40af; }
+        .dark .action-btn.delete { background-color: #450a0a; color: #fecaca; }
+        .dark .action-btn.delete:hover { background-color: #7f1d1d; }
+
+        /* Animation de chargement */
+        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); background-size: 200% 100%; }
+
+        /* Styles pour la gestion des colonnes du tableau */
+        .products-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        /* Largeurs FIXES des colonnes pour maintenir l'alignement */
+        .col-product { width: 280px; min-width: 280px; max-width: 280px; }
+        .col-barcode { width: 120px; min-width: 120px; max-width: 120px; }
+        .col-price-retail { width: 100px; min-width: 100px; max-width: 100px; }
+        .col-price-wholesale { width: 100px; min-width: 100px; max-width: 100px; }
+        .col-stock { width: 140px; min-width: 140px; max-width: 140px; }
+        .col-actions { width: 160px; min-width: 160px; max-width: 160px; }
+
+        /* Container avec scroll horizontal FORCÉ pour petits écrans */
+        .table-container {
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Forcer la largeur minimale du tableau pour déclencher le scroll */
+        .products-table {
+            table-layout: fixed;
+            width: 100%;
+            min-width: 900px !important; /* Force le scroll sur écrans < 900px */
+        }
+
+        /* Indicateur de scroll */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Scroll horizontal visible et stylé */
+        .table-container {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        /* Indicateur de scroll permanent pour petits écrans */
+        @media (max-width: 1024px) {
+            .table-container::before {
+                content: "← Faites défiler horizontalement →";
+                position: sticky;
+                left: 0;
+                top: 0;
+                background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+                color: white;
+                padding: 8px 16px;
+                font-size: 12px;
+                font-weight: 600;
+                text-align: center;
+                z-index: 10;
+                display: block;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            /* Forcer la largeur minimale pour déclencher le scroll */
+            .products-table {
+                min-width: 900px !important;
+            }
+        }
+
+        /* Pour mobile, réduire encore plus mais garder le scroll */
+        @media (max-width: 768px) {
+            .table-container::before {
+                content: "← Glissez pour voir plus →";
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+
+            .products-table {
+                min-width: 800px !important;
+            }
+
+            /* Réduire la taille des boutons d'action */
+            .action-btn {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .action-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .action-btn span {
+                display: none; /* Masquer le texte, garder seulement les icônes */
+            }
+        }
+
+        /* Pour très petits écrans */
+        @media (max-width: 480px) {
+            .table-container::before {
+                content: "← Glissez →";
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            .products-table {
+                min-width: 700px !important;
+            }
+        }
+
+        /* Animation pour attirer l'attention sur le scroll */
+        @keyframes scrollHint {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        @media (max-width: 1024px) {
+            .table-container::before {
+                animation: scrollHint 2s ease-in-out infinite;
+            }
+        }
+
+        /* Troncature du nom du produit */
+        .product-name-truncate {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        /* Force la largeur maximale pour la colonne produit */
+        .col-product {
+            max-width: 0; /* Force le respect de la largeur définie */
+        }
+
+        /* Conteneur flex avec troncature forcée */
+        .product-info-container {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .product-info-container > div {
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* Amélioration du curseur pour indiquer qu'il y a un tooltip */
+        .product-name-truncate:hover {
+            cursor: help;
+        }
+
+        /* Styles pour les boutons d'action (icônes seulement) */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .action-btn.edit {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .action-btn.edit:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .action-btn.delete {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .action-btn.delete:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Responsive pour les boutons d'action */
+        @media (max-width: 768px) {
+            .action-btn {
+                width: 28px;
+                height: 28px;
+                padding: 4px;
+            }
+
+            .action-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2" data-i18n="main_menu_products">Gestion des Produits</h1>
+                <div id="productStats" class="flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Total: <span id="totalProducts" class="font-semibold text-gray-800 dark:text-white">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">En stock: <span id="inStockProducts" class="font-semibold text-green-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Alerte: <span id="alertProducts" class="font-semibold text-yellow-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Rupture: <span id="outOfStockProducts" class="font-semibold text-red-600">0</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="addProductBtn" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2" data-i18n="add_product_button">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Ajouter un Produit
+                </button>
+
+
+            </div>
+        </div>
+
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Barre de recherche améliorée -->
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-i18n-placeholder="search_by_name_or_barcode" placeholder="Rechercher par nom ou code-barres...">
+                </div>
+
+                <!-- Filtres rapides -->
+                <div class="flex flex-wrap gap-2">
+                    <button id="filterAll" class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200">
+                        Tous
+                    </button>
+                    <button id="filterInStock" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        En stock
+                    </button>
+                    <button id="filterAlert" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        Alerte
+                    </button>
+                    <button id="filterOutOfStock" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        Rupture
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="table-container">
+                <table class="products-table divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+                    <tr>
+                        <th class="col-product px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="product_name_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Produit
+                            </div>
+                        </th>
+                        <th class="col-barcode px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="barcode_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"></path>
+                                </svg>
+                                Code-barres
+                            </div>
+                        </th>
+                        <th class="col-price-retail px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="retail_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                Prix Détail
+                            </div>
+                        </th>
+                        <th class="col-price-wholesale px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="wholesale_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Prix Gros
+                            </div>
+                        </th>
+                        <th class="col-stock px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="stock_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Stock
+                            </div>
+                        </th>
+                        <th class="col-actions px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="actions_header">
+                            <div class="flex items-center justify-end gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                </svg>
+                                Actions
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="productModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-40">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-3xl z-50">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6">Ajouter un Produit</h2>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <input type="hidden" id="imagePath">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3 flex flex-col items-center">
+                        <img id="imagePreview" src="assets/placeholder.png" alt="Aperçu du produit" class="w-40 h-40 object-cover rounded-lg border dark:border-gray-600 mb-4">
+                        <button type="button" id="chooseImageBtn" class="w-full bg-gray-200 dark:bg-gray-600 py-2 px-4 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-500" data-i18n="choose_image_button">Choisir une image...</button>
+                    </div>
+                    <div class="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label for="name" class="block text-sm font-medium" data-i18n="product_name_label">Nom du produit</label>
+                            <input type="text" id="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2" required>
+                        </div>
+                        <div>
+                            <label for="barcode" class="flex items-center gap-2 text-sm font-medium mb-2" data-i18n="barcode_label">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h5m0 0v5m0 0h5m0 0V4m0 0h5m0 5v5"></path>
+                                </svg>
+                                Code-barres
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="barcode" class="barcode-input mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all" data-i18n-placeholder="barcode_scanner_placeholder" placeholder="Scannez ou tapez le code-barres...">
+                                <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                    <div id="productBarcodeStatus" class="flex items-center gap-1">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400" data-i18n="scanner_ready">Prêt</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="productBarcodeFeedback" class="mt-1 text-sm hidden">
+                                <div class="flex items-center gap-2 p-2 rounded-lg">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span id="productBarcodeMessage"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative" id="categoryContainer">
+                            <label for="category" class="block text-sm font-medium" data-i18n="category_label">Catégorie</label>
+                            <input type="text" id="category" autocomplete="off" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                            <div id="categoryResults" class="category-results-container hidden"></div>
+                        </div>
+                        <div id="purchasePriceContainer">
+                            <label for="purchase_price" class="block text-sm font-medium" data-i18n="purchase_price_label">Prix d'Achat</label>
+                            <input type="number" step="0.01" id="purchase_price" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                        </div>
+                        <div>
+                            <label for="price_retail" class="block text-sm font-medium" data-i18n="retail_price_label">Prix Détail</label>
+                            <input type="number" step="0.01" id="price_retail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2" required>
+                        </div>
+                        <div>
+                            <label for="price_wholesale" class="block text-sm font-medium" data-i18n="wholesale_price_label">Prix Gros <span class="text-gray-500 text-xs">(optionnel)</span></label>
+                            <input type="number" step="0.01" id="price_wholesale" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label for="price_carton" class="block text-sm font-medium" data-i18n="carton_price_label">Prix Carton</label>
+                            <div class="relative mt-1">
+                                <input type="number" step="0.01" id="price_carton" class="block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2 pr-10">
+                                <button type="button" id="calculate-carton-price-btn" class="absolute inset-y-0 right-0 flex items-center justify-center w-8 h-full bg-blue-600 hover:bg-blue-700 text-white rounded-r-md transition-colors text-sm font-bold" title="Calculer automatiquement le prix carton (Prix Gros × Pièces par Carton)">
+                                    C
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" data-i18n="calculate_carton_price_help">
+                                💡 Cliquez sur "C" pour calculer : Prix Gros × Pièces par Carton
+                            </p>
+                        </div>
+                        <div>
+                            <label for="pieces_per_carton" class="block text-sm font-medium" data-i18n="pieces_per_carton_label">Pièces par Carton</label>
+                            <input type="number" id="pieces_per_carton" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                        </div>
+                        <div>
+                            <label for="stock" class="block text-sm font-medium" data-i18n="stock_label">Stock</label>
+                            <input type="number" id="stock" name="stock" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div>
+                            <label for="alert_threshold" class="block text-sm font-medium" data-i18n="alert_threshold_label">Seuil d'alerte</label>
+                            <input type="number" id="alert_threshold" name="alert_threshold" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-4">
+                    <button type="button" id="cancelBtn" class="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300" data-i18n="cancel_button">Annuler</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" data-i18n="save_button">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 id="confirmationMessage" class="text-lg font-semibold mb-4">Êtes-vous sûr ?</h3>
+            <div class="flex justify-end gap-4">
+                <button id="confirmCancelBtn" class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400" data-i18n="cancel_button">Annuler</button>
+                <button id="confirmOkBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" data-i18n="confirm_button">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestion des Lots -->
+    <div id="lotsModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-6xl">
+            <div class="modal-header">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="modal-title">Gestion des Lots</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" id="lotsModalSubtitle">Produit sélectionné</p>
+                    </div>
+                </div>
+                <button id="closeLotsModal" class="modal-close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Statistiques du produit -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700">
+                        <div class="stat-icon bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Lots Actifs</div>
+                            <div class="stat-value" id="activeLots">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700">
+                        <div class="stat-icon bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Stock Total</div>
+                            <div class="stat-value" id="totalStock">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                        <div class="stat-icon bg-purple-100 dark:bg-purple-800 text-purple-600 dark:text-purple-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Coût Moyen</div>
+                            <div class="stat-value" id="averageCost">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700">
+                        <div class="stat-icon bg-orange-100 dark:bg-orange-800 text-orange-600 dark:text-orange-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Valeur Totale</div>
+                            <div class="stat-value" id="totalValue">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglets -->
+                <div class="tabs-container mb-6">
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-tab="lots">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Lots de Stock
+                        </button>
+                        <button class="tab-btn" data-tab="movements">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Historique
+                        </button>
+                        <button class="tab-btn" data-tab="create">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Nouveau Lot
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenu des onglets -->
+                <div class="tab-content">
+                    <!-- Onglet Lots -->
+                    <div id="lotsTab" class="tab-pane active">
+                        <!-- Conteneur pour les filtres -->
+                        <div id="lotsFiltersContainer"></div>
+
+                        <div id="lotsContainer" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                Chargement des lots...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Mouvements -->
+                    <div id="movementsTab" class="tab-pane hidden">
+                        <div id="movementsContainer" class="space-y-3">
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                Chargement de l'historique...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Création -->
+                    <div id="createTab" class="tab-pane hidden">
+                        <form id="createLotForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Numéro de Lot *
+                                    </label>
+                                    <input type="text" id="newLotNumber" class="form-input" placeholder="LOT-001" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Quantité *
+                                    </label>
+                                    <input type="number" id="newLotQuantity" class="form-input" placeholder="100" min="1" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Prix d'Achat (MAD) *
+                                    </label>
+                                    <input type="number" step="0.01" id="newLotPrice" class="form-input" placeholder="10.50" min="0" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Date d'Expiration
+                                    </label>
+                                    <input type="date" id="newLotExpiry" class="form-input">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Fournisseur
+                                    </label>
+                                    <div class="relative">
+                                        <!-- Input de recherche avec autocomplétion -->
+                                        <input
+                                            type="text"
+                                            id="newLotSupplierSearch"
+                                            placeholder="Aucun fournisseur ou tapez pour rechercher..."
+                                            class="form-input pr-10"
+                                            autocomplete="off"
+                                        />
+
+                                        <!-- Bouton pour ouvrir la liste déroulante -->
+                                        <button
+                                            type="button"
+                                            id="newLotSupplierDropdownBtn"
+                                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                            title="Voir tous les fournisseurs"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+
+                                        <!-- Liste déroulante des suggestions -->
+                                        <div
+                                            id="newLotSupplierDropdown"
+                                            class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden"
+                                        >
+                                            <div class="p-2 text-sm text-gray-500 dark:text-gray-400">
+                                                Chargement des fournisseurs...
+                                            </div>
+                                        </div>
+
+                                        <!-- Input caché pour stocker l'ID du fournisseur sélectionné -->
+                                        <input type="hidden" id="newLotSupplier" name="newLotSupplier" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Date d'Achat
+                                    </label>
+                                    <input type="date" id="newLotPurchaseDate" class="form-input">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Notes
+                                </label>
+                                <textarea id="newLotNotes" class="form-input" rows="3" placeholder="Notes optionnelles sur ce lot..."></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Créer le Lot
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/i18n.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/lot-filters.js"></script>
+    <script src="./js/products.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+</body>
+</html>

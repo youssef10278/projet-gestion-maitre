@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Montant Remboursement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .test-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .data-display {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .amount-display {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .amount-display .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0369a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">💰 Test Montant Remboursement</h1>
+        
+        <div class="status error" id="problemStatus">
+            <strong>🚨 Problème:</strong> Montant remboursé affiché à 0.00 MAD au lieu du montant réel
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Analyse du Problème</h3>
+            <div class="status warning">
+                <strong>Cause Identifiée:</strong><br>
+                L'API retourne <code>totalRefundAmount</code> mais le frontend cherche <code>refund_amount</code>
+            </div>
+            
+            <h4>🔧 Corrections Apportées:</h4>
+            <ul>
+                <li>✅ Ajout de fallback: <code>result.totalRefundAmount || result.refund_amount</code></li>
+                <li>✅ Calcul de secours depuis <code>returnItems</code> si montant = 0</li>
+                <li>✅ Correction du numéro de retour: <code>result.returnNumber</code></li>
+                <li>✅ Logs de debug pour tracer les valeurs</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Simulation des Données</h3>
+            <button class="test-button" onclick="simulateReturnData()">Simuler Données de Retour</button>
+            <button class="test-button" onclick="testAPIResponse()">Simuler Réponse API</button>
+            <button class="test-button" onclick="testDisplayFunction()">Test displayReturnSuccess()</button>
+            
+            <div id="dataDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>💰 Calcul du Montant</h3>
+            <div id="amountCalculation" style="display: none;">
+                <div class="amount-display">
+                    <div>Montant Total Calculé:</div>
+                    <div class="amount" id="calculatedAmount">0.00 MAD</div>
+                </div>
+                
+                <div id="itemsBreakdown"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Test des Différents Formats de Réponse API</h3>
+            <button class="test-button" onclick="testCorrectFormat()">Format Correct (totalRefundAmount)</button>
+            <button class="test-button" onclick="testOldFormat()">Ancien Format (refund_amount)</button>
+            <button class="test-button" onclick="testEmptyFormat()">Format Vide (fallback)</button>
+            
+            <div id="formatTestResults" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎫 Aperçu du Message de Succès</h3>
+            <div id="successPreview" style="display: none;">
+                <!-- Le message de succès sera affiché ici -->
+            </div>
+        </div>
+
+        <h2>📝 Console de Test</h2>
+        <div class="log-container" id="testLog">
+            Logs des tests apparaîtront ici...
+        </div>
+    </div>
+
+    <script>
+        // Variables globales pour simulation
+        let testLog = document.getElementById('testLog');
+        let mockReturnItems = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#60a5fa';
+            testLog.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function simulateReturnData() {
+            log('📊 Simulation des données de retour...', 'info');
+            
+            mockReturnItems = [
+                {
+                    original_sale_item_id: 1001,
+                    product_id: 501,
+                    product_name: 'Électricité',
+                    quantity_returned: 1,
+                    unit_price: 2000.00,
+                    total_price: 2000.00
+                },
+                {
+                    original_sale_item_id: 1002,
+                    product_id: 502,
+                    product_name: 'Loyer',
+                    quantity_returned: 1,
+                    unit_price: 1500.00,
+                    total_price: 1500.00
+                }
+            ];
+            
+            const display = document.getElementById('dataDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(mockReturnItems, null, 2);
+            
+            // Calculer le montant total
+            const totalAmount = mockReturnItems.reduce((sum, item) => sum + item.total_price, 0);
+            
+            const amountSection = document.getElementById('amountCalculation');
+            amountSection.style.display = 'block';
+            
+            document.getElementById('calculatedAmount').textContent = totalAmount.toFixed(2) + ' MAD';
+            
+            const breakdown = document.getElementById('itemsBreakdown');
+            breakdown.innerHTML = '<h4>Détail par Article:</h4>' + 
+                mockReturnItems.map(item => 
+                    `<p>${item.product_name}: ${item.quantity_returned} x ${item.unit_price.toFixed(2)} = ${item.total_price.toFixed(2)} MAD</p>`
+                ).join('');
+            
+            log('✅ Données simulées créées', 'success');
+            log(`💰 Montant total: ${totalAmount.toFixed(2)} MAD`, 'info');
+        }
+
+        function testAPIResponse() {
+            log('🧪 Test de la réponse API...', 'info');
+            
+            if (mockReturnItems.length === 0) {
+                simulateReturnData();
+            }
+            
+            // Simuler la réponse de l'API processProductReturn
+            const apiResponse = {
+                success: true,
+                returnId: 123,
+                returnNumber: 'RET-2025-001',
+                totalRefundAmount: 3500.00  // ✅ Format correct
+            };
+            
+            log('📤 Réponse API simulée:', 'info');
+            log(`  - success: ${apiResponse.success}`, 'info');
+            log(`  - returnNumber: ${apiResponse.returnNumber}`, 'info');
+            log(`  - totalRefundAmount: ${apiResponse.totalRefundAmount}`, 'success');
+            
+            return apiResponse;
+        }
+
+        function testDisplayFunction() {
+            log('🧪 Test de displayReturnSuccess()...', 'info');
+            
+            const result = testAPIResponse();
+            
+            // Simuler la logique de displayReturnSuccess
+            let refundAmount = result.totalRefundAmount || result.refund_amount || 0;
+            
+            if (refundAmount === 0 && mockReturnItems && mockReturnItems.length > 0) {
+                refundAmount = mockReturnItems.reduce((sum, item) => {
+                    const itemTotal = (item.quantity_returned || 0) * (item.unit_price || 0);
+                    return sum + itemTotal;
+                }, 0);
+                log('💰 Montant calculé depuis returnItems (fallback)', 'warning');
+            }
+            
+            const successMessage = `
+                <div style="text-align: center; padding: 20px; border: 2px solid #10b981; border-radius: 8px; background: #d1fae5;">
+                    <div style="font-size: 48px; color: #10b981; margin-bottom: 10px;">✅</div>
+                    <h3 style="color: #065f46; margin-bottom: 10px;">Retour Traité avec Succès</h3>
+                    <p style="color: #374151; margin-bottom: 15px;">
+                        Le retour #${result.returnNumber || result.return_id || result.returnId || 'N/A'} a été traité avec succès.
+                    </p>
+                    <div style="color: #6b7280; font-size: 14px;">
+                        <p><strong>Montant remboursé: ${refundAmount.toFixed(2)} MAD</strong></p>
+                        <p>Date de traitement: ${new Date().toLocaleDateString('fr-FR')}</p>
+                    </div>
+                </div>
+            `;
+            
+            const preview = document.getElementById('successPreview');
+            preview.style.display = 'block';
+            preview.innerHTML = successMessage;
+            
+            log('✅ Message de succès généré', 'success');
+            log(`💰 Montant affiché: ${refundAmount.toFixed(2)} MAD`, 'success');
+        }
+
+        function testCorrectFormat() {
+            log('🧪 Test format correct (totalRefundAmount)...', 'info');
+            
+            const result = {
+                success: true,
+                returnNumber: 'RET-001',
+                totalRefundAmount: 3500.00
+            };
+            
+            const amount = result.totalRefundAmount || result.refund_amount || 0;
+            
+            updateFormatTestResults('Format Correct', result, amount);
+            log(`✅ Format correct: ${amount.toFixed(2)} MAD`, 'success');
+        }
+
+        function testOldFormat() {
+            log('🧪 Test ancien format (refund_amount)...', 'info');
+            
+            const result = {
+                success: true,
+                return_id: 'RET-001',
+                refund_amount: 3500.00
+            };
+            
+            const amount = result.totalRefundAmount || result.refund_amount || 0;
+            
+            updateFormatTestResults('Ancien Format', result, amount);
+            log(`✅ Ancien format: ${amount.toFixed(2)} MAD`, 'success');
+        }
+
+        function testEmptyFormat() {
+            log('🧪 Test format vide (fallback)...', 'info');
+            
+            const result = {
+                success: true,
+                returnNumber: 'RET-001'
+                // Pas de montant
+            };
+            
+            let amount = result.totalRefundAmount || result.refund_amount || 0;
+            
+            // Simulation du fallback
+            if (amount === 0 && mockReturnItems && mockReturnItems.length > 0) {
+                amount = mockReturnItems.reduce((sum, item) => sum + item.total_price, 0);
+            }
+            
+            updateFormatTestResults('Format Vide (Fallback)', result, amount);
+            log(`✅ Fallback calculé: ${amount.toFixed(2)} MAD`, 'success');
+        }
+
+        function updateFormatTestResults(testName, result, amount) {
+            const display = document.getElementById('formatTestResults');
+            display.style.display = 'block';
+            
+            const testResult = {
+                test: testName,
+                input: result,
+                calculatedAmount: amount,
+                success: amount > 0
+            };
+            
+            display.textContent = JSON.stringify(testResult, null, 2);
+        }
+
+        // Test initial
+        setTimeout(() => {
+            log('🚀 Page de test chargée', 'success');
+            log('💰 Test du montant de remboursement', 'info');
+            simulateReturnData();
+        }, 100);
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestionPro - Démarrage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn-close {
+            background: #f44336;
+        }
+        .btn-close:hover {
+            background: #da190b;
+        }
+        .debug-info {
+            margin-top: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 GestionPro</h1>
+        <div class="status">Application démarrée avec succès !</div>
+        
+        <button class="btn" onclick="testLogin()">Test Connexion</button>
+        <button class="btn" onclick="testActivation()">Test Activation</button>
+        <button class="btn btn-close" onclick="closeApp()">Fermer</button>
+        
+        <div class="debug-info">
+            <p>Version de test - Build sécurisé</p>
+            <p id="status">Prêt pour les tests...</p>
+        </div>
+    </div>
+
+    <script>
+        // Test des fonctions IPC
+        function testLogin() {
+            document.getElementById('status').textContent = 'Test de connexion...';
+            if (window.electronAPI) {
+                console.log('✅ electronAPI disponible');
+                document.getElementById('status').textContent = '✅ API Electron OK - Ouverture login...';
+                // Simuler l'ouverture de la fenêtre de login
+                setTimeout(() => {
+                    window.electronAPI.openLogin();
+                }, 1000);
+            } else {
+                console.error('❌ electronAPI non disponible');
+                document.getElementById('status').textContent = '❌ API Electron non disponible';
+            }
+        }
+        
+        function testActivation() {
+            document.getElementById('status').textContent = 'Test d\'activation...';
+            if (window.electronAPI) {
+                document.getElementById('status').textContent = '✅ API Electron OK - Ouverture activation...';
+                setTimeout(() => {
+                    window.electronAPI.openActivation();
+                }, 1000);
+            } else {
+                document.getElementById('status').textContent = '❌ API Electron non disponible';
+            }
+        }
+        
+        function closeApp() {
+            if (window.electronAPI && window.electronAPI.closeApp) {
+                window.electronAPI.closeApp();
+            } else {
+                window.close();
+            }
+        }
+        
+        // Test au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔍 Test de l\'environnement Electron...');
+            console.log('window.electronAPI:', window.electronAPI);
+            console.log('process:', typeof process !== 'undefined' ? 'disponible' : 'non disponible');
+            
+            if (window.electronAPI) {
+                document.getElementById('status').textContent = '✅ Environnement Electron OK';
+            } else {
+                document.getElementById('status').textContent = '⚠️ API Electron manquante - Vérifier preload.js';
+            }
+        });
+    </script>
+</body>
+</html>

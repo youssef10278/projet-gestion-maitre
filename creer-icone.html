@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Icône GestionPro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .icon-preview {
+            width: 256px;
+            height: 256px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .icon-content {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+        .icon-title {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .icon-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .icon-symbol {
+            font-size: 80px;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Générateur d'Icône GestionPro</h1>
+        
+        <div class="icon-preview" id="iconPreview">
+            <div class="icon-content">
+                <div class="icon-symbol">📊</div>
+                <div class="icon-title">GP</div>
+                <div class="icon-subtitle">GestionPro</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="download-btn" onclick="downloadIcon(256, 'icon.png')">
+                📥 Télécharger PNG (256x256)
+            </button>
+            <button class="download-btn" onclick="downloadIcon(512, 'icon@2x.png')">
+                📥 Télécharger PNG (512x512)
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Instructions :</h3>
+            <ol>
+                <li><strong>Téléchargez</strong> l'icône PNG (256x256 recommandé)</li>
+                <li><strong>Convertissez</strong> le PNG en ICO en ligne (ex: convertio.co)</li>
+                <li><strong>Placez</strong> le fichier icon.ico dans le dossier <code>build/</code></li>
+                <li><strong>Relancez</strong> la génération de l'installateur</li>
+            </ol>
+            
+            <h3>💡 Alternative :</h3>
+            <p>Vous pouvez utiliser votre propre logo/icône. Assurez-vous qu'elle soit :</p>
+            <ul>
+                <li>Format ICO (Windows)</li>
+                <li>Taille 256x256 pixels minimum</li>
+                <li>Fond transparent ou uni</li>
+                <li>Nommée <code>icon.ico</code></li>
+            </ul>
+        </div>
+        
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        function downloadIcon(size, filename) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Définir la taille du canvas
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Créer le gradient de fond
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4CAF50');
+            gradient.addColorStop(1, '#2196F3');
+            
+            // Dessiner le fond avec coins arrondis
+            const radius = size * 0.08; // 8% de la taille pour les coins arrondis
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 0, 0, size, size, radius);
+            ctx.fill();
+            
+            // Dessiner l'icône
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Symbole principal
+            ctx.font = `bold ${size * 0.3}px Arial`;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = size * 0.02;
+            ctx.shadowOffsetX = size * 0.01;
+            ctx.shadowOffsetY = size * 0.01;
+            ctx.fillText('📊', size / 2, size * 0.35);
+            
+            // Texte principal
+            ctx.font = `bold ${size * 0.12}px Arial`;
+            ctx.fillText('GP', size / 2, size * 0.65);
+            
+            // Texte secondaire
+            ctx.font = `${size * 0.06}px Arial`;
+            ctx.fillText('GestionPro', size / 2, size * 0.8);
+            
+            // Télécharger l'image
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+    </script>
+</body>
+</html>

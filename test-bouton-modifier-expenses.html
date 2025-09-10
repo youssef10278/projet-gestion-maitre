@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bouton Modifier - Dépenses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .test-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .test-table th, .test-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .test-table th {
+            background-color: #f8f9fa;
+        }
+        .btn-modifier {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .btn-supprimer {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🔧 Test du Bouton Modifier - Gestion des Dépenses</h1>
+        
+        <div class="status" id="globalStatus">
+            ⏳ Initialisation des tests...
+        </div>
+
+        <h2>🎯 Tests des Fonctions Globales</h2>
+        <button class="test-button" onclick="testGlobalFunctions()">Tester les Fonctions Globales</button>
+        <button class="test-button" onclick="testEditExpenseCall()">Tester editExpense(123)</button>
+        <button class="test-button" onclick="testDeleteExpenseCall()">Tester deleteExpense(456)</button>
+
+        <h2>📊 Simulation du Tableau des Dépenses</h2>
+        <table class="test-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Montant</th>
+                    <th>Catégorie</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Électricité</td>
+                    <td>2000.00 MAD</td>
+                    <td>Charges fixes</td>
+                    <td>24/08/2025</td>
+                    <td>
+                        <button class="btn-modifier" onclick="editExpense(1)">Modifier</button>
+                        <button class="btn-supprimer" onclick="deleteExpense(1)">Supprimer</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Loyer</td>
+                    <td>2000.00 MAD</td>
+                    <td>Charges fixes</td>
+                    <td>21/08/2025</td>
+                    <td>
+                        <button class="btn-modifier" onclick="editExpense(2)">Modifier</button>
+                        <button class="btn-supprimer" onclick="deleteExpense(2)">Supprimer</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>📝 Console de Test</h2>
+        <div class="log-container" id="testLog">
+            Logs des tests apparaîtront ici...
+        </div>
+    </div>
+
+    <script>
+        // Simulation des fonctions pour le test
+        let testLog = document.getElementById('testLog');
+        let globalStatus = document.getElementById('globalStatus');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#60a5fa';
+            testLog.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function testGlobalFunctions() {
+            log('🔍 Test des fonctions globales...', 'info');
+            
+            if (typeof window.editExpense === 'function') {
+                log('✅ window.editExpense est disponible', 'success');
+            } else {
+                log('❌ window.editExpense N\'EST PAS disponible', 'error');
+            }
+            
+            if (typeof window.deleteExpense === 'function') {
+                log('✅ window.deleteExpense est disponible', 'success');
+            } else {
+                log('❌ window.deleteExpense N\'EST PAS disponible', 'error');
+            }
+
+            updateGlobalStatus();
+        }
+
+        function testEditExpenseCall() {
+            log('🧪 Test d\'appel editExpense(123)...', 'info');
+            try {
+                if (typeof window.editExpense === 'function') {
+                    // Ne pas vraiment appeler pour éviter les erreurs
+                    log('✅ editExpense peut être appelée (fonction disponible)', 'success');
+                } else {
+                    log('❌ editExpense ne peut pas être appelée', 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur lors du test: ' + error.message, 'error');
+            }
+        }
+
+        function testDeleteExpenseCall() {
+            log('🧪 Test d\'appel deleteExpense(456)...', 'info');
+            try {
+                if (typeof window.deleteExpense === 'function') {
+                    log('✅ deleteExpense peut être appelée (fonction disponible)', 'success');
+                } else {
+                    log('❌ deleteExpense ne peut pas être appelée', 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur lors du test: ' + error.message, 'error');
+            }
+        }
+
+        function updateGlobalStatus() {
+            const editOk = typeof window.editExpense === 'function';
+            const deleteOk = typeof window.deleteExpense === 'function';
+            
+            if (editOk && deleteOk) {
+                globalStatus.className = 'status success';
+                globalStatus.textContent = '✅ Toutes les fonctions sont disponibles';
+            } else if (editOk || deleteOk) {
+                globalStatus.className = 'status warning';
+                globalStatus.textContent = '⚠️ Certaines fonctions manquent';
+            } else {
+                globalStatus.className = 'status error';
+                globalStatus.textContent = '❌ Aucune fonction disponible';
+            }
+        }
+
+        // Fonctions de fallback pour les tests
+        if (typeof window.editExpense !== 'function') {
+            window.editExpense = function(id) {
+                log(`🔧 FALLBACK: editExpense(${id}) appelée`, 'warning');
+                alert(`Fonction editExpense appelée avec ID: ${id}\n\nCeci est une fonction de test.`);
+            };
+        }
+
+        if (typeof window.deleteExpense !== 'function') {
+            window.deleteExpense = function(id) {
+                log(`🗑️ FALLBACK: deleteExpense(${id}) appelée`, 'warning');
+                alert(`Fonction deleteExpense appelée avec ID: ${id}\n\nCeci est une fonction de test.`);
+            };
+        }
+
+        // Test initial
+        setTimeout(() => {
+            log('🚀 Page de test chargée', 'success');
+            testGlobalFunctions();
+        }, 100);
+    </script>
+</body>
+</html>

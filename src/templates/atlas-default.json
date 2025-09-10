@@ -1,0 +1,71 @@
+{
+  "name": "atlas-default",
+  "display_name": "ATLAS Distribution (Par défaut)",
+  "description": "Template professionnel inspiré d'ATLAS Distribution avec dégradé bleu",
+  "is_system": true,
+  "colors_config": {
+    "primary": "#2c5aa0",
+    "primary_light": "#3b82f6",
+    "primary_dark": "#1e40af",
+    "secondary": "#f97316",
+    "success": "#10b981",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "header_gradient_start": "#3b82f6",
+    "header_gradient_end": "#1e40af",
+    "client_section_bg": "#f9fafb",
+    "client_section_border": "#2c5aa0",
+    "table_header_bg": "#2c5aa0",
+    "table_header_text": "#ffffff",
+    "table_row_even": "#f9fafb",
+    "table_row_odd": "#ffffff",
+    "totals_ht_bg": "#dbeafe",
+    "totals_ht_text": "#1e40af",
+    "totals_tva_bg": "#fed7aa",
+    "totals_tva_text": "#ea580c",
+    "totals_ttc_bg": "#d1fae5",
+    "totals_ttc_text": "#065f46"
+  },
+  "fonts_config": {
+    "primary_font": "Arial, sans-serif",
+    "secondary_font": "Georgia, serif",
+    "title_size": "24px",
+    "subtitle_size": "18px",
+    "body_size": "14px",
+    "small_size": "12px",
+    "title_weight": "bold",
+    "subtitle_weight": "600",
+    "body_weight": "normal"
+  },
+  "layout_config": {
+    "page_margins": {
+      "top": "20mm",
+      "bottom": "20mm",
+      "left": "15mm",
+      "right": "15mm"
+    },
+    "header_height": "80px",
+    "logo_position": "left",
+    "logo_size": "64px",
+    "client_section_position": "right",
+    "table_style": "modern",
+    "totals_position": "right",
+    "footer_height": "60px",
+    "section_spacing": "20px"
+  },
+  "elements_config": {
+    "show_logo": true,
+    "show_company_info": true,
+    "show_invoice_number": true,
+    "show_invoice_date": true,
+    "show_due_date": true,
+    "show_client_ice": true,
+    "show_line_numbers": true,
+    "show_unit_badges": true,
+    "show_subtotal_ht": true,
+    "show_tva_details": true,
+    "show_total_ttc": true,
+    "show_legal_mentions": true,
+    "show_payment_terms": true
+  }
+}

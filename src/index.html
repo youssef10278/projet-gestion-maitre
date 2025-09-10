@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="dashboard_page_title">Dashboard - Système de Gestion</title>
+
+    <!-- Pré-chargement des traductions pour éviter le flash -->
+    <script src="./js/lang-init.js"></script>
+
+    <link href="./css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard-enhancements.css">
+    <style>
+        /* Améliorations pour le mode sombre */
+        .dark {
+            color-scheme: dark;
+        }
+
+        /* Amélioration du contraste pour le menu */
+        .dark .nav-link {
+            color: #e5e7eb !important;
+        }
+
+        .dark .nav-link:hover {
+            color: white !important;
+        }
+
+        /* Amélioration des cartes en mode sombre */
+        .dark .bg-white {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+
+        /* Amélioration des bordures */
+        .dark .border-gray-200 {
+            border-color: #374151 !important;
+        }
+
+        .dark .border-gray-300 {
+            border-color: #4b5563 !important;
+        }
+
+        /* Amélioration du texte */
+        .dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #e5e7eb !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #f3f4f6 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #f9fafb !important;
+        }
+
+        /* Amélioration des inputs */
+        .dark input, .dark textarea, .dark select {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #f3f4f6 !important;
+        }
+
+        .dark input:focus, .dark textarea:focus, .dark select:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        }
+
+        /* Amélioration des boutons */
+        .dark .bg-gray-100 {
+            background-color: #374151 !important;
+        }
+
+        .dark .bg-gray-200 {
+            background-color: #4b5563 !important;
+        }
+
+        /* Amélioration des tableaux */
+        .dark table {
+            background-color: #1f2937 !important;
+        }
+
+        .dark th {
+            background-color: #374151 !important;
+            color: #f3f4f6 !important;
+        }
+
+        .dark td {
+            border-color: #4b5563 !important;
+            color: #e5e7eb !important;
+        }
+
+        /* Amélioration des modales */
+        .dark .modal-content {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+
+        /* Amélioration des notifications */
+        .dark .notification {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #f3f4f6 !important;
+        }
+
+        /* Amélioration du sidebar */
+        .dark #sidebar {
+            background-color: #111827 !important;
+            border-color: #374151 !important;
+        }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+
+        /* Amélioration des icônes */
+        .dark .text-gray-400 {
+            color: #9ca3af !important;
+        }
+
+        .dark .text-gray-500 {
+            color: #6b7280 !important;
+        }
+
+        /* Amélioration des ombres */
+        .dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* Amélioration des hover states */
+        .dark .hover\:bg-gray-100:hover {
+            background-color: #374151 !important;
+        }
+
+        .dark .hover\:bg-gray-200:hover {
+            background-color: #4b5563 !important;
+        }
+
+        /* Amélioration des focus states */
+        .dark .focus\:ring-blue-500:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        /* Amélioration des alertes */
+        .dark .bg-red-50 {
+            background-color: #7f1d1d !important;
+        }
+
+        .dark .bg-green-50 {
+            background-color: #14532d !important;
+        }
+
+        .dark .bg-yellow-50 {
+            background-color: #78350f !important;
+        }
+
+        .dark .bg-blue-50 {
+            background-color: #1e3a8a !important;
+        }
+
+        /* Amélioration des badges */
+        .dark .badge {
+            background-color: #374151 !important;
+            color: #f3f4f6 !important;
+        }
+
+        /* Amélioration des dividers */
+        .dark hr {
+            border-color: #374151 !important;
+        }
+
+        /* Amélioration des placeholders */
+        .dark ::placeholder {
+            color: #9ca3af !important;
+        }
+
+        /* Amélioration des scrollbars */
+        .dark ::-webkit-scrollbar {
+            background-color: #1f2937;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 6px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+
+        /* Amélioration des transitions */
+        * {
+            transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+            transition-duration: 200ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <!-- Header avec Centre d'Alertes -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="dashboard_main_title">Tableau de Bord</h1>
+
+            <!-- Centre d'Alertes -->
+            <div class="relative">
+                <button id="alertsToggle" class="relative p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-gray-700">
+                    <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM11 19H6a2 2 0 01-2-2V7a2 2 0 012-2h5m5 0v5"></path>
+                    </svg>
+                    <!-- Badge de notification -->
+                    <span id="alertsBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold hidden">0</span>
+                </button>
+
+                <!-- Panel d'Alertes -->
+                <div id="alertsPanel" class="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 hidden">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Centre d'Alertes</h3>
+                            <button id="markAllRead" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400">Tout marquer lu</button>
+                        </div>
+                    </div>
+                    <div id="alertsList" class="max-h-96 overflow-y-auto">
+                        <!-- Alertes dynamiques -->
+                    </div>
+                    <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                        <button id="viewAllAlerts" class="w-full text-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                            Voir toutes les alertes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button data-period="today" class="period-btn px-3 py-1 text-sm rounded-md" data-i18n="today">Aujourd'hui</button>
+                <button data-period="week" class="period-btn px-3 py-1 text-sm rounded-md" data-i18n="this_week">Cette Semaine</button>
+                <button data-period="month" class="period-btn px-3 py-1 text-sm rounded-md" data-i18n="this_month">Ce Mois-ci</button>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+                <span data-i18n="from">De:</span>
+                <input type="date" id="startDate" class="p-1 border rounded dark:bg-gray-700 dark:border-gray-600">
+                <span data-i18n="to">à:</span>
+                <input type="date" id="endDate" class="p-1 border rounded dark:bg-gray-700 dark:border-gray-600">
+                <button id="filterByDate" class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white" data-i18n="filter_button">Filtrer</button>
+            </div>
+        </div>
+
+        <!-- KPIs Visuels Améliorés -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Chiffre d'Affaires avec Jauge -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="turnover_sales">Chiffre d'Affaires</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            <span id="revenue-stat">0.00</span> MAD
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Objectif: <span id="revenue-target">10,000</span> MAD
+                        </p>
+                    </div>
+                    <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                </div>
+                <!-- Jauge de Performance -->
+                <div class="relative">
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div id="revenue-progress" class="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>0%</span>
+                        <span id="revenue-percentage" class="font-medium">0%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bénéfice Net avec Jauge -->
+            <div id="profit-stat-card" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200 hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="net_profit">Bénéfice Net</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            <span id="profit-stat">0.00</span> MAD
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Marge: <span id="profit-margin">0</span>%
+                        </p>
+                    </div>
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <!-- Jauge de Marge -->
+                <div class="relative">
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div id="profit-progress" class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>0%</span>
+                        <span id="profit-percentage" class="font-medium">0%</span>
+                        <span>50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crédits avec Alerte -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="credits_granted">Crédits Accordés</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            <span id="credit-stat">0.00</span> MAD
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            En retard: <span id="overdue-credits" class="text-red-500 font-medium">0</span>
+                        </p>
+                    </div>
+                    <div class="p-3 bg-orange-100 dark:bg-orange-900 rounded-full">
+                        <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <!-- Indicateur de Risque -->
+                <div class="flex items-center space-x-2">
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div id="credit-risk" class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <span id="credit-risk-label" class="text-xs text-gray-500 dark:text-gray-400">Faible</span>
+                </div>
+            </div>
+
+            <!-- Stock Critique -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Stock Critique</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            <span id="low-stock-count">0</span> Produits
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Total produits: <span id="total-products">0</span>
+                        </p>
+                    </div>
+                    <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <!-- Indicateur de Stock -->
+                <div class="flex items-center space-x-2">
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div id="stock-health" class="bg-gradient-to-r from-green-500 to-yellow-500 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                    <span id="stock-health-label" class="text-xs text-gray-500 dark:text-gray-400">Bon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Rapides -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                <span class="mr-2">⚡</span>
+                Actions Rapides
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Nouvelle Vente -->
+                <button onclick="window.location.href='caisse.html'" class="quick-action-btn bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Nouvelle Vente</span>
+                </button>
+
+                <!-- Ajouter Produit -->
+                <button onclick="window.location.href='products.html'" class="quick-action-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h6"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Ajouter Produit</span>
+                </button>
+
+                <!-- Réapprovisionner -->
+                <button id="quickRestock" class="quick-action-btn bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Réapprovisionner</span>
+                </button>
+
+                <!-- Relancer Clients -->
+                <button id="quickReminder" class="quick-action-btn bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Relancer Clients</span>
+                </button>
+
+                <!-- Rapport Express -->
+                <button id="quickReport" class="quick-action-btn bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Rapport Express</span>
+                </button>
+
+                <!-- Paramètres -->
+                <button onclick="window.location.href='settings.html'" class="quick-action-btn bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center space-y-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Paramètres</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section Analytics Produits -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                    <span class="mr-3">📊</span>
+                    <span data-i18n="product_analytics">Analytics Produits</span>
+                </h2>
+                <button id="exportAnalytics" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span data-i18n="export_data">Exporter</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Bénéfices Card -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-xl shadow-lg border border-green-200 dark:border-green-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-green-800 dark:text-green-200 flex items-center">
+                            <span class="mr-2">💰</span>
+                            <span data-i18n="top_profitable_products">Produits les Plus Rentables</span>
+                        </h3>
+                        <div class="animate-pulse">
+                            <div id="profitable-loading" class="w-4 h-4 bg-green-400 rounded-full hidden"></div>
+                        </div>
+                    </div>
+                    <div id="profitable-products" class="space-y-3">
+                        <!-- Contenu dynamique -->
+                    </div>
+                </div>
+
+                <!-- Top Ventes Card -->
+                <div class="bg-gradient-to-br from-blue-50 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl shadow-lg border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-blue-800 dark:text-blue-200 flex items-center">
+                            <span class="mr-2">🔥</span>
+                            <span data-i18n="top_selling_products">Produits les Plus Vendus</span>
+                        </h3>
+                        <div class="animate-pulse">
+                            <div id="selling-loading" class="w-4 h-4 bg-blue-400 rounded-full hidden"></div>
+                        </div>
+                    </div>
+                    <div id="selling-products" class="space-y-3">
+                        <!-- Contenu dynamique -->
+                    </div>
+                </div>
+
+                <!-- Performance Globale Card -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-xl shadow-lg border border-purple-200 dark:border-purple-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-purple-800 dark:text-purple-200 flex items-center">
+                            <span class="mr-2">📊</span>
+                            <span data-i18n="performance_overview">Vue d'Ensemble</span>
+                        </h3>
+                        <button id="viewPerformanceDetails" class="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 transition-colors">
+                            <span data-i18n="view_details">Voir Détails</span>
+                        </button>
+                    </div>
+                    <div id="performance-overview" class="space-y-3">
+                        <!-- Contenu dynamique -->
+                    </div>
+                </div>
+
+                <!-- Insights Rapides Card -->
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-xl shadow-lg border border-yellow-200 dark:border-yellow-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-yellow-800 dark:text-yellow-200 flex items-center">
+                            <span class="mr-2">🎯</span>
+                            <span data-i18n="quick_insights">Recommandations</span>
+                        </h3>
+                    </div>
+                    <div id="quick-insights" class="space-y-3">
+                        <!-- Contenu dynamique -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="./js/i18n.js"></script>
+    <script src="./js/preloader.js"></script>
+    <script src="./js/page-initializer.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+</body>
+</html>

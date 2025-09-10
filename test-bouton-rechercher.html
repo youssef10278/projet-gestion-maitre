@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bouton Rechercher - Historique</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .log-output {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test du Bouton Rechercher - Historique des Retours</h1>
+    
+    <div class="test-section">
+        <h2>📋 Instructions</h2>
+        <ol>
+            <li>Ouvrir l'application GestionPro</li>
+            <li>Aller dans "Retours"</li>
+            <li>Cliquer sur "Historique"</li>
+            <li>Ouvrir cette page dans un nouvel onglet</li>
+            <li>Utiliser les boutons de test ci-dessous</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Tests Automatiques</h2>
+        <button class="test-button" onclick="testModalExists()">1. Vérifier Modal Existe</button>
+        <button class="test-button" onclick="testButtonExists()">2. Vérifier Bouton Existe</button>
+        <button class="test-button" onclick="testEventAttached()">3. Tester Événement</button>
+        <button class="test-button" onclick="testDirectCall()">4. Appel Direct</button>
+        <button class="test-button" onclick="testFullFlow()">5. Test Complet</button>
+        <button class="test-button" onclick="clearLogs()">🧹 Effacer Logs</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Résultats des Tests</h2>
+        <div id="status" class="status info">Prêt pour les tests...</div>
+        <div id="logs" class="log-output">Logs des tests apparaîtront ici...\n</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛠️ Actions de Correction</h2>
+        <button class="test-button" onclick="forceReconfigure()">Reconfigurer Événements</button>
+        <button class="test-button" onclick="simulateClick()">Simuler Clic</button>
+        <button class="test-button" onclick="debugDOM()">Debug DOM</button>
+    </div>
+
+    <script>
+        let logContainer = document.getElementById('logs');
+        let statusContainer = document.getElementById('status');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logContainer.textContent += `[${timestamp}] ${message}\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Mettre à jour le statut
+            statusContainer.textContent = message;
+            statusContainer.className = `status ${type}`;
+        }
+
+        function clearLogs() {
+            logContainer.textContent = 'Logs effacés...\n';
+            statusContainer.textContent = 'Logs effacés';
+            statusContainer.className = 'status info';
+        }
+
+        function testModalExists() {
+            try {
+                const modal = window.parent.document.getElementById('historyModal');
+                if (modal) {
+                    const isVisible = !modal.classList.contains('hidden');
+                    log(`✅ Modal trouvée - Visible: ${isVisible}`, 'success');
+                    return true;
+                } else {
+                    log('❌ Modal non trouvée', 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Erreur accès modal: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function testButtonExists() {
+            try {
+                const button = window.parent.document.getElementById('searchHistory');
+                if (button) {
+                    const isVisible = button.offsetParent !== null;
+                    const isDisabled = button.disabled;
+                    log(`✅ Bouton trouvé - Visible: ${isVisible}, Disabled: ${isDisabled}`, 'success');
+                    return true;
+                } else {
+                    log('❌ Bouton searchHistory non trouvé', 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Erreur accès bouton: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function testEventAttached() {
+            try {
+                const button = window.parent.document.getElementById('searchHistory');
+                if (!button) {
+                    log('❌ Bouton non trouvé pour test événement', 'error');
+                    return false;
+                }
+
+                // Créer un événement de test
+                let eventFired = false;
+                const testHandler = () => { eventFired = true; };
+                
+                button.addEventListener('click', testHandler);
+                button.click();
+                button.removeEventListener('click', testHandler);
+
+                if (eventFired) {
+                    log('✅ Événement click fonctionne', 'success');
+                    return true;
+                } else {
+                    log('❌ Événement click ne fonctionne pas', 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Erreur test événement: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function testDirectCall() {
+            try {
+                if (window.parent.searchHistoryData) {
+                    log('🔍 Appel direct de searchHistoryData...', 'info');
+                    window.parent.searchHistoryData();
+                    log('✅ Fonction appelée directement', 'success');
+                    return true;
+                } else {
+                    log('❌ Fonction searchHistoryData non trouvée', 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Erreur appel direct: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function testFullFlow() {
+            log('🧪 Début du test complet...', 'info');
+            
+            const tests = [
+                { name: 'Modal existe', func: testModalExists },
+                { name: 'Bouton existe', func: testButtonExists },
+                { name: 'Événement attaché', func: testEventAttached },
+                { name: 'Appel direct', func: testDirectCall }
+            ];
+
+            let passed = 0;
+            tests.forEach(test => {
+                if (test.func()) {
+                    passed++;
+                }
+            });
+
+            if (passed === tests.length) {
+                log(`🎉 Tous les tests réussis (${passed}/${tests.length})`, 'success');
+            } else {
+                log(`⚠️ ${passed}/${tests.length} tests réussis`, 'warning');
+            }
+        }
+
+        function forceReconfigure() {
+            try {
+                if (window.parent.forceSetupHistoryEvents) {
+                    log('🔧 Reconfiguration forcée des événements...', 'info');
+                    window.parent.forceSetupHistoryEvents();
+                    log('✅ Reconfiguration terminée', 'success');
+                } else {
+                    log('❌ Fonction forceSetupHistoryEvents non trouvée', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erreur reconfiguration: ${error.message}`, 'error');
+            }
+        }
+
+        function simulateClick() {
+            try {
+                if (window.parent.testHistorySearch) {
+                    log('🖱️ Simulation de clic...', 'info');
+                    window.parent.testHistorySearch();
+                    log('✅ Simulation terminée', 'success');
+                } else {
+                    log('❌ Fonction testHistorySearch non trouvée', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erreur simulation: ${error.message}`, 'error');
+            }
+        }
+
+        function debugDOM() {
+            try {
+                const modal = window.parent.document.getElementById('historyModal');
+                if (modal) {
+                    const elements = Array.from(modal.querySelectorAll('*[id]'));
+                    log('🔍 Éléments avec ID dans la modal:', 'info');
+                    elements.forEach(el => {
+                        log(`  - ${el.id} (${el.tagName})`, 'info');
+                    });
+                } else {
+                    log('❌ Modal non trouvée pour debug', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erreur debug DOM: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test au chargement
+        setTimeout(() => {
+            log('🚀 Page de test chargée', 'info');
+            log('💡 Ouvrez la modal historique dans l\'application puis utilisez les boutons de test', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>

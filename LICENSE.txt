@@ -1,0 +1,42 @@
+LICENCE D'UTILISATION - GESTIONPRO
+=====================================
+
+Copyright (c) 2025 GestionPro. Tous droits réservés.
+
+ACCORD DE LICENCE UTILISATEUR FINAL (CLUF)
+
+En installant et en utilisant ce logiciel, vous acceptez les termes et conditions suivants :
+
+1. OCTROI DE LICENCE
+   Ce logiciel vous est concédé sous licence, non vendu. GestionPro vous accorde une licence limitée, non exclusive et non transférable pour utiliser ce logiciel conformément aux termes de cet accord.
+
+2. UTILISATION AUTORISÉE
+   - Vous pouvez installer et utiliser ce logiciel sur un seul ordinateur à la fois
+   - Vous pouvez faire une copie de sauvegarde du logiciel
+   - L'utilisation est limitée aux fins commerciales légitimes de votre entreprise
+
+3. RESTRICTIONS
+   - Vous ne pouvez pas copier, distribuer ou transférer ce logiciel à des tiers
+   - Vous ne pouvez pas modifier, décompiler ou effectuer de l'ingénierie inverse
+   - Vous ne pouvez pas louer, prêter ou sous-licencier ce logiciel
+
+4. PROPRIÉTÉ INTELLECTUELLE
+   Tous les droits, titres et intérêts dans et sur le logiciel restent la propriété exclusive de GestionPro.
+
+5. SUPPORT ET MISES À JOUR
+   Le support technique et les mises à jour sont fournis selon les termes de votre contrat de maintenance.
+
+6. LIMITATION DE RESPONSABILITÉ
+   Ce logiciel est fourni "en l'état" sans garantie d'aucune sorte. GestionPro ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs.
+
+7. RÉSILIATION
+   Cette licence prend fin automatiquement si vous violez l'un de ses termes. En cas de résiliation, vous devez détruire toutes les copies du logiciel.
+
+8. DROIT APPLICABLE
+   Cet accord est régi par les lois du Maroc.
+
+Pour toute question concernant cette licence, contactez :
+Email: support@gestionpro.ma
+Site web: www.gestionpro.ma
+
+Date d'entrée en vigueur : 2025

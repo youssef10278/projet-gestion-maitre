@@ -1,0 +1,71 @@
+{
+  "name": "minimal-bw",
+  "display_name": "Minimaliste Noir & Blanc",
+  "description": "Design minimaliste en noir et blanc, focus sur l'essentiel",
+  "is_system": true,
+  "colors_config": {
+    "primary": "#000000",
+    "primary_light": "#374151",
+    "primary_dark": "#000000",
+    "secondary": "#6b7280",
+    "success": "#374151",
+    "warning": "#6b7280",
+    "danger": "#000000",
+    "header_gradient_start": "#000000",
+    "header_gradient_end": "#374151",
+    "client_section_bg": "#ffffff",
+    "client_section_border": "#000000",
+    "table_header_bg": "#000000",
+    "table_header_text": "#ffffff",
+    "table_row_even": "#f9fafb",
+    "table_row_odd": "#ffffff",
+    "totals_ht_bg": "#f3f4f6",
+    "totals_ht_text": "#000000",
+    "totals_tva_bg": "#e5e7eb",
+    "totals_tva_text": "#374151",
+    "totals_ttc_bg": "#d1d5db",
+    "totals_ttc_text": "#000000"
+  },
+  "fonts_config": {
+    "primary_font": "Helvetica, Arial, sans-serif",
+    "secondary_font": "Helvetica, Arial, sans-serif",
+    "title_size": "26px",
+    "subtitle_size": "18px",
+    "body_size": "14px",
+    "small_size": "12px",
+    "title_weight": "300",
+    "subtitle_weight": "400",
+    "body_weight": "300"
+  },
+  "layout_config": {
+    "page_margins": {
+      "top": "30mm",
+      "bottom": "30mm",
+      "left": "25mm",
+      "right": "25mm"
+    },
+    "header_height": "60px",
+    "logo_position": "left",
+    "logo_size": "50px",
+    "client_section_position": "right",
+    "table_style": "minimal",
+    "totals_position": "right",
+    "footer_height": "40px",
+    "section_spacing": "25px"
+  },
+  "elements_config": {
+    "show_logo": true,
+    "show_company_info": true,
+    "show_invoice_number": true,
+    "show_invoice_date": true,
+    "show_due_date": false,
+    "show_client_ice": true,
+    "show_line_numbers": false,
+    "show_unit_badges": false,
+    "show_subtotal_ht": true,
+    "show_tva_details": true,
+    "show_total_ttc": true,
+    "show_legal_mentions": false,
+    "show_payment_terms": false
+  }
+}

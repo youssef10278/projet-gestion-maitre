@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu Boutons Icônes - GestionPro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .section {
+            text-align: center;
+        }
+
+        .section h3 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        .before {
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fef2f2;
+        }
+
+        .after {
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f0fdf4;
+        }
+
+        /* Styles pour les anciens boutons (avec texte) */
+        .old-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .old-btn.edit {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .old-btn.delete {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Styles pour les nouveaux boutons (icônes seulement) */
+        .new-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 6px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .new-btn.edit {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .new-btn.edit:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .new-btn.delete {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .new-btn.delete:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .new-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .demo-table th,
+        .demo-table td {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .demo-table th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        .advantages {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+        }
+
+        .advantages h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+
+        .advantages ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .advantages li {
+            padding: 5px 0;
+            color: #374151;
+        }
+
+        .advantages li::before {
+            content: "✅ ";
+            margin-right: 8px;
+        }
+
+        .responsive-demo {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .responsive-demo h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .new-btn {
+                width: 28px;
+                height: 28px;
+                padding: 4px;
+            }
+
+            .new-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Optimisation des Boutons d'Action</h1>
+            <p>Comparaison Avant/Après - Page Produits & Stock</p>
+        </div>
+
+        <div class="comparison">
+            <div class="section">
+                <div class="before">
+                    <h3>❌ Avant (Avec Texte)</h3>
+                    <div>
+                        <button class="old-btn edit">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Modifier
+                        </button>
+                        <button class="old-btn delete">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Supprimer
+                        </button>
+                    </div>
+                    
+                    <table class="demo-table">
+                        <tr>
+                            <th>Largeur</th>
+                            <td>~140px par bouton</td>
+                        </tr>
+                        <tr>
+                            <th>Espace total</th>
+                            <td>~280px pour les 2</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile</th>
+                            <td>Problème d'espace</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="after">
+                    <h3>✅ Après (Icônes Seulement)</h3>
+                    <div>
+                        <button class="new-btn edit" title="Modifier">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </button>
+                        <button class="new-btn delete" title="Supprimer">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <table class="demo-table">
+                        <tr>
+                            <th>Largeur</th>
+                            <td>32px par bouton</td>
+                        </tr>
+                        <tr>
+                            <th>Espace total</th>
+                            <td>~74px pour les 2</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile</th>
+                            <td>Parfait !</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="advantages">
+            <h3>🎯 Avantages de la Nouvelle Version</h3>
+            <ul>
+                <li><strong>Gain d'espace :</strong> 75% d'espace économisé (280px → 74px)</li>
+                <li><strong>Responsive optimal :</strong> Parfait sur mobile et tablette</li>
+                <li><strong>Design moderne :</strong> Interface plus épurée et professionnelle</li>
+                <li><strong>Tooltips informatifs :</strong> Texte au survol pour clarté</li>
+                <li><strong>Animations fluides :</strong> Effets hover améliorés</li>
+                <li><strong>Cohérence visuelle :</strong> Alignement parfait des colonnes</li>
+                <li><strong>Accessibilité :</strong> Attributs title pour lecteurs d'écran</li>
+                <li><strong>Performance :</strong> Moins de DOM, rendu plus rapide</li>
+            </ul>
+        </div>
+
+        <div class="responsive-demo">
+            <h3>📱 Test Responsive</h3>
+            <p>Redimensionnez cette fenêtre pour voir l'adaptation automatique des boutons !</p>
+            <p><strong>Desktop :</strong> 32x32px | <strong>Mobile :</strong> 28x28px</p>
+        </div>
+
+        <div style="padding: 20px; text-align: center; color: #6b7280; border-top: 1px solid #e5e7eb;">
+            <p><strong>🎉 Optimisation Terminée !</strong></p>
+            <p>Les boutons d'action sont maintenant optimisés pour tous les écrans</p>
+            <p>Testez dans l'application : Page Produits & Stock → Colonne Actions</p>
+        </div>
+    </div>
+
+    <script>
+        // Ajouter des effets interactifs
+        document.querySelectorAll('.new-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Afficher les dimensions en temps réel
+        function updateDimensions() {
+            const width = window.innerWidth;
+            const responsiveDemo = document.querySelector('.responsive-demo p:last-child');
+            
+            if (width <= 768) {
+                responsiveDemo.innerHTML = '<strong>Mode Mobile :</strong> Boutons 28x28px - Icônes 14x14px';
+                responsiveDemo.style.color = '#059669';
+            } else {
+                responsiveDemo.innerHTML = '<strong>Mode Desktop :</strong> Boutons 32x32px - Icônes 16x16px';
+                responsiveDemo.style.color = '#0369a1';
+            }
+        }
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Bouton Fermeture - FINAL</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .test-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #1f2937;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 2000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .status-success { color: #10b981; }
+        .status-error { color: #ef4444; }
+        .status-warning { color: #f59e0b; }
+        .test-step {
+            margin: 8px 0;
+            padding: 8px;
+            border-left: 3px solid #374151;
+            background: rgba(255,255,255,0.05);
+        }
+        .step-active { border-left-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .step-success { border-left-color: #10b981; background: rgba(16,185,129,0.1); }
+        .step-error { border-left-color: #ef4444; background: rgba(239,68,68,0.1); }
+    </style>
+</head>
+<body>
+    <!-- Panel de test -->
+    <div class="test-status">
+        <h3 style="margin: 0 0 15px 0;">🧪 Test Bouton Fermeture</h3>
+        
+        <div id="step1" class="test-step">
+            <strong>1. Réduire largeur &lt; 1024px</strong>
+            <div id="step1-status">En attente...</div>
+        </div>
+        
+        <div id="step2" class="test-step">
+            <strong>2. Bouton hamburger visible</strong>
+            <div id="step2-status">En attente...</div>
+        </div>
+        
+        <div id="step3" class="test-step">
+            <strong>3. Ouvrir le menu</strong>
+            <div id="step3-status">En attente...</div>
+        </div>
+        
+        <div id="step4" class="test-step">
+            <strong>4. Bouton X visible</strong>
+            <div id="step4-status">En attente...</div>
+        </div>
+        
+        <div id="step5" class="test-step">
+            <strong>5. Cliquer bouton X</strong>
+            <div id="step5-status">En attente...</div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #374151;">
+            <button onclick="autoTest()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%;">
+                🤖 Test Automatique
+            </button>
+        </div>
+        
+        <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
+            Largeur actuelle: <span id="current-width">0</span>px
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-xl font-bold border-b border-gray-700">
+            🔧 Test Bouton X
+        </div>
+        <nav class="flex-grow p-4">
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🏠 Dashboard
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💰 Caisse
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📦 Produits
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                👥 Clients
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <h1 class="text-3xl font-bold mb-6">Test Final du Bouton de Fermeture</h1>
+        
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-green-800 mb-4">✅ Corrections Appliquées</h2>
+            <ul class="list-disc list-inside text-green-700 space-y-2">
+                <li><strong>CSS amélioré</strong> : Bouton visible avec classes .sidebar-responsive et .sidebar-open</li>
+                <li><strong>JavaScript renforcé</strong> : Vérification d'existence + création sécurisée</li>
+                <li><strong>Visibilité forcée</strong> : style.display = 'flex' lors de l'ouverture</li>
+                <li><strong>Feedback tactile</strong> : Vibration et animations améliorées</li>
+                <li><strong>Logs de debug</strong> : Console détaillée pour diagnostic</li>
+            </ul>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4">🧪 Instructions de Test</h2>
+            <ol class="list-decimal list-inside text-blue-700 space-y-2">
+                <li><strong>Réduisez la largeur</strong> du navigateur en dessous de 1024px</li>
+                <li><strong>Vérifiez</strong> que le bouton hamburger (☰) apparaît en haut à gauche</li>
+                <li><strong>Cliquez</strong> sur le bouton hamburger pour ouvrir le menu</li>
+                <li><strong>Vérifiez</strong> que le bouton X apparaît en haut à droite de la sidebar</li>
+                <li><strong>Cliquez</strong> sur le bouton X pour fermer le menu</li>
+                <li><strong>Répétez</strong> plusieurs fois pour valider la stabilité</li>
+            </ol>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Actions Manuelles</h3>
+                <div class="space-y-3">
+                    <button onclick="forceOpenMenu()" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                        🔓 Forcer Ouverture Menu
+                    </button>
+                    <button onclick="forceCloseMenu()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                        🔒 Forcer Fermeture Menu
+                    </button>
+                    <button onclick="highlightCloseButton()" class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600">
+                        🔦 Surligner Bouton X
+                    </button>
+                    <button onclick="debugCloseButton()" class="w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+                        🐛 Debug Bouton X
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">État du Système</h3>
+                <div class="space-y-2 text-sm">
+                    <div>Menu ouvert: <span id="menu-open-status" class="font-mono">Non</span></div>
+                    <div>Bouton X trouvé: <span id="close-btn-found" class="font-mono">Non</span></div>
+                    <div>Bouton X visible: <span id="close-btn-visible" class="font-mono">Non</span></div>
+                    <div>Sidebar responsive: <span id="sidebar-responsive" class="font-mono">Non</span></div>
+                    <div>Largeur écran: <span id="screen-width" class="font-mono">0px</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        let testSteps = {
+            step1: false, // Largeur < 1024px
+            step2: false, // Bouton hamburger visible
+            step3: false, // Menu ouvert
+            step4: false, // Bouton X visible
+            step5: false  // Bouton X cliqué
+        };
+
+        function updateStepStatus(step, success, message) {
+            const element = document.getElementById(step);
+            const statusElement = document.getElementById(step + '-status');
+            
+            element.className = 'test-step ' + (success ? 'step-success' : 'step-error');
+            statusElement.innerHTML = `<span class="${success ? 'status-success' : 'status-error'}">${message}</span>`;
+            
+            testSteps[step] = success;
+        }
+
+        function updateSystemStatus() {
+            const width = window.innerWidth;
+            document.getElementById('current-width').textContent = width;
+            document.getElementById('screen-width').textContent = width + 'px';
+            
+            // Step 1: Largeur < 1024px
+            if (width < 1024) {
+                updateStepStatus('step1', true, '✅ Largeur OK (' + width + 'px)');
+            } else {
+                updateStepStatus('step1', false, '❌ Trop large (' + width + 'px)');
+            }
+            
+            // Step 2: Bouton hamburger visible
+            const hamburgerBtn = document.getElementById('hamburger-menu-btn');
+            const hamburgerVisible = hamburgerBtn && !hamburgerBtn.classList.contains('hidden');
+            if (hamburgerVisible) {
+                updateStepStatus('step2', true, '✅ Bouton ☰ visible');
+            } else {
+                updateStepStatus('step2', false, '❌ Bouton ☰ non visible');
+            }
+            
+            // Step 3: Menu ouvert
+            const menuOpen = document.body.classList.contains('menu-open');
+            document.getElementById('menu-open-status').textContent = menuOpen ? 'Oui' : 'Non';
+            if (menuOpen) {
+                updateStepStatus('step3', true, '✅ Menu ouvert');
+            } else {
+                updateStepStatus('step3', false, '❌ Menu fermé');
+            }
+            
+            // Step 4: Bouton X visible
+            const closeBtn = document.querySelector('.sidebar-close-btn');
+            document.getElementById('close-btn-found').textContent = closeBtn ? 'Oui' : 'Non';
+            
+            if (closeBtn) {
+                const style = window.getComputedStyle(closeBtn);
+                const visible = style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+                document.getElementById('close-btn-visible').textContent = visible ? 'Oui' : 'Non';
+                
+                if (visible && menuOpen) {
+                    updateStepStatus('step4', true, '✅ Bouton X visible');
+                } else if (menuOpen) {
+                    updateStepStatus('step4', false, '❌ Bouton X masqué');
+                } else {
+                    document.getElementById('step4-status').innerHTML = '<span style="color: #6b7280;">En attente ouverture menu</span>';
+                }
+            } else {
+                document.getElementById('close-btn-visible').textContent = 'Non';
+                updateStepStatus('step4', false, '❌ Bouton X non trouvé');
+            }
+            
+            // Sidebar responsive
+            const sidebar = document.querySelector('aside');
+            const isResponsive = sidebar && sidebar.classList.contains('sidebar-responsive');
+            document.getElementById('sidebar-responsive').textContent = isResponsive ? 'Oui' : 'Non';
+        }
+
+        function autoTest() {
+            console.log('🤖 Démarrage test automatique');
+            
+            // Simuler une largeur mobile
+            document.body.style.maxWidth = '800px';
+            window.dispatchEvent(new Event('resize'));
+            
+            setTimeout(() => {
+                updateSystemStatus();
+                
+                // Ouvrir le menu automatiquement
+                if (window.hamburgerMenu) {
+                    window.hamburgerMenu.openMenu();
+                    console.log('🔓 Menu ouvert automatiquement');
+                    
+                    setTimeout(() => {
+                        updateSystemStatus();
+                        
+                        // Tester le bouton de fermeture
+                        const closeBtn = document.querySelector('.sidebar-close-btn');
+                        if (closeBtn) {
+                            console.log('🔦 Bouton X trouvé, test de clic');
+                            closeBtn.click();
+                            updateStepStatus('step5', true, '✅ Bouton X cliqué');
+                            
+                            setTimeout(() => {
+                                updateSystemStatus();
+                                console.log('✅ Test automatique terminé');
+                            }, 500);
+                        } else {
+                            updateStepStatus('step5', false, '❌ Bouton X non trouvé');
+                        }
+                    }, 500);
+                }
+            }, 500);
+        }
+
+        function forceOpenMenu() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.openMenu();
+                setTimeout(updateSystemStatus, 100);
+            }
+        }
+
+        function forceCloseMenu() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.closeMenu();
+                setTimeout(updateSystemStatus, 100);
+            }
+        }
+
+        function highlightCloseButton() {
+            const closeBtn = document.querySelector('.sidebar-close-btn');
+            if (closeBtn) {
+                closeBtn.style.outline = '3px solid red';
+                closeBtn.style.backgroundColor = 'rgba(255,0,0,0.3)';
+                setTimeout(() => {
+                    closeBtn.style.outline = '';
+                    closeBtn.style.backgroundColor = '';
+                }, 3000);
+                console.log('🔦 Bouton X surligné');
+            } else {
+                console.log('❌ Bouton X non trouvé pour surlignage');
+            }
+        }
+
+        function debugCloseButton() {
+            const closeBtn = document.querySelector('.sidebar-close-btn');
+            if (closeBtn) {
+                const style = window.getComputedStyle(closeBtn);
+                console.log('🐛 Debug bouton X:');
+                console.log('  Display:', style.display);
+                console.log('  Visibility:', style.visibility);
+                console.log('  Opacity:', style.opacity);
+                console.log('  Position:', style.position);
+                console.log('  Top:', style.top);
+                console.log('  Right:', style.right);
+                console.log('  Z-index:', style.zIndex);
+                console.log('  Classes:', closeBtn.className);
+            } else {
+                console.log('❌ Bouton X non trouvé pour debug');
+            }
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            setTimeout(updateSystemStatus, 1000);
+        });
+
+        window.addEventListener('resize', updateSystemStatus);
+
+        // Observer les changements
+        const observer = new MutationObserver(() => {
+            setTimeout(updateSystemStatus, 50);
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        // Mise à jour initiale
+        updateSystemStatus();
+    </script>
+</body>
+</html>

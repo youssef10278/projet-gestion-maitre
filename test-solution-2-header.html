@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Solution 2 - Header Structuré</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 2000;
+            max-width: 420px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .status-ok { 
+            border-left: 4px solid #10b981; 
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .status-warning { 
+            border-left: 4px solid #f59e0b; 
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .status-error { 
+            border-left: 4px solid #ef4444; 
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .test-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .highlight-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 70px;
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px dashed #ffd700;
+            z-index: 1001;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .highlight-header.show {
+            opacity: 1;
+        }
+        .solution-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Zone de test pour visualiser le header -->
+    <div class="highlight-header" id="highlightHeader"></div>
+
+    <!-- Panel de test -->
+    <div class="test-panel">
+        <h3 style="margin: 0 0 15px 0; text-align: center; color: #fbbf24;">🎯 Test Solution 2</h3>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div><strong>Largeur:</strong> <span id="screen-width">0</span>px</div>
+            <div><strong>Type:</strong> <span id="screen-type">Détection...</span></div>
+        </div>
+        
+        <div class="solution-info">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #10b981;">✅ Solution 2 : Header Structuré</div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                🏢 Logo à gauche + ✕ Bouton à droite<br>
+                📐 Header dédié de 70px de hauteur<br>
+                🎨 Design professionnel et cohérent
+            </div>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-item" id="header-status">
+                <div style="font-size: 12px; opacity: 0.8;">Header Créé</div>
+                <div id="header-state">❌ Absent</div>
+            </div>
+            <div class="status-item" id="logo-status">
+                <div style="font-size: 12px; opacity: 0.8;">Logo Visible</div>
+                <div id="logo-state">❌ Masqué</div>
+            </div>
+            <div class="status-item" id="button-status">
+                <div style="font-size: 12px; opacity: 0.8;">Bouton X</div>
+                <div id="button-state">❌ Mal placé</div>
+            </div>
+            <div class="status-item" id="overlap-status">
+                <div style="font-size: 12px; opacity: 0.8;">Superposition</div>
+                <div id="overlap-state">❌ Détectée</div>
+            </div>
+        </div>
+        
+        <div style="margin: 15px 0; padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px;">
+            <div style="font-size: 12px; margin-bottom: 5px;"><strong>Améliorations Apportées:</strong></div>
+            <div style="font-size: 11px; opacity: 0.9;">
+                ✅ Header structuré avec flexbox<br>
+                ✅ Logo et bouton sur même ligne<br>
+                ✅ Espacement optimal (70px hauteur)<br>
+                ✅ Bordure de séparation subtile<br>
+                ✅ Responsive sur tous écrans
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" onclick="simulateTablet()">📱 Tablette</button>
+            <button class="test-btn" onclick="simulateLaptop()">💻 Laptop 15"</button>
+            <button class="test-btn" onclick="simulateLarge()">🖥️ Grand Écran</button>
+            <button class="test-btn" onclick="toggleHighlight()">🔦 Zone Header</button>
+            <button class="test-btn" onclick="testMenuToggle()">🔄 Toggle Menu</button>
+            <button class="test-btn" onclick="analyzeHeader()">🔍 Analyser</button>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; text-align: center;">
+            Réduisez la largeur pour voir le header structuré
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-xl font-bold border-b border-gray-700">
+            🏢 GestionPro
+        </div>
+        <nav class="flex-grow p-4">
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🏠 Dashboard
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💰 Caisse
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📦 Produits & Stock
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💲 Ajustement des Prix
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline bg-blue-600">
+                📊 Ajustement de Stock
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                👥 Clients
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🕒 Historique
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💳 Gestion Crédits
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📄 Facturation
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                ⚙️ Paramètres
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💾 Sauvegarde
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <h1 class="text-3xl font-bold mb-6" id="main-title">Tableau de Bord</h1>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4">🎯 Solution 2 : Header Structuré</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-blue-800 mb-2">🏗️ Architecture du Header</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-1 text-sm">
+                        <li><strong>Flexbox Layout:</strong> Logo à gauche, bouton à droite</li>
+                        <li><strong>Hauteur fixe:</strong> 70px pour cohérence visuelle</li>
+                        <li><strong>Background subtil:</strong> rgba(0,0,0,0.1) pour distinction</li>
+                        <li><strong>Bordure inférieure:</strong> Séparation claire avec navigation</li>
+                        <li><strong>Responsive:</strong> Adaptation automatique par écran</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-blue-800 mb-2">✅ Problèmes Résolus</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-1 text-sm">
+                        <li><strong>Logo visible:</strong> Plus de superposition avec bouton X</li>
+                        <li><strong>UX professionnelle:</strong> Design structuré et moderne</li>
+                        <li><strong>Branding préservé:</strong> Logo toujours lisible</li>
+                        <li><strong>Accessibilité:</strong> Bouton X bien positionné</li>
+                        <li><strong>Cohérence:</strong> Standard UI/UX respecté</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation du contenu -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Chiffre d'Affaires</h3>
+                <p class="text-3xl font-bold text-green-600">145.00 MAD</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Bénéfice Net</h3>
+                <p class="text-3xl font-bold text-blue-600">25.00 MAD</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Crédits Accordés</h3>
+                <p class="text-3xl font-bold text-orange-600">0.00 MAD</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        let highlightVisible = false;
+
+        function updateStatus() {
+            const width = window.innerWidth;
+            document.getElementById('screen-width').textContent = width;
+            
+            // Déterminer le type d'écran
+            let screenType = '🖥️ Grand Écran';
+            if (width <= 768) {
+                screenType = '📱 Mobile';
+            } else if (width <= 1024) {
+                screenType = '📱 Tablette';
+            } else if (width <= 1440) {
+                screenType = '💻 Laptop 15"';
+            }
+            document.getElementById('screen-type').textContent = screenType;
+            
+            // Vérifier l'existence du header structuré
+            const sidebarHeader = document.querySelector('.sidebar-header');
+            const headerStatus = document.getElementById('header-status');
+            const headerState = document.getElementById('header-state');
+            
+            if (sidebarHeader) {
+                headerStatus.className = 'status-item status-ok';
+                headerState.textContent = '✅ Créé';
+            } else {
+                headerStatus.className = 'status-item status-error';
+                headerState.textContent = '❌ Absent';
+            }
+            
+            // Vérifier la visibilité du logo
+            const sidebarLogo = document.querySelector('.sidebar-logo');
+            const logoStatus = document.getElementById('logo-status');
+            const logoState = document.getElementById('logo-state');
+            
+            if (sidebarLogo) {
+                logoStatus.className = 'status-item status-ok';
+                logoState.textContent = '✅ Visible';
+            } else {
+                logoStatus.className = 'status-item status-warning';
+                logoState.textContent = '⚠️ Ancien format';
+            }
+            
+            // Vérifier le bouton X
+            const closeButton = document.querySelector('.sidebar-close-btn');
+            const buttonStatus = document.getElementById('button-status');
+            const buttonState = document.getElementById('button-state');
+            
+            if (closeButton && sidebarHeader && sidebarHeader.contains(closeButton)) {
+                buttonStatus.className = 'status-item status-ok';
+                buttonState.textContent = '✅ Dans header';
+            } else if (closeButton) {
+                buttonStatus.className = 'status-item status-warning';
+                buttonState.textContent = '⚠️ Mal placé';
+            } else {
+                buttonStatus.className = 'status-item status-error';
+                buttonState.textContent = '❌ Absent';
+            }
+            
+            // Vérifier la superposition
+            const overlapStatus = document.getElementById('overlap-status');
+            const overlapState = document.getElementById('overlap-state');
+            
+            if (sidebarHeader && sidebarLogo && closeButton && sidebarHeader.contains(closeButton)) {
+                overlapStatus.className = 'status-item status-ok';
+                overlapState.textContent = '✅ Résolue';
+            } else {
+                overlapStatus.className = 'status-item status-error';
+                overlapState.textContent = '❌ Possible';
+            }
+        }
+
+        function simulateTablet() {
+            document.body.style.maxWidth = '1024px';
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(updateStatus, 300);
+        }
+
+        function simulateLaptop() {
+            document.body.style.maxWidth = '1366px';
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(updateStatus, 300);
+        }
+
+        function simulateLarge() {
+            document.body.style.maxWidth = '';
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(updateStatus, 300);
+        }
+
+        function toggleHighlight() {
+            const zone = document.getElementById('highlightHeader');
+            highlightVisible = !highlightVisible;
+            zone.classList.toggle('show', highlightVisible);
+        }
+
+        function testMenuToggle() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.toggleMenu();
+                setTimeout(updateStatus, 200);
+            }
+        }
+
+        function analyzeHeader() {
+            const sidebarHeader = document.querySelector('.sidebar-header');
+            const sidebarLogo = document.querySelector('.sidebar-logo');
+            const closeButton = document.querySelector('.sidebar-close-btn');
+            
+            let analysis = '🔍 Analyse du Header Structuré:\n\n';
+            
+            if (sidebarHeader) {
+                const headerRect = sidebarHeader.getBoundingClientRect();
+                analysis += `✅ Header trouvé: ${Math.round(headerRect.width)}×${Math.round(headerRect.height)}px\n`;
+                
+                if (sidebarLogo) {
+                    const logoRect = sidebarLogo.getBoundingClientRect();
+                    analysis += `✅ Logo trouvé: ${Math.round(logoRect.width)}×${Math.round(logoRect.height)}px\n`;
+                } else {
+                    analysis += `❌ Logo non trouvé dans le header\n`;
+                }
+                
+                if (closeButton && sidebarHeader.contains(closeButton)) {
+                    const btnRect = closeButton.getBoundingClientRect();
+                    analysis += `✅ Bouton X dans header: ${Math.round(btnRect.width)}×${Math.round(btnRect.height)}px\n`;
+                } else {
+                    analysis += `❌ Bouton X non trouvé dans le header\n`;
+                }
+                
+                analysis += `\n🎯 Solution 2 : ${sidebarHeader && sidebarLogo && closeButton ? 'SUCCÈS' : 'PARTIEL'}`;
+            } else {
+                analysis += `❌ Header structuré non trouvé\n`;
+                analysis += `ℹ️ Le menu hamburger doit être activé pour créer le header`;
+            }
+            
+            alert(analysis);
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            setTimeout(updateStatus, 1000);
+        });
+
+        window.addEventListener('resize', () => {
+            setTimeout(updateStatus, 100);
+        });
+
+        // Observer les changements DOM
+        const observer = new MutationObserver(() => {
+            setTimeout(updateStatus, 50);
+        });
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['class'] 
+        });
+
+        // Mise à jour initiale
+        updateStatus();
+    </script>
+</body>
+</html>

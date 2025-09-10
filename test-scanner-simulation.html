@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Scanner - GestionPro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .barcode-test {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .barcode-test:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+        .barcode-code {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        .barcode-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        .instructions {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .copied {
+            background: #d1ecf1 !important;
+            border-color: #bee5eb !important;
+        }
+        .title {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section h3 {
+            color: #495057;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔍 Simulateur de Scanner - GestionPro</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instructions d'utilisation :</h3>
+            <ol>
+                <li><strong>Cliquer</strong> sur un code-barres ci-dessous pour le copier</li>
+                <li><strong>Ouvrir GestionPro</strong> dans un autre onglet</li>
+                <li><strong>Aller dans Caisse</strong> ou Produits</li>
+                <li><strong>Coller</strong> le code (Ctrl+V) dans le champ scanner</li>
+                <li><strong>Appuyer sur Entrée</strong> pour tester</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3>🧪 Codes-Barres de Test Basiques</h3>
+            
+            <div class="barcode-test" onclick="copyToClipboard('12345678', this)">
+                <div class="barcode-code">12345678</div>
+                <div class="barcode-desc">Code simple - 8 chiffres</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('123456789012', this)">
+                <div class="barcode-code">123456789012</div>
+                <div class="barcode-desc">Code EAN-13 standard - 12 chiffres</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('TEST123', this)">
+                <div class="barcode-code">TEST123</div>
+                <div class="barcode-desc">Code alphanumérique simple</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('PROD001', this)">
+                <div class="barcode-code">PROD001</div>
+                <div class="barcode-desc">Code produit avec préfixe</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🚨 Codes-Barres Problématiques (Pour Tester les Corrections)</h3>
+            
+            <div class="barcode-test" onclick="copyToClipboard('  abc123  ', this)">
+                <div class="barcode-code">  abc123  </div>
+                <div class="barcode-desc">Code avec espaces (doit devenir ABC123)</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('test@#$123', this)">
+                <div class="barcode-code">test@#$123</div>
+                <div class="barcode-desc">Code avec caractères spéciaux (doit devenir TEST123)</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('abc\r\n123', this)">
+                <div class="barcode-code">abc\r\n123</div>
+                <div class="barcode-desc">Code avec retour chariot (doit devenir ABC123)</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('CODE:xyz789', this)">
+                <div class="barcode-code">CODE:xyz789</div>
+                <div class="barcode-desc">Code avec préfixe (doit devenir XYZ789) ✅ CORRIGÉ</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('PROD:test123', this)">
+                <div class="barcode-code">PROD:test123</div>
+                <div class="barcode-desc">Préfixe PROD: (doit devenir TEST123)</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('BARCODE:456789', this)">
+                <div class="barcode-code">BARCODE:456789</div>
+                <div class="barcode-desc">Préfixe BARCODE: (doit devenir 456789)</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('abc123END', this)">
+                <div class="barcode-code">abc123END</div>
+                <div class="barcode-desc">Suffixe END (doit devenir ABC123)</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>✅ Codes-Barres Valides pour Produits</h3>
+            
+            <div class="barcode-test" onclick="copyToClipboard('PAIN001', this)">
+                <div class="barcode-code">PAIN001</div>
+                <div class="barcode-desc">Pain - Boulangerie</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('LAIT500', this)">
+                <div class="barcode-code">LAIT500</div>
+                <div class="barcode-desc">Lait 500ml</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('CAFE250', this)">
+                <div class="barcode-code">CAFE250</div>
+                <div class="barcode-desc">Café 250g</div>
+            </div>
+
+            <div class="barcode-test" onclick="copyToClipboard('SUCRE1KG', this)">
+                <div class="barcode-code">SUCRE1KG</div>
+                <div class="barcode-desc">Sucre 1kg</div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Tests à Effectuer :</h3>
+            <ul>
+                <li><strong>Affichage</strong> : Vérifier que les codes s'affichent en police monospace</li>
+                <li><strong>Nettoyage</strong> : Les codes problématiques doivent être nettoyés automatiquement</li>
+                <li><strong>Validation</strong> : Codes trop courts (< 4 caractères) doivent être rejetés</li>
+                <li><strong>Couleurs</strong> : Codes valides en vert, invalides en rouge</li>
+                <li><strong>Recherche</strong> : Produits existants doivent être trouvés</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Simulation de Scanner Rapide</h3>
+            <p>Pour simuler un scanner qui tape très vite :</p>
+            <button onclick="simulateFastTyping('FAST123')" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Simuler Scan Rapide : FAST123
+            </button>
+        </div>
+
+        <div id="status" style="margin-top: 20px; padding: 10px; border-radius: 5px; display: none;"></div>
+    </div>
+
+    <script>
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Feedback visuel
+                element.classList.add('copied');
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                }, 1000);
+                
+                showStatus(`✅ Code copié : ${text}`, 'success');
+            }).catch(function(err) {
+                showStatus('❌ Erreur de copie : ' + err, 'error');
+            });
+        }
+
+        function simulateFastTyping(text) {
+            copyToClipboard(text);
+            showStatus(`⚡ Simulation scan rapide : ${text} - Collez dans GestionPro`, 'info');
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.display = 'block';
+            
+            // Couleurs selon le type
+            switch(type) {
+                case 'success':
+                    status.style.background = '#d4edda';
+                    status.style.border = '1px solid #c3e6cb';
+                    status.style.color = '#155724';
+                    break;
+                case 'error':
+                    status.style.background = '#f8d7da';
+                    status.style.border = '1px solid #f5c6cb';
+                    status.style.color = '#721c24';
+                    break;
+                case 'info':
+                    status.style.background = '#d1ecf1';
+                    status.style.border = '1px solid #bee5eb';
+                    status.style.color = '#0c5460';
+                    break;
+            }
+            
+            // Masquer après 3 secondes
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        // Message de bienvenue
+        window.onload = function() {
+            showStatus('🎉 Simulateur prêt ! Cliquez sur un code-barres pour le copier', 'info');
+        };
+    </script>
+</body>
+</html>

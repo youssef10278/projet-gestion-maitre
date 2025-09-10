@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Scanner Basique</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .scanner-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .scanner-input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.scanning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Scanner Code-Barres Basique</h1>
+        
+        <div id="status" class="status ready">
+            ✅ Scanner prêt - Scannez ou tapez un code-barres
+        </div>
+        
+        <div>
+            <label for="barcodeInput"><strong>Scanner Code-Barres :</strong></label>
+            <input type="text" id="barcodeInput" class="scanner-input" 
+                   placeholder="Scannez un code-barres ici..." 
+                   autocomplete="off" autofocus>
+        </div>
+        
+        <div>
+            <button class="button" onclick="clearLog()">Effacer Log</button>
+            <button class="button" onclick="testCode('1234567890123')">Test Code 1</button>
+            <button class="button" onclick="testCode('9876543210987')">Test Code 2</button>
+            <button class="button" onclick="testMultiple()">Test Multiple</button>
+        </div>
+        
+        <h3>📋 Log des Événements :</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Variables globales
+        let lastProcessedBarcode = '';
+        let lastProcessedTime = 0;
+        let isProcessingBarcode = false;
+        let inputTimeout = null;
+
+        // Fonction de log
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '📱';
+            log.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Fonction de nettoyage de code-barres (simplifiée)
+        function cleanAndValidateBarcode(barcode) {
+            if (!barcode) return '';
+            
+            let cleaned = String(barcode).trim().replace(/[\r\n\t]/g, '');
+            
+            if (cleaned.length < 4 || cleaned.length > 20) {
+                addLog(`Code-barres longueur invalide: ${cleaned.length} caractères`, 'error');
+                return '';
+            }
+            
+            return cleaned;
+        }
+
+        // Simulation de processBarcodeInput
+        async function processBarcodeInput(barcode) {
+            addLog(`processBarcodeInput appelé avec: "${barcode}"`);
+            
+            if (!barcode || barcode.trim() === '') {
+                addLog('Code-barres vide, abandon', 'warning');
+                return;
+            }
+
+            // Protection contre les appels multiples
+            const currentTime = Date.now();
+            const cleanedBarcode = cleanAndValidateBarcode(barcode);
+            
+            addLog(`État avant traitement: cleanedBarcode="${cleanedBarcode}", lastProcessed="${lastProcessedBarcode}", timeDiff=${currentTime - lastProcessedTime}ms, isProcessing=${isProcessingBarcode}`);
+            
+            // Si c'est le même code-barres traité récemment (dans les 1000ms), ignorer
+            if (cleanedBarcode === lastProcessedBarcode && (currentTime - lastProcessedTime) < 1000) {
+                addLog(`Code-barres déjà traité récemment, ignoré: ${cleanedBarcode}`, 'warning');
+                return;
+            }
+            
+            // Si on est déjà en train de traiter un code-barres, ignorer
+            if (isProcessingBarcode) {
+                addLog(`Traitement en cours, code-barres ignoré: ${cleanedBarcode}`, 'warning');
+                return;
+            }
+            
+            // Marquer comme en cours de traitement
+            isProcessingBarcode = true;
+            lastProcessedBarcode = cleanedBarcode;
+            lastProcessedTime = currentTime;
+            
+            updateStatus('scanning', `🔍 Traitement de: ${cleanedBarcode}`);
+            
+            try {
+                if (!cleanedBarcode) {
+                    addLog('Code-barres invalide ou trop court', 'error');
+                    updateStatus('error', '❌ Code-barres invalide');
+                    return;
+                }
+                
+                // Simulation du traitement
+                addLog(`✅ Code-barres traité avec succès: ${cleanedBarcode}`, 'success');
+                updateStatus('ready', '✅ Scanner prêt - Code traité avec succès');
+                
+                // Simulation d'ajout au panier
+                addLog(`🛒 Produit ajouté au panier (simulation)`, 'success');
+                
+            } catch (error) {
+                addLog(`Erreur lors du traitement: ${error.message}`, 'error');
+                updateStatus('error', '❌ Erreur de traitement');
+            } finally {
+                // Libérer le verrou
+                setTimeout(() => {
+                    isProcessingBarcode = false;
+                    addLog('🔓 Verrou de traitement libéré');
+                }, 100);
+            }
+        }
+
+        // Fonction pour gérer les codes-barres simples et multiples
+        async function handleBarcodeInput(inputValue, inputElement) {
+            try {
+                addLog(`Analyse de l'input: "${inputValue}" (longueur: ${inputValue.length})`);
+                
+                const possibleCodes = [];
+                
+                // Détecter si c'est probablement des codes multiples concaténés
+                if (inputValue.length > 20) {
+                    addLog(`Détection possible de codes multiples: ${inputValue.length} caractères`, 'warning');
+                    
+                    // Essayer de séparer en codes de 13 caractères (EAN-13 standard)
+                    for (let i = 0; i < inputValue.length; i += 13) {
+                        const code = inputValue.substring(i, i + 13);
+                        if (code.length >= 8) {
+                            possibleCodes.push(code);
+                        }
+                    }
+                    
+                    // Si ça ne donne pas de bons résultats, essayer 12 caractères (UPC-A)
+                    if (possibleCodes.length === 0 || possibleCodes.some(code => code.length < 10)) {
+                        possibleCodes.length = 0;
+                        for (let i = 0; i < inputValue.length; i += 12) {
+                            const code = inputValue.substring(i, i + 12);
+                            if (code.length >= 8) {
+                                possibleCodes.push(code);
+                            }
+                        }
+                    }
+                } else {
+                    // Code unique
+                    possibleCodes.push(inputValue);
+                }
+                
+                addLog(`Codes détectés: [${possibleCodes.join(', ')}]`);
+                
+                // Traiter chaque code séparément
+                for (let i = 0; i < possibleCodes.length; i++) {
+                    const code = possibleCodes[i];
+                    if (code.length >= 8) {
+                        addLog(`Traitement code ${i + 1}/${possibleCodes.length}: "${code}"`);
+                        await processBarcodeInput(code);
+                        
+                        // Petit délai entre les traitements pour éviter les conflits
+                        if (i < possibleCodes.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+                }
+                
+                // Vider le champ après traitement complet
+                if (inputElement) {
+                    setTimeout(() => {
+                        inputElement.value = '';
+                        inputElement.focus();
+                        addLog('🧹 Champ vidé et focus restauré');
+                    }, 200);
+                }
+                
+            } catch (error) {
+                addLog(`Erreur lors du traitement de l'input: ${error.message}`, 'error');
+            }
+        }
+
+        // Mettre à jour le statut
+        function updateStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            
+            addLog('🚀 Test scanner initialisé');
+            
+            // Event listener pour Enter
+            barcodeInput.addEventListener('keydown', async (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const barcode = e.target.value.trim();
+                    if (barcode.length > 0) {
+                        addLog(`🔍 Scan manuel via Enter: "${barcode}"`);
+                        await processBarcodeInput(barcode);
+                        e.target.value = '';
+                    }
+                }
+            });
+            
+            // Event listener pour input automatique
+            barcodeInput.addEventListener('input', async (e) => {
+                const currentValue = e.target.value.trim();
+                
+                // Annuler le timeout précédent
+                if (inputTimeout) {
+                    clearTimeout(inputTimeout);
+                }
+                
+                // Si le champ contient un code-barres potentiel, attendre un peu avant de traiter
+                if (currentValue.length >= 8) {
+                    inputTimeout = setTimeout(async () => {
+                        addLog(`📱 Détection scan automatique dans input: "${currentValue}"`);
+                        await handleBarcodeInput(currentValue, e.target);
+                    }, 100); // Attendre 100ms pour s'assurer que la saisie est terminée
+                }
+            });
+            
+            addLog('✅ Event listeners configurés');
+        });
+
+        // Fonctions de test
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+            addLog('🧹 Log effacé');
+        }
+
+        function testCode(code) {
+            const input = document.getElementById('barcodeInput');
+            input.value = code;
+            input.focus();
+            addLog(`🧪 Test manuel avec code: "${code}"`);
+            processBarcodeInput(code);
+        }
+
+        function testMultiple() {
+            const input = document.getElementById('barcodeInput');
+            const multipleCode = '12345678901239876543210987';
+            input.value = multipleCode;
+            input.focus();
+            addLog(`🧪 Test codes multiples: "${multipleCode}"`);
+            handleBarcodeInput(multipleCode, input);
+        }
+    </script>
+</body>
+</html>

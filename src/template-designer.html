@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnalisation des Factures - GestionPro</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet" href="./css/invoice-professional.css">
+    <style>
+        /* Styles spécifiques pour le designer de templates */
+        .template-designer {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            height: 100vh;
+            gap: 0;
+        }
+        
+        .designer-sidebar {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+        
+        .designer-preview {
+            background: #ffffff;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .designer-properties {
+            background: #f1f5f9;
+            border-left: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+        
+        .color-picker-input {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .template-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .template-card:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .template-card.active {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        
+        .preview-container {
+            transform-origin: top left;
+            transition: transform 0.2s;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .property-group {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .property-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .font-preview {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button id="backBtn" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-800">🎨 Personnalisation des Factures</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="saveTemplateBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    💾 Sauvegarder
+                </button>
+                <button id="resetTemplateBtn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                    🔄 Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface principale -->
+    <div class="template-designer">
+        <!-- Sidebar gauche - Sélection de templates -->
+        <div class="designer-sidebar p-4">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">📋 Templates Disponibles</h2>
+            
+            <!-- Templates système -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-600 mb-2">Templates Système</h3>
+                <div id="systemTemplates">
+                    <!-- Templates système chargés dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- Templates utilisateur -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-600 mb-2">Mes Templates</h3>
+                <div id="userTemplates">
+                    <!-- Templates utilisateur chargés dynamiquement -->
+                </div>
+                <button id="newTemplateBtn" class="w-full mt-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                    ➕ Nouveau Template
+                </button>
+            </div>
+        </div>
+
+        <!-- Zone de prévisualisation centrale -->
+        <div class="designer-preview">
+            <!-- Contrôles de zoom -->
+            <div class="zoom-controls">
+                <button id="zoomOutBtn" class="p-2 hover:bg-gray-100 rounded">🔍-</button>
+                <span id="zoomLevel" class="px-3 py-2 text-sm font-medium">100%</span>
+                <button id="zoomInBtn" class="p-2 hover:bg-gray-100 rounded">🔍+</button>
+                <button id="fitToScreenBtn" class="p-2 hover:bg-gray-100 rounded ml-2">📐</button>
+            </div>
+            
+            <!-- Aperçu de la facture -->
+            <div class="p-8">
+                <div id="invoicePreview" class="preview-container bg-white shadow-lg" style="width: 210mm; min-height: 297mm; transform: scale(0.6);">
+                    <!-- Contenu de la facture généré dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau de propriétés droite -->
+        <div class="designer-properties p-4">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">🎨 Propriétés</h2>
+            
+            <!-- Informations du template -->
+            <div class="property-group">
+                <label class="property-label">Nom du Template</label>
+                <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Couleurs -->
+            <div class="property-group">
+                <label class="property-label">🎨 Couleurs</label>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-gray-600">Couleur Principale</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="color" id="primaryColor" class="color-picker-input">
+                            <input type="text" id="primaryColorText" class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">Couleur Secondaire</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="color" id="secondaryColor" class="color-picker-input">
+                            <input type="text" id="secondaryColorText" class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">En-tête (Début)</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="color" id="headerStartColor" class="color-picker-input">
+                            <input type="text" id="headerStartColorText" class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">En-tête (Fin)</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="color" id="headerEndColor" class="color-picker-input">
+                            <input type="text" id="headerEndColorText" class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Polices -->
+            <div class="property-group">
+                <label class="property-label">📝 Polices</label>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-gray-600">Police Principale</label>
+                        <select id="primaryFont" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Times New Roman, serif">Times New Roman</option>
+                            <option value="Helvetica, sans-serif">Helvetica</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Inter, system-ui, sans-serif">Inter</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">Taille du Titre</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="range" id="titleSize" min="18" max="36" class="flex-1">
+                            <span id="titleSizeValue" class="text-sm font-medium w-12">24px</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">Taille du Texte</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="range" id="bodySize" min="10" max="18" class="flex-1">
+                            <span id="bodySizeValue" class="text-sm font-medium w-12">14px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mise en page -->
+            <div class="property-group">
+                <label class="property-label">📐 Mise en Page</label>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-gray-600">Hauteur En-tête</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="range" id="headerHeight" min="60" max="120" class="flex-1">
+                            <span id="headerHeightValue" class="text-sm font-medium w-12">80px</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm text-gray-600">Espacement Sections</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="range" id="sectionSpacing" min="10" max="40" class="flex-1">
+                            <span id="sectionSpacingValue" class="text-sm font-medium w-12">20px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Éléments -->
+            <div class="property-group">
+                <label class="property-label">🔧 Éléments</label>
+                
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showLogo" class="mr-2">
+                        <span class="text-sm">Afficher le logo</span>
+                    </label>
+                    
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showLineNumbers" class="mr-2">
+                        <span class="text-sm">Numéros de ligne</span>
+                    </label>
+                    
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showUnitBadges" class="mr-2">
+                        <span class="text-sm">Badges d'unités</span>
+                    </label>
+                    
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showDueDate" class="mr-2">
+                        <span class="text-sm">Date d'échéance</span>
+                    </label>
+                    
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showLegalMentions" class="mr-2">
+                        <span class="text-sm">Mentions légales</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/template-manager.js"></script>
+    <script src="./js/init-templates.js"></script>
+    <script src="./js/template-designer.js"></script>
+</body>
+</html>

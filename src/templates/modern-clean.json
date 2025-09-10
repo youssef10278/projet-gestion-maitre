@@ -1,0 +1,71 @@
+{
+  "name": "modern-clean",
+  "display_name": "Moderne Épuré",
+  "description": "Design moderne et épuré avec couleurs vives et espaces aérés",
+  "is_system": true,
+  "colors_config": {
+    "primary": "#6366f1",
+    "primary_light": "#8b5cf6",
+    "primary_dark": "#4f46e5",
+    "secondary": "#06b6d4",
+    "success": "#10b981",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "header_gradient_start": "#6366f1",
+    "header_gradient_end": "#8b5cf6",
+    "client_section_bg": "#f8fafc",
+    "client_section_border": "#6366f1",
+    "table_header_bg": "#6366f1",
+    "table_header_text": "#ffffff",
+    "table_row_even": "#f8fafc",
+    "table_row_odd": "#ffffff",
+    "totals_ht_bg": "#e0e7ff",
+    "totals_ht_text": "#4f46e5",
+    "totals_tva_bg": "#fef3c7",
+    "totals_tva_text": "#d97706",
+    "totals_ttc_bg": "#d1fae5",
+    "totals_ttc_text": "#065f46"
+  },
+  "fonts_config": {
+    "primary_font": "Inter, system-ui, sans-serif",
+    "secondary_font": "Inter, system-ui, sans-serif",
+    "title_size": "28px",
+    "subtitle_size": "20px",
+    "body_size": "15px",
+    "small_size": "13px",
+    "title_weight": "700",
+    "subtitle_weight": "600",
+    "body_weight": "400"
+  },
+  "layout_config": {
+    "page_margins": {
+      "top": "25mm",
+      "bottom": "25mm",
+      "left": "20mm",
+      "right": "20mm"
+    },
+    "header_height": "100px",
+    "logo_position": "center",
+    "logo_size": "80px",
+    "client_section_position": "left",
+    "table_style": "minimal",
+    "totals_position": "right",
+    "footer_height": "80px",
+    "section_spacing": "30px"
+  },
+  "elements_config": {
+    "show_logo": true,
+    "show_company_info": true,
+    "show_invoice_number": true,
+    "show_invoice_date": true,
+    "show_due_date": true,
+    "show_client_ice": true,
+    "show_line_numbers": false,
+    "show_unit_badges": true,
+    "show_subtotal_ht": true,
+    "show_tva_details": true,
+    "show_total_ttc": true,
+    "show_legal_mentions": true,
+    "show_payment_terms": true
+  }
+}

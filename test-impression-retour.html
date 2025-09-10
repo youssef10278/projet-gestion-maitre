@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Impression Retour</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .test-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .data-display {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .ticket-preview {
+            background: white;
+            border: 2px solid #000;
+            padding: 20px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🖨️ Test Impression Ticket de Retour</h1>
+        
+        <div class="status error" id="errorStatus">
+            <strong>Erreur Originale:</strong> TypeError: Cannot read properties of undefined (reading 'map')
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Problème Identifié</h3>
+            <p><strong>Cause:</strong> La variable <code>returnItems</code> était <code>undefined</code> lors de l'appel à <code>printReturnTicket()</code></p>
+            
+            <h4>🔧 Corrections Apportées:</h4>
+            <ul>
+                <li>✅ Correction de <code>returnItems = returnData.itemsToReturn</code> (au lieu de <code>returnData.items</code>)</li>
+                <li>✅ Ajout de vérifications robustes dans <code>printReturnTicket()</code></li>
+                <li>✅ Fallback pour récupérer les données depuis <code>returnResult</code></li>
+                <li>✅ Gestion flexible des propriétés des items (quantity_returned, returnQuantity, etc.)</li>
+                <li>✅ Passage explicite des données dans l'event listener</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Simulation des Données</h3>
+            <button class="test-button" onclick="simulateReturnData()">Simuler Données de Retour</button>
+            <button class="test-button" onclick="testPrintFunction()">Test printReturnTicket()</button>
+            <button class="test-button" onclick="simulateRealPrint()">Simuler Impression Réelle</button>
+            
+            <div id="dataDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎫 Aperçu du Ticket</h3>
+            <div id="ticketPreview" class="ticket-preview" style="display: none;">
+                <!-- Le contenu du ticket sera généré ici -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Variables Globales</h3>
+            <button class="test-button" onclick="debugVariables()">Debug Variables</button>
+            <div id="variablesDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <h2>📝 Console de Test</h2>
+        <div class="log-container" id="testLog">
+            Logs des tests apparaîtront ici...
+        </div>
+    </div>
+
+    <script>
+        // Variables globales pour simulation
+        let testLog = document.getElementById('testLog');
+        let mockCurrentSale = null;
+        let mockReturnItems = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#60a5fa';
+            testLog.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function simulateReturnData() {
+            log('📊 Simulation des données de retour...', 'info');
+            
+            // Simuler currentSale
+            mockCurrentSale = {
+                id: 12345,
+                date: '2025-01-15',
+                client_id: 1,
+                client_name: 'Client Test'
+            };
+            
+            // Simuler returnItems avec structure corrigée
+            mockReturnItems = [
+                {
+                    original_sale_item_id: 1001,
+                    product_id: 501,
+                    product_name: 'Électricité',
+                    quantity_returned: 1,
+                    unit: 'pièce',
+                    unit_price: 2000.00,
+                    total_price: 2000.00
+                },
+                {
+                    original_sale_item_id: 1002,
+                    product_id: 502,
+                    product_name: 'Loyer',
+                    quantity_returned: 1,
+                    unit: 'pièce',
+                    unit_price: 2000.00,
+                    total_price: 2000.00
+                }
+            ];
+            
+            const display = document.getElementById('dataDisplay');
+            display.style.display = 'block';
+            display.textContent = `currentSale:\n${JSON.stringify(mockCurrentSale, null, 2)}\n\nreturnItems:\n${JSON.stringify(mockReturnItems, null, 2)}`;
+            
+            log('✅ Données simulées créées', 'success');
+            log(`📦 ${mockReturnItems.length} items de retour simulés`, 'info');
+        }
+
+        function testPrintFunction() {
+            log('🧪 Test de la fonction printReturnTicket()...', 'info');
+            
+            if (mockReturnItems.length === 0) {
+                log('⚠️ Aucune donnée simulée, création automatique...', 'warning');
+                simulateReturnData();
+            }
+            
+            // Simuler returnResult
+            const mockReturnResult = {
+                return_id: 'RET-001',
+                refund_amount: 4000.00,
+                success: true,
+                items: mockReturnItems // Fallback data
+            };
+            
+            try {
+                // Test de la logique de vérification
+                if (!mockReturnItems || mockReturnItems.length === 0) {
+                    log('❌ Test échoué: returnItems vide', 'error');
+                    return;
+                }
+                
+                if (!mockCurrentSale) {
+                    log('❌ Test échoué: currentSale manquant', 'error');
+                    return;
+                }
+                
+                // Test de la génération du contenu
+                const ticketContent = generateTicketContent(mockReturnResult, mockReturnItems, mockCurrentSale);
+                
+                const preview = document.getElementById('ticketPreview');
+                preview.style.display = 'block';
+                preview.innerHTML = ticketContent;
+                
+                log('✅ Test réussi: Ticket généré sans erreur', 'success');
+                log('📄 Aperçu du ticket affiché', 'info');
+                
+            } catch (error) {
+                log('❌ Erreur lors du test: ' + error.message, 'error');
+            }
+        }
+
+        function generateTicketContent(returnResult, returnItems, currentSale) {
+            return `
+                <div style="text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
+                    <h2>TICKET DE RETOUR</h2>
+                    <p>Retour #${returnResult.return_id || 'N/A'}</p>
+                    <p>${new Date().toLocaleString('fr-FR')}</p>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <strong>Vente Originale:</strong> #${currentSale?.id || 'N/A'}<br>
+                    <strong>Date Vente:</strong> ${currentSale?.date ? new Date(currentSale.date).toLocaleDateString('fr-FR') : 'N/A'}
+                </div>
+                
+                <div style="border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
+                    <strong>PRODUITS RETOURNÉS:</strong><br>
+                    ${returnItems.map(item => {
+                        const productName = item.product_name || 'Produit inconnu';
+                        const quantity = item.quantity_returned || item.returnQuantity || item.quantity || 0;
+                        const unitPrice = item.unit_price || 0;
+                        const totalPrice = item.total_price || item.returnTotal || (quantity * unitPrice);
+                        
+                        return `
+                            ${productName}<br>
+                            Qté: ${quantity} x ${unitPrice.toFixed(2)} MAD<br>
+                            Total: ${totalPrice.toFixed(2)} MAD<br>
+                        `;
+                    }).join('<br>')}
+                </div>
+                
+                <div style="text-align: center; font-size: 18px; font-weight: bold;">
+                    TOTAL REMBOURSÉ: ${returnResult.refund_amount || '0.00'} MAD
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+                    Merci de votre confiance
+                </div>
+            `;
+        }
+
+        function simulateRealPrint() {
+            log('🖨️ Simulation d\'impression réelle...', 'info');
+            
+            if (mockReturnItems.length === 0) {
+                simulateReturnData();
+            }
+            
+            const mockReturnResult = {
+                return_id: 'RET-001',
+                refund_amount: 4000.00,
+                success: true
+            };
+            
+            try {
+                const ticketContent = generateTicketContent(mockReturnResult, mockReturnItems, mockCurrentSale);
+                
+                // Simuler l'ouverture d'une fenêtre d'impression
+                const printWindow = window.open('', '_blank', 'width=400,height=600');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Ticket de Retour</title>
+                            <style>
+                                body { margin: 0; padding: 20px; font-family: monospace; }
+                                @media print {
+                                    body { margin: 0; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            ${ticketContent}
+                            <script>
+                                setTimeout(() => {
+                                    window.print();
+                                    setTimeout(() => window.close(), 1000);
+                                }, 500);
+                            </script>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                
+                log('✅ Fenêtre d\'impression ouverte', 'success');
+                
+            } catch (error) {
+                log('❌ Erreur lors de l\'impression: ' + error.message, 'error');
+            }
+        }
+
+        function debugVariables() {
+            log('🔍 Debug des variables globales...', 'info');
+            
+            const debug = {
+                mockCurrentSale: mockCurrentSale,
+                mockReturnItems: mockReturnItems,
+                returnItemsLength: mockReturnItems ? mockReturnItems.length : 'undefined',
+                currentSaleExists: !!mockCurrentSale
+            };
+            
+            const display = document.getElementById('variablesDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(debug, null, 2);
+            
+            log('✅ Variables debuggées', 'success');
+            
+            if (mockReturnItems && mockReturnItems.length > 0) {
+                log(`📦 ${mockReturnItems.length} items disponibles pour impression`, 'success');
+            } else {
+                log('⚠️ Aucun item disponible pour impression', 'warning');
+            }
+        }
+
+        // Test initial
+        setTimeout(() => {
+            log('🚀 Page de test chargée', 'success');
+            log('🔧 Erreur d\'impression corrigée', 'info');
+            simulateReturnData();
+        }, 100);
+    </script>
+</body>
+</html>

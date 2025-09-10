@@ -1,0 +1,71 @@
+{
+  "name": "classic-traditional",
+  "display_name": "Classique Traditionnel",
+  "description": "Style traditionnel sobre avec couleurs neutres et mise en page classique",
+  "is_system": true,
+  "colors_config": {
+    "primary": "#374151",
+    "primary_light": "#6b7280",
+    "primary_dark": "#1f2937",
+    "secondary": "#d97706",
+    "success": "#059669",
+    "warning": "#d97706",
+    "danger": "#dc2626",
+    "header_gradient_start": "#374151",
+    "header_gradient_end": "#1f2937",
+    "client_section_bg": "#f9fafb",
+    "client_section_border": "#374151",
+    "table_header_bg": "#374151",
+    "table_header_text": "#ffffff",
+    "table_row_even": "#f9fafb",
+    "table_row_odd": "#ffffff",
+    "totals_ht_bg": "#f3f4f6",
+    "totals_ht_text": "#374151",
+    "totals_tva_bg": "#fef3c7",
+    "totals_tva_text": "#92400e",
+    "totals_ttc_bg": "#ecfdf5",
+    "totals_ttc_text": "#065f46"
+  },
+  "fonts_config": {
+    "primary_font": "Times New Roman, serif",
+    "secondary_font": "Arial, sans-serif",
+    "title_size": "22px",
+    "subtitle_size": "16px",
+    "body_size": "13px",
+    "small_size": "11px",
+    "title_weight": "bold",
+    "subtitle_weight": "bold",
+    "body_weight": "normal"
+  },
+  "layout_config": {
+    "page_margins": {
+      "top": "20mm",
+      "bottom": "20mm",
+      "left": "20mm",
+      "right": "20mm"
+    },
+    "header_height": "70px",
+    "logo_position": "left",
+    "logo_size": "60px",
+    "client_section_position": "right",
+    "table_style": "classic",
+    "totals_position": "right",
+    "footer_height": "50px",
+    "section_spacing": "15px"
+  },
+  "elements_config": {
+    "show_logo": true,
+    "show_company_info": true,
+    "show_invoice_number": true,
+    "show_invoice_date": true,
+    "show_due_date": true,
+    "show_client_ice": true,
+    "show_line_numbers": true,
+    "show_unit_badges": false,
+    "show_subtotal_ht": true,
+    "show_tva_details": true,
+    "show_total_ttc": true,
+    "show_legal_mentions": true,
+    "show_payment_terms": true
+  }
+}

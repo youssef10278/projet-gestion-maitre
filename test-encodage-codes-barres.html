@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test d'Encodage - Codes-Barres</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .barcode-input {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 12px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .result-display {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        .encoding-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .clear-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .title {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .hex-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔍 Test d'Encodage - Codes-Barres</h1>
+        
+        <div class="warning">
+            <h3>📋 Instructions d'utilisation :</h3>
+            <ol>
+                <li><strong>Scanner</strong> ou <strong>taper</strong> des codes-barres dans les champs ci-dessous</li>
+                <li><strong>Observer</strong> comment ils s'affichent et sont traités</li>
+                <li><strong>Comparer</strong> les différents encodages</li>
+                <li><strong>Identifier</strong> les problèmes potentiels</li>
+            </ol>
+        </div>
+
+        <!-- Test 1: Saisie Brute -->
+        <div class="test-section">
+            <h3>🔤 Test 1 : Saisie Brute (Sans Traitement)</h3>
+            <p>Tapez ou scannez un code-barres ici pour voir l'encodage brut :</p>
+            <input type="text" id="rawInput" class="barcode-input" placeholder="Scanner ou taper un code-barres...">
+            <button class="test-button" onclick="analyzeRawInput()">Analyser</button>
+            <button class="clear-button" onclick="clearRawInput()">Effacer</button>
+            
+            <div id="rawResults" class="result-display"></div>
+            <div id="rawEncoding" class="encoding-info"></div>
+        </div>
+
+        <!-- Test 2: Avec Nettoyage -->
+        <div class="test-section">
+            <h3>🧹 Test 2 : Avec Nettoyage (Fonction GestionPro)</h3>
+            <p>Le même code après nettoyage par la fonction GestionPro :</p>
+            <input type="text" id="cleanInput" class="barcode-input" placeholder="Scanner ou taper un code-barres...">
+            <button class="test-button" onclick="analyzeCleanInput()">Nettoyer et Analyser</button>
+            <button class="clear-button" onclick="clearCleanInput()">Effacer</button>
+            
+            <div id="cleanResults" class="result-display"></div>
+            <div id="cleanEncoding" class="encoding-info"></div>
+        </div>
+
+        <!-- Test 3: Codes Problématiques -->
+        <div class="test-section">
+            <h3>🚨 Test 3 : Codes Problématiques Connus</h3>
+            <p>Testez ces codes qui posent souvent des problèmes :</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <button class="test-button" onclick="testProblematicCode('CODE:xyz789')">CODE:xyz789</button>
+                <button class="test-button" onclick="testProblematicCode('  abc123  ')">  abc123  </button>
+                <button class="test-button" onclick="testProblematicCode('test@#$123')">test@#$123</button>
+                <button class="test-button" onclick="testProblematicCode('abc\r\n123')">abc\r\n123</button>
+                <button class="test-button" onclick="testProblematicCode('BARCODE:456789')">BARCODE:456789</button>
+                <button class="test-button" onclick="testProblematicCode('123END')">123END</button>
+            </div>
+            
+            <div id="problematicResults" class="result-display"></div>
+        </div>
+
+        <!-- Test 4: Encodages Différents -->
+        <div class="test-section">
+            <h3>🌐 Test 4 : Différents Encodages</h3>
+            <p>Testez comment différents encodages affectent les codes :</p>
+            
+            <input type="text" id="encodingInput" class="barcode-input" placeholder="Entrez un code pour tester différents encodages...">
+            <button class="test-button" onclick="testDifferentEncodings()">Tester Encodages</button>
+            <button class="clear-button" onclick="clearEncodingInput()">Effacer</button>
+            
+            <div id="encodingResults" class="result-display"></div>
+        </div>
+
+        <!-- Test 5: Simulation Scanner -->
+        <div class="test-section">
+            <h3>📱 Test 5 : Simulation de Scanner</h3>
+            <p>Simule la saisie rapide d'un scanner :</p>
+            
+            <button class="test-button" onclick="simulateScanner('12345678')">Scanner: 12345678</button>
+            <button class="test-button" onclick="simulateScanner('CODE:ABC123')">Scanner: CODE:ABC123</button>
+            <button class="test-button" onclick="simulateScanner('PROD-2024-001')">Scanner: PROD-2024-001</button>
+            
+            <div id="scannerResults" class="result-display"></div>
+        </div>
+
+        <!-- Résultats Globaux -->
+        <div class="test-section">
+            <h3>📊 Résultats Globaux</h3>
+            <div id="globalResults" class="result-display">
+                Aucun test effectué pour le moment.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonction de nettoyage des codes-barres (copie de GestionPro)
+        function cleanAndValidateBarcode(barcode) {
+            if (!barcode) return '';
+            
+            // Convertir en string et nettoyer les caractères de base
+            let cleaned = String(barcode)
+                .trim()                           // Supprimer espaces début/fin
+                .replace(/[\r\n\t]/g, '')         // Supprimer retours chariot/tabulations
+                .toUpperCase();                   // Normaliser en majuscules d'abord
+            
+            // Supprimer les préfixes courants AVANT le nettoyage des caractères spéciaux
+            const prefixesToRemove = [
+                'CODE:', 'BARCODE:', 'BC:', 'ID:', 'PROD:', 'ITEM:', 'SKU:', 'REF:'
+            ];
+            
+            prefixesToRemove.forEach(prefix => {
+                if (cleaned.startsWith(prefix)) {
+                    cleaned = cleaned.substring(prefix.length);
+                }
+            });
+            
+            // Supprimer les suffixes courants
+            const suffixesToRemove = ['END', 'STOP', 'FIN'];
+            suffixesToRemove.forEach(suffix => {
+                if (cleaned.endsWith(suffix)) {
+                    cleaned = cleaned.substring(0, cleaned.length - suffix.length);
+                }
+            });
+            
+            // Maintenant nettoyer les caractères spéciaux
+            cleaned = cleaned.replace(/[^a-zA-Z0-9\-_]/g, '');
+            
+            return cleaned;
+        }
+
+        // Fonction pour analyser l'encodage d'une chaîne
+        function analyzeEncoding(str) {
+            const analysis = {
+                length: str.length,
+                charCodes: [],
+                hexCodes: [],
+                utf8Bytes: [],
+                hasSpecialChars: false,
+                hasControlChars: false,
+                encoding: 'UTF-8'
+            };
+
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charAt(i);
+                const charCode = str.charCodeAt(i);
+                
+                analysis.charCodes.push(charCode);
+                analysis.hexCodes.push('0x' + charCode.toString(16).toUpperCase().padStart(2, '0'));
+                
+                // Détecter les caractères spéciaux
+                if (charCode < 32 || charCode > 126) {
+                    if (charCode < 32) {
+                        analysis.hasControlChars = true;
+                    } else {
+                        analysis.hasSpecialChars = true;
+                    }
+                }
+            }
+
+            return analysis;
+        }
+
+        // Fonction pour afficher les résultats d'analyse
+        function displayAnalysis(str, elementId, title) {
+            const analysis = analyzeEncoding(str);
+            const element = document.getElementById(elementId);
+            
+            let result = `${title}\n`;
+            result += `═══════════════════════════════════════\n`;
+            result += `Texte: "${str}"\n`;
+            result += `Longueur: ${analysis.length} caractères\n`;
+            result += `Caractères spéciaux: ${analysis.hasSpecialChars ? 'OUI' : 'NON'}\n`;
+            result += `Caractères de contrôle: ${analysis.hasControlChars ? 'OUI' : 'NON'}\n\n`;
+            
+            result += `Détail caractère par caractère:\n`;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charAt(i);
+                const charCode = analysis.charCodes[i];
+                const hex = analysis.hexCodes[i];
+                
+                let charName = char;
+                if (charCode < 32) {
+                    const controlNames = {
+                        9: '\\t (TAB)', 10: '\\n (LF)', 13: '\\r (CR)', 
+                        0: '\\0 (NULL)', 27: '\\e (ESC)'
+                    };
+                    charName = controlNames[charCode] || `\\x${charCode.toString(16)}`;
+                }
+                
+                result += `  [${i}] "${charName}" → Code: ${charCode} → Hex: ${hex}\n`;
+            }
+            
+            element.textContent = result;
+        }
+
+        // Test 1: Analyse brute
+        function analyzeRawInput() {
+            const input = document.getElementById('rawInput').value;
+            displayAnalysis(input, 'rawResults', '📥 ANALYSE BRUTE');
+            
+            const encodingInfo = document.getElementById('rawEncoding');
+            encodingInfo.innerHTML = `
+                <strong>Informations d'encodage:</strong><br>
+                • Encodage détecté: UTF-8<br>
+                • Longueur: ${input.length} caractères<br>
+                • Taille en bytes: ${new Blob([input]).size} bytes
+            `;
+        }
+
+        function clearRawInput() {
+            document.getElementById('rawInput').value = '';
+            document.getElementById('rawResults').textContent = '';
+            document.getElementById('rawEncoding').innerHTML = '';
+        }
+
+        // Test 2: Avec nettoyage
+        function analyzeCleanInput() {
+            const input = document.getElementById('cleanInput').value;
+            const cleaned = cleanAndValidateBarcode(input);
+            
+            displayAnalysis(input, 'cleanResults', '📥 AVANT NETTOYAGE');
+            
+            const element = document.getElementById('cleanResults');
+            element.textContent += '\n\n';
+            
+            displayAnalysis(cleaned, 'cleanResults', '🧹 APRÈS NETTOYAGE');
+            
+            const encodingInfo = document.getElementById('cleanEncoding');
+            encodingInfo.innerHTML = `
+                <strong>Résultat du nettoyage:</strong><br>
+                • Original: "${input}" (${input.length} caractères)<br>
+                • Nettoyé: "${cleaned}" (${cleaned.length} caractères)<br>
+                • Changement: ${input === cleaned ? 'AUCUN' : 'MODIFIÉ'}
+            `;
+        }
+
+        function clearCleanInput() {
+            document.getElementById('cleanInput').value = '';
+            document.getElementById('cleanResults').textContent = '';
+            document.getElementById('cleanEncoding').innerHTML = '';
+        }
+
+        // Test 3: Codes problématiques
+        function testProblematicCode(code) {
+            const cleaned = cleanAndValidateBarcode(code);
+            const element = document.getElementById('problematicResults');
+            
+            let result = `Test du code problématique: "${code}"\n`;
+            result += `═══════════════════════════════════════\n`;
+            result += `Original: "${code}"\n`;
+            result += `Nettoyé:  "${cleaned}"\n`;
+            result += `Statut:   ${cleaned ? '✅ VALIDE' : '❌ INVALIDE'}\n`;
+            result += `Longueur: ${code.length} → ${cleaned.length}\n\n`;
+            
+            element.textContent += result;
+        }
+
+        // Test 4: Différents encodages
+        function testDifferentEncodings() {
+            const input = document.getElementById('encodingInput').value;
+            const element = document.getElementById('encodingResults');
+            
+            let result = `Test d'encodages pour: "${input}"\n`;
+            result += `═══════════════════════════════════════\n`;
+            
+            // UTF-8
+            const utf8Bytes = new TextEncoder().encode(input);
+            result += `UTF-8: [${Array.from(utf8Bytes).map(b => '0x' + b.toString(16).toUpperCase()).join(', ')}]\n`;
+            
+            // ASCII (simulation)
+            let asciiResult = '';
+            for (let i = 0; i < input.length; i++) {
+                const code = input.charCodeAt(i);
+                asciiResult += code <= 127 ? input.charAt(i) : '?';
+            }
+            result += `ASCII: "${asciiResult}"\n`;
+            
+            // Nettoyage GestionPro
+            const cleaned = cleanAndValidateBarcode(input);
+            result += `GestionPro: "${cleaned}"\n\n`;
+            
+            element.textContent = result;
+        }
+
+        function clearEncodingInput() {
+            document.getElementById('encodingInput').value = '';
+            document.getElementById('encodingResults').textContent = '';
+        }
+
+        // Test 5: Simulation scanner
+        function simulateScanner(code) {
+            const element = document.getElementById('scannerResults');
+            
+            // Simuler la saisie rapide avec délai
+            let result = `Simulation scanner pour: "${code}"\n`;
+            result += `═══════════════════════════════════════\n`;
+            result += `Saisie caractère par caractère:\n`;
+            
+            for (let i = 0; i < code.length; i++) {
+                const char = code.charAt(i);
+                result += `  ${i + 1}. "${char}" (${char.charCodeAt(0)})\n`;
+            }
+            
+            const cleaned = cleanAndValidateBarcode(code);
+            result += `\nRésultat final: "${cleaned}"\n`;
+            result += `Statut: ${cleaned ? '✅ ACCEPTÉ' : '❌ REJETÉ'}\n\n`;
+            
+            element.textContent += result;
+        }
+
+        // Mise à jour des résultats globaux
+        function updateGlobalResults() {
+            const element = document.getElementById('globalResults');
+            const now = new Date().toLocaleTimeString();
+            
+            let summary = `Dernière mise à jour: ${now}\n`;
+            summary += `═══════════════════════════════════════\n`;
+            summary += `Tests effectués:\n`;
+            summary += `• Analyse brute: ${document.getElementById('rawResults').textContent ? '✅' : '⏳'}\n`;
+            summary += `• Nettoyage: ${document.getElementById('cleanResults').textContent ? '✅' : '⏳'}\n`;
+            summary += `• Codes problématiques: ${document.getElementById('problematicResults').textContent ? '✅' : '⏳'}\n`;
+            summary += `• Encodages: ${document.getElementById('encodingResults').textContent ? '✅' : '⏳'}\n`;
+            summary += `• Simulation scanner: ${document.getElementById('scannerResults').textContent ? '✅' : '⏳'}\n`;
+            
+            element.textContent = summary;
+        }
+
+        // Mettre à jour les résultats globaux toutes les 2 secondes
+        setInterval(updateGlobalResults, 2000);
+
+        // Message de bienvenue
+        window.onload = function() {
+            console.log('🔍 Outil de test d\'encodage des codes-barres chargé');
+            console.log('Utilisez les différents tests pour identifier les problèmes d\'encodage');
+        };
+    </script>
+</body>
+</html>

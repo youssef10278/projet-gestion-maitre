@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Impression Automatique</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 2000;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .status-ok { 
+            border-left: 4px solid #10b981; 
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .status-warning { 
+            border-left: 4px solid #f59e0b; 
+            background: rgba(245, 158, 11, 0.2);
+        }
+        .status-error { 
+            border-left: 4px solid #ef4444; 
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .test-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        .test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .feature-info {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 120px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .log-success { background: rgba(16, 185, 129, 0.2); }
+        .log-error { background: rgba(239, 68, 68, 0.2); }
+        .log-info { background: rgba(59, 130, 246, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Panel de test -->
+    <div class="test-panel">
+        <h3 style="margin: 0 0 15px 0; text-align: center; color: #fbbf24;">🖨️ Test Impression Automatique</h3>
+        
+        <div class="feature-info">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #10b981;">✨ Nouvelle Fonctionnalité Implémentée</div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                🎯 Paramètre dans Settings → Impression<br>
+                🖨️ Impression auto après validation paiement<br>
+                🔄 Fallback manuel en cas d'erreur
+            </div>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-item" id="setting-status">
+                <div style="font-size: 12px; opacity: 0.8;">Paramètre DB</div>
+                <div id="setting-state">❓ Vérification...</div>
+            </div>
+            <div class="status-item" id="api-status">
+                <div style="font-size: 12px; opacity: 0.8;">API Disponible</div>
+                <div id="api-state">❓ Test...</div>
+            </div>
+            <div class="status-item" id="caisse-status">
+                <div style="font-size: 12px; opacity: 0.8;">Logique Caisse</div>
+                <div id="caisse-state">❓ Analyse...</div>
+            </div>
+            <div class="status-item" id="settings-ui-status">
+                <div style="font-size: 12px; opacity: 0.8;">Interface Settings</div>
+                <div id="settings-ui-state">❓ Vérification...</div>
+            </div>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <div style="font-size: 12px; margin-bottom: 5px;"><strong>Valeur Actuelle:</strong></div>
+            <div id="current-value" style="font-family: monospace; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; font-size: 11px;">
+                Chargement...
+            </div>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <div style="font-size: 12px; margin-bottom: 5px;"><strong>Logs de Test:</strong></div>
+            <div class="log-container" id="test-logs">
+                <div class="log-entry log-info">Initialisation des tests...</div>
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" id="test-get-btn" onclick="testGetSetting()">🔍 Test GET</button>
+            <button class="test-btn" id="test-set-true-btn" onclick="testSetSetting(true)">✅ Activer</button>
+            <button class="test-btn" id="test-set-false-btn" onclick="testSetSetting(false)">❌ Désactiver</button>
+            <button class="test-btn" id="test-caisse-btn" onclick="testCaisseLogic()">🧪 Test Caisse</button>
+            <button class="test-btn" id="open-settings-btn" onclick="openSettings()">⚙️ Ouvrir Settings</button>
+            <button class="test-btn" id="refresh-btn" onclick="refreshTests()">🔄 Actualiser</button>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; text-align: center;">
+            Tests de la fonctionnalité d'impression automatique
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">Test Impression Automatique</h1>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🎯 Fonctionnalité Testée</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold text-green-800 mb-2">✅ Composants Implémentés</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                        <li><strong>Base de données :</strong> Paramètre auto_print_tickets</li>
+                        <li><strong>Interface Settings :</strong> Section Impression</li>
+                        <li><strong>API :</strong> getSetting / saveSetting</li>
+                        <li><strong>Logique Caisse :</strong> checkAutoPrintSetting()</li>
+                        <li><strong>Impression Auto :</strong> performAutoPrint()</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-blue-800 mb-2">🔄 Workflow Implémenté</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                        <li><strong>1. Validation paiement</strong> → Vente enregistrée</li>
+                        <li><strong>2. Vérification paramètre</strong> → auto_print_tickets</li>
+                        <li><strong>3a. Si TRUE :</strong> Impression automatique</li>
+                        <li><strong>3b. Si FALSE :</strong> Bouton manuel</li>
+                        <li><strong>4. Fallback :</strong> Manuel en cas d'erreur</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4">🧪 Instructions de Test</h2>
+            <ol class="list-decimal list-inside text-blue-700 space-y-2">
+                <li><strong>Testez les API</strong> - Vérifiez que getSetting/saveSetting fonctionnent</li>
+                <li><strong>Activez/Désactivez</strong> - Changez la valeur du paramètre</li>
+                <li><strong>Ouvrez Settings</strong> - Vérifiez l'interface utilisateur</li>
+                <li><strong>Testez la Caisse</strong> - Simulez une vente pour voir l'impression</li>
+                <li><strong>Vérifiez les Logs</strong> - Suivez l'exécution dans la console</li>
+            </ol>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-yellow-800 mb-4">⚠️ Points à Vérifier</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-yellow-800 mb-2">🔧 Technique</h3>
+                    <ul class="list-disc list-inside text-yellow-700 space-y-1 text-sm">
+                        <li>Paramètre correctement initialisé en DB</li>
+                        <li>API IPC fonctionnelles</li>
+                        <li>Interface Settings responsive</li>
+                        <li>Logique caisse intégrée</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-yellow-800 mb-2">👥 Utilisateur</h3>
+                    <ul class="list-disc list-inside text-yellow-700 space-y-1 text-sm">
+                        <li>Option claire dans Settings</li>
+                        <li>Feedback visuel approprié</li>
+                        <li>Gestion d'erreurs gracieuse</li>
+                        <li>Workflow fluide en caisse</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testLogs = [];
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLogs.push({ timestamp, message, type });
+            
+            const logContainer = document.getElementById('test-logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Garder seulement les 20 derniers logs
+            if (testLogs.length > 20) {
+                testLogs.shift();
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        async function testGetSetting() {
+            const btn = document.getElementById('test-get-btn');
+            btn.disabled = true;
+            
+            try {
+                addLog('Test GET auto_print_tickets...', 'info');
+                
+                if (!window.api || !window.api.getSetting) {
+                    throw new Error('API getSetting non disponible');
+                }
+                
+                const value = await window.api.getSetting('auto_print_tickets');
+                addLog(`Valeur récupérée: ${value}`, 'success');
+                
+                document.getElementById('current-value').textContent = `auto_print_tickets = "${value}"`;
+                updateStatus('setting-status', 'setting-state', true, 'Récupéré');
+                
+            } catch (error) {
+                addLog(`Erreur GET: ${error.message}`, 'error');
+                updateStatus('setting-status', 'setting-state', false, 'Erreur');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testSetSetting(value) {
+            const btn = value ? document.getElementById('test-set-true-btn') : document.getElementById('test-set-false-btn');
+            btn.disabled = true;
+            
+            try {
+                addLog(`Test SET auto_print_tickets = ${value}...`, 'info');
+                
+                if (!window.api || !window.api.saveSetting) {
+                    throw new Error('API saveSetting non disponible');
+                }
+                
+                await window.api.saveSetting('auto_print_tickets', value.toString());
+                addLog(`Valeur sauvegardée: ${value}`, 'success');
+                
+                // Vérifier la sauvegarde
+                const savedValue = await window.api.getSetting('auto_print_tickets');
+                if (savedValue === value.toString()) {
+                    addLog('Vérification réussie', 'success');
+                    document.getElementById('current-value').textContent = `auto_print_tickets = "${savedValue}"`;
+                } else {
+                    addLog(`Vérification échouée: attendu ${value}, reçu ${savedValue}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`Erreur SET: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testCaisseLogic() {
+            const btn = document.getElementById('test-caisse-btn');
+            btn.disabled = true;
+            
+            try {
+                addLog('Test logique caisse...', 'info');
+                
+                // Simuler la vérification du paramètre comme dans caisse.js
+                if (typeof checkAutoPrintSetting === 'function') {
+                    const isEnabled = await checkAutoPrintSetting();
+                    addLog(`checkAutoPrintSetting() = ${isEnabled}`, 'success');
+                    updateStatus('caisse-status', 'caisse-state', true, isEnabled ? 'Auto' : 'Manuel');
+                } else {
+                    addLog('Fonction checkAutoPrintSetting non trouvée', 'error');
+                    updateStatus('caisse-status', 'caisse-state', false, 'Non trouvée');
+                }
+                
+            } catch (error) {
+                addLog(`Erreur test caisse: ${error.message}`, 'error');
+                updateStatus('caisse-status', 'caisse-state', false, 'Erreur');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function openSettings() {
+            addLog('Ouverture de la page Settings...', 'info');
+            window.location.href = './src/settings.html';
+        }
+
+        function refreshTests() {
+            addLog('Actualisation des tests...', 'info');
+            initTests();
+        }
+
+        function updateStatus(statusId, stateId, success, text) {
+            const statusEl = document.getElementById(statusId);
+            const stateEl = document.getElementById(stateId);
+            
+            if (success) {
+                statusEl.className = 'status-item status-ok';
+                stateEl.textContent = `✅ ${text}`;
+            } else {
+                statusEl.className = 'status-item status-error';
+                stateEl.textContent = `❌ ${text}`;
+            }
+        }
+
+        async function initTests() {
+            addLog('Initialisation des tests...', 'info');
+            
+            // Test API disponibilité
+            if (window.api && window.api.getSetting && window.api.saveSetting) {
+                updateStatus('api-status', 'api-state', true, 'Disponible');
+                addLog('API getSetting/saveSetting disponibles', 'success');
+            } else {
+                updateStatus('api-status', 'api-state', false, 'Manquante');
+                addLog('API getSetting/saveSetting manquantes', 'error');
+            }
+            
+            // Test interface Settings
+            try {
+                const response = await fetch('./src/settings.html');
+                if (response.ok) {
+                    const html = await response.text();
+                    if (html.includes('printing-section') && html.includes('autoPrintTickets')) {
+                        updateStatus('settings-ui-status', 'settings-ui-state', true, 'Implémentée');
+                        addLog('Interface Settings trouvée avec section impression', 'success');
+                    } else {
+                        updateStatus('settings-ui-status', 'settings-ui-state', false, 'Incomplète');
+                        addLog('Section impression manquante dans Settings', 'error');
+                    }
+                } else {
+                    updateStatus('settings-ui-status', 'settings-ui-state', false, 'Erreur');
+                    addLog('Impossible de charger settings.html', 'error');
+                }
+            } catch (error) {
+                updateStatus('settings-ui-status', 'settings-ui-state', false, 'Erreur');
+                addLog(`Erreur test interface: ${error.message}`, 'error');
+            }
+            
+            // Test valeur actuelle
+            await testGetSetting();
+        }
+
+        // Initialisation au chargement
+        window.addEventListener('load', () => {
+            setTimeout(initTests, 1000);
+        });
+    </script>
+</body>
+</html>

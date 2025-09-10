@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Nettoyage Boutons Duplicates</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 2000;
+            max-width: 480px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .status-ok { 
+            border-left: 4px solid #10b981; 
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .status-warning { 
+            border-left: 4px solid #f59e0b; 
+            background: rgba(245, 158, 11, 0.2);
+        }
+        .status-error { 
+            border-left: 4px solid #ef4444; 
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .test-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        .cleanup-info {
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        .button-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .button-item {
+            font-size: 11px;
+            padding: 4px 8px;
+            margin: 2px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Panel de test -->
+    <div class="test-panel">
+        <h3 style="margin: 0 0 15px 0; text-align: center; color: #fbbf24;">🗑️ Test Nettoyage Boutons</h3>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div><strong>Largeur:</strong> <span id="screen-width">0</span>px</div>
+            <div><strong>Type:</strong> <span id="screen-type">Détection...</span></div>
+        </div>
+        
+        <div class="cleanup-info">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #dc2626;">🗑️ Nettoyage des Boutons Duplicates</div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                🔍 Détection automatique des doublons<br>
+                🗑️ Suppression des anciens boutons<br>
+                ✅ Conservation du bouton dans header structuré
+            </div>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-item" id="total-buttons-status">
+                <div style="font-size: 12px; opacity: 0.8;">Total Boutons</div>
+                <div id="total-buttons-state">❓ Comptage...</div>
+            </div>
+            <div class="status-item" id="duplicate-status">
+                <div style="font-size: 12px; opacity: 0.8;">Duplicates</div>
+                <div id="duplicate-state">❓ Vérification...</div>
+            </div>
+            <div class="status-item" id="header-button-status">
+                <div style="font-size: 12px; opacity: 0.8;">Bouton Header</div>
+                <div id="header-button-state">❓ Recherche...</div>
+            </div>
+            <div class="status-item" id="cleanup-status">
+                <div style="font-size: 12px; opacity: 0.8;">Nettoyage</div>
+                <div id="cleanup-state">❓ En attente...</div>
+            </div>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <div style="font-size: 12px; margin-bottom: 5px;"><strong>Boutons Détectés:</strong></div>
+            <div class="button-list" id="button-list">
+                <div style="font-size: 11px; opacity: 0.7; text-align: center;">Aucun scan effectué</div>
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" onclick="scanButtons()">🔍 Scanner</button>
+            <button class="test-btn" onclick="forceCleanup()">🗑️ Nettoyer</button>
+            <button class="test-btn" onclick="testMenuToggle()">🔄 Toggle Menu</button>
+            <button class="test-btn" onclick="resetTest()">🔄 Reset</button>
+            <button class="test-btn" onclick="simulateLaptop()">💻 Laptop</button>
+            <button class="test-btn" onclick="detailedAnalysis()">📊 Analyse</button>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; text-align: center;">
+            Réduisez la largeur pour activer le menu et tester
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-xl font-bold border-b border-gray-700">
+            🏢 GestionPro
+        </div>
+        <nav class="flex-grow p-4">
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🏠 Dashboard
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💰 Caisse
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📦 Produits & Stock
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💲 Ajustement des Prix
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline bg-blue-600">
+                📊 Ajustement de Stock
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                👥 Clients
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🕒 Historique
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💳 Gestion Crédits
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📄 Facturation
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                ⚙️ Paramètres
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💾 Sauvegarde
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <h1 class="text-3xl font-bold mb-6" id="main-title">Tableau de Bord</h1>
+        
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-red-800 mb-4">🗑️ Nettoyage des Boutons Duplicates</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-red-800 mb-2">🔍 Problème Identifié</h3>
+                    <ul class="list-disc list-inside text-red-700 space-y-1 text-sm">
+                        <li><strong>Boutons multiples :</strong> Création de doublons</li>
+                        <li><strong>Ancien système :</strong> Bouton dans .p-4</li>
+                        <li><strong>Nouveau système :</strong> Bouton dans .sidebar-header</li>
+                        <li><strong>Conflit :</strong> Deux boutons X visibles</li>
+                        <li><strong>UX dégradée :</strong> Interface confuse</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-red-800 mb-2">✅ Solution Appliquée</h3>
+                    <ul class="list-disc list-inside text-red-700 space-y-1 text-sm">
+                        <li><strong>Fonction cleanupSidebar() :</strong> Nettoyage automatique</li>
+                        <li><strong>Suppression préventive :</strong> Avant création nouveau</li>
+                        <li><strong>Scan complet :</strong> Tous .sidebar-close-btn</li>
+                        <li><strong>Nettoyage headers :</strong> Anciens .sidebar-header</li>
+                        <li><strong>Styles inline :</strong> Suppression conflits</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation du contenu -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Chiffre d'Affaires</h3>
+                <p class="text-3xl font-bold text-green-600">145.00 MAD</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Bénéfice Net</h3>
+                <p class="text-3xl font-bold text-blue-600">25.00 MAD</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-2">Crédits Accordés</h3>
+                <p class="text-3xl font-bold text-orange-600">0.00 MAD</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        function updateStatus() {
+            const width = window.innerWidth;
+            document.getElementById('screen-width').textContent = width;
+            
+            // Déterminer le type d'écran
+            let screenType = '🖥️ Grand Écran';
+            if (width <= 768) {
+                screenType = '📱 Mobile';
+            } else if (width <= 1024) {
+                screenType = '📱 Tablette';
+            } else if (width <= 1440) {
+                screenType = '💻 Laptop 15"';
+            }
+            document.getElementById('screen-type').textContent = screenType;
+            
+            // Scanner automatiquement
+            scanButtons();
+        }
+
+        function scanButtons() {
+            const sidebar = document.querySelector('aside');
+            if (!sidebar) {
+                updateButtonStatus('error', 'Sidebar non trouvée');
+                return;
+            }
+            
+            // Compter tous les boutons de fermeture
+            const allCloseButtons = sidebar.querySelectorAll('.sidebar-close-btn');
+            const totalButtons = allCloseButtons.length;
+            
+            // Vérifier les boutons dans le header
+            const headerButtons = sidebar.querySelectorAll('.sidebar-header .sidebar-close-btn');
+            const headerButtonCount = headerButtons.length;
+            
+            // Vérifier les boutons orphelins (hors header)
+            const orphanButtons = Array.from(allCloseButtons).filter(btn => 
+                !btn.closest('.sidebar-header')
+            );
+            const orphanCount = orphanButtons.length;
+            
+            // Mettre à jour les statuts
+            updateTotalButtonsStatus(totalButtons);
+            updateDuplicateStatus(totalButtons, orphanCount);
+            updateHeaderButtonStatus(headerButtonCount);
+            updateCleanupStatus(orphanCount);
+            
+            // Afficher la liste des boutons
+            displayButtonList(allCloseButtons, headerButtons, orphanButtons);
+        }
+
+        function updateTotalButtonsStatus(count) {
+            const status = document.getElementById('total-buttons-status');
+            const state = document.getElementById('total-buttons-state');
+            
+            if (count === 0) {
+                status.className = 'status-item status-warning';
+                state.textContent = '⚠️ Aucun';
+            } else if (count === 1) {
+                status.className = 'status-item status-ok';
+                state.textContent = `✅ ${count}`;
+            } else {
+                status.className = 'status-item status-error';
+                state.textContent = `❌ ${count}`;
+            }
+        }
+
+        function updateDuplicateStatus(total, orphans) {
+            const status = document.getElementById('duplicate-status');
+            const state = document.getElementById('duplicate-state');
+            
+            if (orphans === 0) {
+                status.className = 'status-item status-ok';
+                state.textContent = '✅ Aucun';
+            } else {
+                status.className = 'status-item status-error';
+                state.textContent = `❌ ${orphans}`;
+            }
+        }
+
+        function updateHeaderButtonStatus(count) {
+            const status = document.getElementById('header-button-status');
+            const state = document.getElementById('header-button-state');
+            
+            if (count === 1) {
+                status.className = 'status-item status-ok';
+                state.textContent = '✅ Présent';
+            } else if (count === 0) {
+                status.className = 'status-item status-warning';
+                state.textContent = '⚠️ Absent';
+            } else {
+                status.className = 'status-item status-error';
+                state.textContent = `❌ ${count}`;
+            }
+        }
+
+        function updateCleanupStatus(orphans) {
+            const status = document.getElementById('cleanup-status');
+            const state = document.getElementById('cleanup-state');
+            
+            if (orphans === 0) {
+                status.className = 'status-item status-ok';
+                state.textContent = '✅ Propre';
+            } else {
+                status.className = 'status-item status-error';
+                state.textContent = '❌ Requis';
+            }
+        }
+
+        function displayButtonList(allButtons, headerButtons, orphanButtons) {
+            const listContainer = document.getElementById('button-list');
+            let html = '';
+            
+            if (allButtons.length === 0) {
+                html = '<div style="font-size: 11px; opacity: 0.7; text-align: center;">Aucun bouton trouvé</div>';
+            } else {
+                allButtons.forEach((btn, index) => {
+                    const isInHeader = btn.closest('.sidebar-header');
+                    const isOrphan = !isInHeader;
+                    const location = isInHeader ? 'Header' : 'Orphelin';
+                    const color = isInHeader ? '#10b981' : '#ef4444';
+                    
+                    html += `<div class="button-item" style="border-left-color: ${color};">
+                        Bouton ${index + 1}: ${location} - ${btn.style.display || 'visible'}
+                    </div>`;
+                });
+            }
+            
+            listContainer.innerHTML = html;
+        }
+
+        function forceCleanup() {
+            if (window.hamburgerMenu && window.hamburgerMenu.cleanupSidebar) {
+                window.hamburgerMenu.cleanupSidebar();
+                setTimeout(scanButtons, 100);
+                console.log('🗑️ Nettoyage forcé effectué');
+            } else {
+                console.warn('⚠️ Fonction de nettoyage non disponible');
+            }
+        }
+
+        function testMenuToggle() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.toggleMenu();
+                setTimeout(scanButtons, 200);
+            }
+        }
+
+        function resetTest() {
+            // Recharger la page pour reset complet
+            window.location.reload();
+        }
+
+        function simulateLaptop() {
+            document.body.style.maxWidth = '1366px';
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(updateStatus, 300);
+        }
+
+        function detailedAnalysis() {
+            const sidebar = document.querySelector('aside');
+            if (!sidebar) {
+                alert('❌ Sidebar non trouvée');
+                return;
+            }
+            
+            const allButtons = sidebar.querySelectorAll('.sidebar-close-btn');
+            const headers = sidebar.querySelectorAll('.sidebar-header');
+            
+            let analysis = '📊 Analyse Détaillée:\n\n';
+            analysis += `🔍 Total boutons: ${allButtons.length}\n`;
+            analysis += `🏗️ Headers structurés: ${headers.length}\n\n`;
+            
+            if (allButtons.length > 0) {
+                analysis += '📋 Détail des boutons:\n';
+                allButtons.forEach((btn, index) => {
+                    const parent = btn.parentElement;
+                    const isInHeader = btn.closest('.sidebar-header');
+                    const display = btn.style.display || 'visible';
+                    
+                    analysis += `${index + 1}. Parent: ${parent.className}\n`;
+                    analysis += `   Dans header: ${isInHeader ? 'OUI' : 'NON'}\n`;
+                    analysis += `   Display: ${display}\n\n`;
+                });
+            }
+            
+            analysis += `🎯 Statut: ${allButtons.length === 1 ? 'CORRECT ✅' : 'PROBLÈME ❌'}`;
+            
+            alert(analysis);
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            setTimeout(updateStatus, 1000);
+        });
+
+        window.addEventListener('resize', () => {
+            setTimeout(updateStatus, 100);
+        });
+
+        // Observer les changements DOM
+        const observer = new MutationObserver(() => {
+            setTimeout(scanButtons, 50);
+        });
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['class', 'style'] 
+        });
+
+        // Mise à jour initiale
+        updateStatus();
+    </script>
+</body>
+</html>

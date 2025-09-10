@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title data-i18n="clients_page_title">Clients - Système de Gestion</title>
+    <link href="./css/output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="clients_page_title">Gestion des Clients</h1>
+            <button id="addClientBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="add_client_button">
+                Ajouter un Client
+            </button>
+        </div>
+
+        <!-- Barre de recherche et filtres -->
+        <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+                <div class="flex-1">
+                    <input type="text" id="clientSearch"
+                           class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           data-i18n-placeholder="search_by_name_phone_ice"
+                           placeholder="Rechercher par nom, téléphone ou ICE...">
+                </div>
+                <div class="flex gap-2">
+                    <button id="filterDebtors" class="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors" data-i18n="filter_debtors">
+                        Débiteurs
+                    </button>
+                    <button id="clearFilters" class="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors" data-i18n="clear_filters">
+                        Tout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Clients</p>
+                        <p id="totalClients" class="text-lg font-semibold text-gray-900 dark:text-white">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Débiteurs</p>
+                        <p id="totalDebtors" class="text-lg font-semibold text-red-600 dark:text-red-400">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Crédit Total</p>
+                        <p id="totalCredit" class="text-lg font-semibold text-yellow-600 dark:text-yellow-400">0.00 MAD</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Clients Sains</p>
+                        <p id="healthyClients" class="text-lg font-semibold text-green-600 dark:text-green-400">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des clients -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="name_header">
+                            <div class="flex items-center space-x-1">
+                                <span>Nom</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="phone_header">Téléphone</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="ice_header">ICE</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="address_header">Adresse</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="credit_header">
+                            <div class="flex items-center space-x-1">
+                                <span>Crédit</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider" data-i18n="actions_header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="client-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="clientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-40">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-lg z-50">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6">Ajouter un Client</h2>
+            <form id="clientForm" class="space-y-4">
+                <input type="hidden" id="clientId">
+                <div>
+                    <label for="clientName" class="block text-sm font-medium" data-i18n="client_name_label">Nom du client</label>
+                    <input type="text" id="clientName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2" required>
+                </div>
+                <div>
+                    <label for="clientPhone" class="block text-sm font-medium" data-i18n="client_phone_label">Téléphone</label>
+                    <input type="text" id="clientPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                </div>
+                <div>
+                    <label for="clientIce" class="block text-sm font-medium" data-i18n="client_ice_label">ICE</label>
+                    <input type="text" id="clientIce" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2">
+                </div>
+                <div>
+                    <label for="clientAddress" class="block text-sm font-medium" data-i18n="client_address_label">Adresse</label>
+                    <textarea id="clientAddress" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 p-2"></textarea>
+                </div>
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button type="button" id="deleteClientBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 hidden" data-i18n="delete">Supprimer</button>
+                    <button type="button" id="cancelBtn" class="bg-gray-200 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-300" data-i18n="cancel_button">Annuler</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" data-i18n="save_button">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="./js/i18n.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/clients.js"></script>
+</body>
+</html>

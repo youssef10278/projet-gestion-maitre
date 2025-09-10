@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sauvegarde et Restauration - GestionPro</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center space-x-2">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">GestionPro</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                    <a href="index.html" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" data-i18n="back_to_dashboard">Retour au tableau de bord</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="max-w-7xl mx-auto py-6 px-4">
+        <!-- En-tête -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="backup_restore_title">Sauvegarde et Restauration</h1>
+            <p class="text-gray-600 dark:text-gray-400" data-i18n="backup_restore_description">Gérez vos sauvegardes de données pour protéger vos informations importantes</p>
+        </div>
+
+        <!-- Alertes et notifications -->
+        <div id="notification" class="hidden mb-6 p-4 rounded-lg"></div>
+
+        <!-- Section Sauvegarde -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Export/Sauvegarde -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="export_backup_title">Exporter / Sauvegarder</h2>
+                </div>
+                
+                <p class="text-gray-600 dark:text-gray-400 mb-6" data-i18n="export_description">Créez une sauvegarde complète de vos données</p>
+
+                <!-- Options d'export -->
+                <div class="space-y-4 mb-6">
+                    <div class="border dark:border-gray-600 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="export_options">Options d'export</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="export-products" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="export_products">Produits et stocks</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="export-clients" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="export_clients">Clients</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="export-sales" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="export_sales">Historique des ventes</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="export-invoices" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="export_invoices">Factures</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="export-settings" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="export_settings">Paramètres</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border dark:border-gray-600 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="export_format">Format d'export</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="export-format" value="json" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300">JSON (Recommandé pour restauration)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="export-format" value="csv" class="mr-2">
+                                <span class="text-gray-700 dark:text-gray-300">CSV (Pour analyse externe)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="export-format" value="excel" class="mr-2">
+                                <span class="text-gray-700 dark:text-gray-300">Excel (Pour rapports)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'export -->
+                <div class="space-y-3">
+                    <button id="export-complete-btn" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span data-i18n="export_complete">Sauvegarde Complète</span>
+                    </button>
+                    
+                    <button id="export-partial-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span data-i18n="export_partial">Export Sélectif</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Import/Restauration -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="import_restore_title">Importer / Restaurer</h2>
+                </div>
+                
+                <p class="text-gray-600 dark:text-gray-400 mb-6" data-i18n="import_description">Restaurez vos données à partir d'une sauvegarde</p>
+
+                <!-- Zone de drop pour fichiers -->
+                <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-6 transition-colors hover:border-blue-500 dark:hover:border-blue-400">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="text-gray-600 dark:text-gray-400 mb-2" data-i18n="drop_file_here">Glissez votre fichier de sauvegarde ici</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500 mb-4" data-i18n="or_click_to_select">ou cliquez pour sélectionner</p>
+                    <input type="file" id="import-file" class="hidden" accept=".json,.csv,.xlsx,.xls">
+                    <button id="select-file-btn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors" data-i18n="select_file">Sélectionner un fichier</button>
+                </div>
+
+                <!-- Options d'import -->
+                <div class="space-y-4 mb-6">
+                    <div class="border dark:border-gray-600 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="import_options">Options d'import</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="import-mode" value="replace" class="mr-2" checked>
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="replace_all">Remplacer toutes les données</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="import-mode" value="merge" class="mr-2">
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="merge_data">Fusionner avec les données existantes</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="import-mode" value="add" class="mr-2">
+                                <span class="text-gray-700 dark:text-gray-300" data-i18n="add_only">Ajouter uniquement (pas de remplacement)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <span class="text-sm text-yellow-800 dark:text-yellow-200" data-i18n="backup_warning">Attention : Une sauvegarde automatique sera créée avant l'import</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton d'import -->
+                <button id="import-btn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" disabled>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    <span data-i18n="start_import">Démarrer l'Import</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section Sauvegardes Automatiques -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="auto_backup_title">Sauvegardes Automatiques</h2>
+                </div>
+                <label class="flex items-center">
+                    <input type="checkbox" id="auto-backup-toggle" class="mr-2">
+                    <span class="text-gray-700 dark:text-gray-300" data-i18n="enable_auto_backup">Activer</span>
+                </label>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="border dark:border-gray-600 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="backup_frequency">Fréquence</h3>
+                    <select id="backup-frequency" class="w-full p-2 border dark:border-gray-600 rounded-lg dark:bg-gray-700">
+                        <option value="daily" data-i18n="daily">Quotidienne</option>
+                        <option value="weekly" data-i18n="weekly">Hebdomadaire</option>
+                        <option value="monthly" data-i18n="monthly">Mensuelle</option>
+                    </select>
+                </div>
+
+                <div class="border dark:border-gray-600 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="backup_time">Heure</h3>
+                    <input type="time" id="backup-time" class="w-full p-2 border dark:border-gray-600 rounded-lg dark:bg-gray-700" value="02:00">
+                </div>
+
+                <div class="border dark:border-gray-600 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2" data-i18n="backup_retention">Rétention</h3>
+                    <select id="backup-retention" class="w-full p-2 border dark:border-gray-600 rounded-lg dark:bg-gray-700">
+                        <option value="7" data-i18n="days_7">7 jours</option>
+                        <option value="30" data-i18n="days_30">30 jours</option>
+                        <option value="90" data-i18n="days_90">90 jours</option>
+                        <option value="365" data-i18n="days_365">1 an</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Historique des Sauvegardes -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="backup_history_title">Historique des Sauvegardes</h2>
+                <button id="refresh-history-btn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors" data-i18n="refresh">Actualiser</button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-700">
+                            <th class="px-4 py-2 text-left text-gray-900 dark:text-white" data-i18n="backup_date">Date</th>
+                            <th class="px-4 py-2 text-left text-gray-900 dark:text-white" data-i18n="backup_type">Type</th>
+                            <th class="px-4 py-2 text-left text-gray-900 dark:text-white" data-i18n="backup_size">Taille</th>
+                            <th class="px-4 py-2 text-left text-gray-900 dark:text-white" data-i18n="backup_status">Statut</th>
+                            <th class="px-4 py-2 text-left text-gray-900 dark:text-white" data-i18n="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backup-history-table" class="divide-y divide-gray-200 dark:divide-gray-600">
+                        <!-- Les sauvegardes seront ajoutées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+</body>
+</html>

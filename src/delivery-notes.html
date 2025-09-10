@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="delivery_notes_page_title">Bons de Livraison - Système de Gestion</title>
+
+    <!-- Pré-chargement des traductions pour éviter le flash -->
+    <script src="./js/lang-init.js"></script>
+
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        /* Styles spécifiques pour les bons de livraison */
+        :root {
+            --delivery-primary: #059669;
+            --delivery-secondary: #10b981;
+            --delivery-accent: #34d399;
+            --delivery-light: #d1fae5;
+            --delivery-dark: #064e3b;
+        }
+
+        .delivery-container {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .dark .delivery-container {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .delivery-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dark .delivery-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .delivery-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--delivery-light);
+        }
+
+        .dark .delivery-header {
+            border-bottom-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .delivery-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--delivery-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dark .delivery-title {
+            color: var(--delivery-accent);
+        }
+
+        .delivery-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, var(--delivery-primary), var(--delivery-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .btn-delivery {
+            background: linear-gradient(135deg, var(--delivery-primary), var(--delivery-secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-delivery:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-delivery-outline {
+            background: transparent;
+            color: var(--delivery-primary);
+            border: 2px solid var(--delivery-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-delivery-outline:hover {
+            background: var(--delivery-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .delivery-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .dark .stat-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 25px rgba(5, 150, 105, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--delivery-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .dark .stat-label {
+            color: #9ca3af;
+        }
+
+        .delivery-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .delivery-table {
+            background: #1f2937;
+        }
+
+        .delivery-table th {
+            background: linear-gradient(135deg, var(--delivery-primary), var(--delivery-secondary));
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .delivery-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .dark .delivery-table td {
+            border-bottom-color: #374151;
+            color: #d1d5db;
+        }
+
+        .delivery-table tbody tr:hover {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-confirmed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 0.25rem;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-edit {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn-print {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .delivery-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .delivery-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+            
+            .delivery-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .delivery-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .delivery-table {
+                font-size: 0.875rem;
+            }
+            
+            .delivery-table th,
+            .delivery-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Animation pour les nouveaux éléments */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Styles pour les modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .dark .modal-content {
+            background: #1f2937;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* Styles pour les articles dans le formulaire */
+        .item-row {
+            transition: all 0.3s ease;
+        }
+
+        .item-row:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styles pour l'impression */
+        .print-document {
+            background: white;
+            color: black;
+        }
+
+        .print-document table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .print-document th,
+        .print-document td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .print-document th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        /* Amélioration des champs de formulaire */
+        .form-input {
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+        }
+
+        /* Animation pour les nouveaux articles */
+        .item-row {
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Styles pour les listes déroulantes de recherche */
+        .search-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .search-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .search-dropdown::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .search-dropdown::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .search-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Styles pour les éléments de recherche */
+        .search-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .search-item:hover {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+
+        /* Styles pour le texte surligné */
+        mark {
+            background-color: #fef08a;
+            color: #365314;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+
+        .dark mark {
+            background-color: #ca8a04;
+            color: #fef3c7;
+        }
+
+        /* Styles pour les boutons d'action dans les articles */
+        .item-action-btn {
+            transition: all 0.2s ease;
+        }
+
+        .item-action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive pour les modales */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+                max-height: 95vh;
+            }
+
+            .item-row .grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .item-row .md\\:col-span-2 {
+                grid-column: span 1;
+            }
+        }
+
+        /* Styles pour la pagination */
+        .pagination-container {
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .dark .pagination-container {
+            border-top-color: #374151;
+            background: #1f2937;
+        }
+
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            margin: 0 0.125rem;
+            text-sm: true;
+            font-weight: 500;
+            color: #6b7280;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            min-width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background-color: #f3f4f6;
+            color: #374151;
+            border-color: #9ca3af;
+        }
+
+        .pagination-btn.active {
+            background-color: #059669;
+            color: white;
+            border-color: #059669;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .dark .pagination-btn {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        .dark .pagination-btn:hover:not(.disabled) {
+            background-color: #4b5563;
+            color: #f9fafb;
+        }
+
+        .dark .pagination-btn.active {
+            background-color: #059669;
+            border-color: #059669;
+        }
+
+        /* Optimisations performance */
+        .table-container {
+            position: relative;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .dark .loading-overlay {
+            background: rgba(31, 41, 55, 0.8);
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #059669;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <!-- Menu latéral identique au dashboard -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 overflow-y-auto">
+        <div class="delivery-container">
+            <!-- En-tête principal -->
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-title">
+                        <div class="delivery-icon">
+                            📦
+                        </div>
+                        <span data-i18n="delivery_notes_title">Bons de Livraison</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="reportingBtn" class="btn-delivery-outline">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span data-i18n="delivery_notes_reporting">Reporting</span>
+                        </button>
+                        <button id="exportBtn" class="btn-delivery-outline">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span data-i18n="delivery_notes_export">Export</span>
+                        </button>
+                        <button id="newDeliveryBtn" class="btn-delivery">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span data-i18n="delivery_notes_new">Nouveau Bon</span>
+                        </button>
+                        <button id="refreshBtn" class="btn-delivery-outline">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <span data-i18n="delivery_notes_refresh">Actualiser</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="delivery-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDeliveries">0</div>
+                        <div class="stat-label" data-i18n="delivery_notes_total">Total Bons</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingDeliveries">0</div>
+                        <div class="stat-label" data-i18n="delivery_notes_pending">En Attente</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="deliveredToday">0</div>
+                        <div class="stat-label" data-i18n="delivery_notes_today">Livrés Aujourd'hui</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="monthlyDeliveries">0</div>
+                        <div class="stat-label" data-i18n="delivery_notes_monthly">Ce Mois</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et recherche -->
+            <div class="delivery-card">
+                <div class="flex flex-wrap items-center gap-4 mb-4">
+                    <div class="flex-1 min-w-64">
+                        <input type="text" id="searchInput" placeholder="Rechercher par numéro, client..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <select id="typeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="" data-i18n="delivery_notes_all_types">Tous les types</option>
+                        <option value="incoming" data-i18n="delivery_notes_incoming">Entrant</option>
+                        <option value="outgoing" data-i18n="delivery_notes_outgoing">Sortant</option>
+                        <option value="return" data-i18n="delivery_notes_return">Retour</option>
+                    </select>
+                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="" data-i18n="delivery_notes_all_status">Tous les statuts</option>
+                        <option value="draft" data-i18n="delivery_notes_draft">Brouillon</option>
+                        <option value="confirmed" data-i18n="delivery_notes_confirmed">Confirmé</option>
+                        <option value="delivered" data-i18n="delivery_notes_delivered">Livré</option>
+                        <option value="cancelled" data-i18n="delivery_notes_cancelled">Annulé</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Liste des bons de livraison -->
+            <div class="delivery-card">
+                <div class="overflow-x-auto">
+                    <table class="delivery-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="delivery_notes_table_number">Numéro</th>
+                                <th data-i18n="delivery_notes_table_type">Type</th>
+                                <th data-i18n="delivery_notes_table_date">Date</th>
+                                <th data-i18n="delivery_notes_table_client">Client/Fournisseur</th>
+                                <th data-i18n="delivery_notes_table_items">Articles</th>
+                                <th data-i18n="delivery_notes_table_status">Statut</th>
+                                <th data-i18n="delivery_notes_table_actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deliveryNotesTableBody">
+                            <!-- Les bons de livraison seront chargés ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Nouveau/Édition Bon de Livraison -->
+    <div id="deliveryModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; width: 90vw;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-900 dark:text-white">
+                    Nouveau Bon de Livraison
+                </h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="deliveryForm" class="space-y-6">
+                <!-- Informations générales -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Type de bon
+                        </label>
+                        <select id="deliveryType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            <option value="outgoing">📤 Sortant (Livraison client)</option>
+                            <option value="incoming">📥 Entrant (Réception fournisseur)</option>
+                            <option value="return">🔄 Retour (Produit défectueux)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Date
+                        </label>
+                        <input type="date" id="deliveryDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                </div>
+
+                <!-- Client/Fournisseur -->
+                <div>
+                    <label id="clientLabel" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Client
+                    </label>
+                    <div class="relative">
+                        <!-- Input de recherche client -->
+                        <input type="text"
+                               id="clientSearch"
+                               placeholder="Tapez pour rechercher un client..."
+                               class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               autocomplete="off">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+
+                        <!-- Liste déroulante des résultats -->
+                        <div id="clientDropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                            <!-- Résultats de recherche -->
+                        </div>
+                    </div>
+
+                    <!-- Client sélectionné -->
+                    <div id="selectedClientDisplay" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 hidden">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold text-blue-900 dark:text-blue-100" id="selectedClientName">Client sélectionné</p>
+                                <p class="text-sm text-blue-700 dark:text-blue-300" id="selectedClientDetails">Détails</p>
+                            </div>
+                            <button type="button" onclick="clearClientSelection()" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Informations client détaillées -->
+                    <div id="clientInfo" class="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hidden">
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <p><strong>Téléphone:</strong> <span id="clientPhone">-</span></p>
+                            <p><strong>Crédit:</strong> <span id="clientCredit" class="font-semibold">0.00 MAD</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Articles -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Articles
+                        </label>
+                        <button type="button" id="addItemBtn" class="btn-delivery text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Ajouter Article
+                        </button>
+                    </div>
+
+                    <div id="itemsList" class="space-y-3">
+                        <!-- Les articles seront ajoutés ici -->
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Notes (optionnel)
+                    </label>
+                    <textarea id="deliveryNotes" rows="3" placeholder="Notes additionnelles..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" id="cancelBtn" class="btn-delivery-outline">
+                        Annuler
+                    </button>
+                    <button type="submit" id="saveBtn" class="btn-delivery">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal d'impression -->
+    <div id="printModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px; width: 90vw;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    Aperçu d'impression
+                </h2>
+                <button id="closePrintModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="printPreview" class="bg-white p-6 border border-gray-200 rounded-lg mb-6">
+                <!-- Le contenu d'impression sera généré ici -->
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="cancelPrintBtn" class="btn-delivery-outline">
+                    Annuler
+                </button>
+                <button type="button" id="confirmPrintBtn" class="btn-delivery">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reporting -->
+    <div id="reportingModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 1200px; width: 95vw; max-height: 90vh; overflow-y: auto;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    📊 Reporting et Analytics
+                </h2>
+                <button id="closeReportingBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Filtres de période -->
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold mb-4">Période d'analyse</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Date début</label>
+                        <input type="date" id="reportDateFrom" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Date fin</label>
+                        <input type="date" id="reportDateTo" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Type de bon</label>
+                        <select id="reportType" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option value="">Tous les types</option>
+                            <option value="outgoing">Sortant</option>
+                            <option value="incoming">Entrant</option>
+                            <option value="return">Retour</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button id="generateReportBtn" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            Générer Rapport
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques et statistiques -->
+            <div id="reportContent" class="space-y-6">
+                <!-- Le contenu sera généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Export -->
+    <div id="exportModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    📄 Export des Données
+                </h2>
+                <button id="closeExportBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Options d'export -->
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Format d'export</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="exportExcelBtn" class="export-format-btn p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 text-center transition-colors">
+                            <svg class="w-8 h-8 text-green-600 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="font-medium">Excel (.xlsx)</div>
+                            <div class="text-sm text-gray-500">Tableau avec formules</div>
+                        </button>
+                        <button id="exportCsvBtn" class="export-format-btn p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 text-center transition-colors">
+                            <svg class="w-8 h-8 text-blue-600 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="font-medium">CSV (.csv)</div>
+                            <div class="text-sm text-gray-500">Données brutes</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Données à inclure</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeItems" checked class="mr-2">
+                            <span>Articles détaillés</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeHistory" class="mr-2">
+                            <span>Historique des statuts</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeNotes" checked class="mr-2">
+                            <span>Notes et commentaires</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Filtres d'export</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Date début</label>
+                            <input type="date" id="exportDateFrom" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Date fin</label>
+                            <input type="date" id="exportDateTo" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/lang-init.js"></script>
+    <script src="./js/i18n.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/delivery-notes.js"></script>
+</body>
+</html>

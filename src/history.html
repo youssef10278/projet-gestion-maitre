@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="history_page_title">Historique - Système de Gestion</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        .search-results-container {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0 0 0.5rem 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .dark .search-results-container {
+            background-color: #374151;
+            border-color: #4b5563;
+        }
+        .search-result-item {
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+        .search-result-item:hover {
+            background-color: #f3f4f6;
+        }
+        .dark .search-result-item:hover {
+            background-color: #4b5563;
+        }
+
+        /* Responsive table styles */
+        @media (max-width: 768px) {
+            .table-responsive {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-card {
+                display: block !important;
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            }
+
+            .mobile-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .mobile-card-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .mobile-field {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .mobile-field-label {
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
+            }
+
+            .mobile-field-value {
+                font-size: 0.875rem;
+                color: #111827;
+            }
+        }
+
+        /* Amélioration des badges pour mobile */
+        @media (max-width: 640px) {
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .action-button {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+            }
+        }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6" data-i18n="history_page_title">Historique des Ventes</h1>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+            <!-- Ligne 1: Filtres principaux -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="relative">
+                    <label for="clientSearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="filter_by_client">Filtrer par Client</label>
+                    <input type="text" id="clientSearch" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off" placeholder="Rechercher un client..." data-i18n-placeholder="type_client_name">
+                    <div id="clientSearchResults" class="search-results-container hidden"></div>
+                    <input type="hidden" id="clientId">
+                </div>
+                <div class="relative">
+                    <label for="productSearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="filter_by_product">Filtrer par Produit</label>
+                    <input type="text" id="productSearch" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off" placeholder="Rechercher un produit..." data-i18n-placeholder="type_product_name">
+                    <div id="productSearchResults" class="search-results-container hidden"></div>
+                    <input type="hidden" id="productId">
+                </div>
+            </div>
+
+            <!-- Ligne 2: Dates et boutons -->
+            <div class="flex flex-wrap items-end gap-4 mb-4">
+                <div class="flex-1 min-w-[150px]">
+                    <label for="startDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="from_date">Du</label>
+                    <input type="date" id="startDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="flex-1 min-w-[150px]">
+                    <label for="endDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="to_date">Au</label>
+                    <input type="date" id="endDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="flex gap-3">
+                    <button id="filterBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                        🔍 Filtrer
+                    </button>
+                    <button id="resetBtn" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium">
+                        🔄 Réinitialiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ligne 3: Options d'affichage -->
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Options d'affichage</label>
+                <div class="flex flex-wrap gap-6">
+                    <div class="flex items-center">
+                        <button id="showAllBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
+                            📋 Afficher tout
+                        </button>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="showNormal" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <label for="showNormal" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            🟢 Afficher les ventes normales
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="showCorrections" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <label for="showCorrections" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            🟡 Afficher les corrections
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="showCorrected" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <label for="showCorrected" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            🔴 Afficher les ventes corrigées
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé des résultats -->
+        <div id="resultsSummary" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4 hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <span class="text-blue-800 dark:text-blue-200 font-medium">
+                        📊 <span id="totalResults">0</span> ventes trouvées
+                    </span>
+                    <span class="text-blue-600 dark:text-blue-300">
+                        💰 Total: <span id="totalAmount" class="font-bold">0.00</span> MAD
+                    </span>
+                </div>
+                <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                    📥 Exporter
+                </button>
+            </div>
+        </div>
+
+
+
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead id="historyTableHead" class="bg-gray-50 dark:bg-gray-700">
+                        </thead>
+                    <tbody id="historyTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Légende des statuts -->
+        <div class="mt-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Légende des statuts</h3>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        🟢 Normale
+                    </span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Vente complétée normalement</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        🟡 Correction
+                    </span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Vente qui corrige une autre</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        🔴 Corrigée
+                    </span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Vente remplacée par une correction</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        ↩️ Retournée
+                    </span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Vente retournée</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="detailsModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-40">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-3xl z-50 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-4">
+                <h2 id="modalTitle" class="text-2xl font-bold" data-i18n="details_modal_title">Détails de la Vente</h2>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div id="modalContent" class="overflow-y-auto"></div>
+            <div id="modalActions" class="mt-4 pt-4 border-t dark:border-gray-700 flex justify-end gap-4"></div>
+        </div>
+    </div>
+    
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-50">
+        </div>
+    
+    <script src="./js/i18n.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/history.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+</body>
+</html>

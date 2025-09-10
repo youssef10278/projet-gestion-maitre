@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="stock_adjustment_page_title">Ajustement de Stock - Système de Gestion</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        /* Styles pour les champs de stock et seuils */
+        .stock-input, .threshold-input { transition: all 0.2s ease-in-out; }
+        .stock-input:focus, .threshold-input:focus { ring: 2px; ring-color: #3b82f6; border-color: #3b82f6; transform: scale(1.02); }
+        .stock-input.changed, .threshold-input.changed { background-color: #fef3c7; border-color: #f59e0b; }
+        .dark .stock-input.changed, .dark .threshold-input.changed { background-color: #451a03; border-color: #f59e0b; }
+
+        /* Styles pour les lignes modifiées */
+        .row-changed { background-color: #fef3c7 !important; border-left: 4px solid #f59e0b; }
+        .dark .row-changed { background-color: #451a03 !important; }
+
+        /* Styles pour les badges de statut */
+        .status-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-badge.in-stock { background-color: #dcfce7; color: #166534; }
+        .status-badge.alert { background-color: #fef3c7; color: #92400e; }
+        .status-badge.out-of-stock { background-color: #fee2e2; color: #991b1b; }
+        .dark .status-badge.in-stock { background-color: #14532d; color: #bbf7d0; }
+        .dark .status-badge.alert { background-color: #451a03; color: #fde68a; }
+        .dark .status-badge.out-of-stock { background-color: #450a0a; color: #fecaca; }
+
+        /* Styles pour les mouvements */
+        .movement-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 600; }
+        .movement-badge.increase { background-color: #dcfce7; color: #166534; }
+        .movement-badge.decrease { background-color: #fee2e2; color: #991b1b; }
+        .movement-badge.neutral { background-color: #f3f4f6; color: #6b7280; }
+        .dark .movement-badge.increase { background-color: #14532d; color: #bbf7d0; }
+        .dark .movement-badge.decrease { background-color: #450a0a; color: #fecaca; }
+        .dark .movement-badge.neutral { background-color: #374151; color: #9ca3af; }
+
+        /* Animation pour les lignes du tableau */
+        tbody tr { transition: all 0.2s ease-in-out; }
+        tbody tr:hover { background-color: #f8fafc; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dark tbody tr:hover { background-color: #1e293b; }
+
+        /* Animation de chargement */
+        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); background-size: 200% 100%; }
+
+        /* Styles pour la gestion des colonnes du tableau d'ajustement de stock */
+        .stock-adjustment-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        /* Largeurs fixes des colonnes pour l'ajustement de stock */
+        .col-product-stock { width: 30%; }
+        .col-current-stock { width: 15%; }
+        .col-threshold-stock { width: 15%; }
+        .col-new-stock { width: 15%; }
+        .col-movement-stock { width: 15%; }
+        .col-value-stock { width: 10%; }
+
+        /* Troncature du nom du produit dans l'ajustement de stock */
+        .product-name-truncate-stock {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        /* Force la largeur maximale pour la colonne produit */
+        .col-product-stock {
+            max-width: 0; /* Force le respect de la largeur définie */
+        }
+
+        /* Conteneur flex avec troncature forcée pour l'ajustement de stock */
+        .product-info-container-stock {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .product-info-container-stock > div {
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* Amélioration du curseur pour indiquer qu'il y a un tooltip */
+        .product-name-truncate-stock:hover {
+            cursor: help;
+        }
+
+        /* Styles pour les filtres */
+        .filter-btn.active { background-color: #dbeafe !important; color: #1d4ed8 !important; border-color: #3b82f6 !important; }
+        .dark .filter-btn.active { background-color: #1e3a8a !important; color: #93c5fd !important; border-color: #3b82f6 !important; }
+
+        /* Indicateur de changement */
+        .change-indicator { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 flex flex-col overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4 flex-shrink-0">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2" data-i18n="stock_adjustment_main_title">Ajustement de Stock</h1>
+                <div id="stockStats" class="flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Total: <span id="totalProducts" class="font-semibold text-gray-800 dark:text-white">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">En stock: <span id="inStockProducts" class="font-semibold text-green-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Alertes: <span id="alertProducts" class="font-semibold text-yellow-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Ruptures: <span id="outOfStockProducts" class="font-semibold text-red-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Valeur: <span id="totalStockValue" class="font-semibold text-purple-600">0 MAD</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Modifiés: <span id="changedProducts" class="font-semibold text-orange-600">0</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="resetChangesBtn" class="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Réinitialiser
+                </button>
+                <button id="saveAdjustmentsBtn" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" data-i18n="save_adjustments_button" disabled>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Sauvegarder les Ajustements
+                </button>
+            </div>
+        </div>
+        
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Barre de recherche améliorée -->
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-i18n-placeholder="search_product_placeholder_simple" placeholder="Rechercher un produit...">
+                </div>
+
+                <!-- Filtres de statut -->
+                <div class="flex flex-wrap gap-2">
+                    <button id="filterAll" class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200">
+                        Tous
+                    </button>
+                    <button id="filterInStock" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        En stock
+                    </button>
+                    <button id="filterAlert" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        Alertes
+                    </button>
+                    <button id="filterOutOfStock" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                        Ruptures
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ligne des outils d'ajustement -->
+            <div class="flex flex-col lg:flex-row gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <!-- Motif de l'ajustement -->
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="reasonInput" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-i18n-placeholder="adjustment_reason_placeholder" placeholder="Motif de l'ajustement (ex: Inventaire annuel)">
+                </div>
+
+                <!-- Outils d'ajustement en masse -->
+                <div class="flex flex-wrap gap-2">
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Ajust.:</label>
+                        <select id="bulkAdjustmentType" class="px-2 py-1 text-sm border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500">
+                            <option value="add">Ajouter</option>
+                            <option value="subtract">Retirer</option>
+                            <option value="set">Définir</option>
+                        </select>
+                        <input type="number" id="bulkAdjustmentValue" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500" placeholder="0" min="0">
+                        <button id="applyBulkAdjustmentBtn" class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600 transition-colors">
+                            Appliquer
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Seuil:</label>
+                        <input type="number" id="bulkThresholdValue" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500" placeholder="0" min="0">
+                        <button id="applyBulkThresholdBtn" class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 transition-colors">
+                            Appliquer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col">
+            <div class="flex-1 overflow-y-auto max-h-[calc(100vh-400px)]">
+                <table class="stock-adjustment-table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 sticky top-0 z-10">
+                    <tr>
+                        <th class="col-product-stock px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="product_header_simple">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Produit
+                            </div>
+                        </th>
+                        <th class="col-current-stock px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32" data-i18n="current_stock_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Stock Actuel
+                            </div>
+                        </th>
+                        <th class="col-threshold-stock px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-24">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Seuil
+                            </div>
+                        </th>
+                        <th class="col-new-stock px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32" data-i18n="new_stock_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Nouveau Stock
+                            </div>
+                        </th>
+                        <th class="col-movement-stock px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32">
+                            <div class="flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                </svg>
+                                Mouvement
+                            </div>
+                        </th>
+                        <th class="col-value-stock px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32">
+                            <div class="flex items-center justify-end gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                Valeur
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                    <tbody id="adjustmentTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </main>
+    
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 id="confirmationMessage" class="text-lg font-semibold mb-4"></h3>
+            <div class="flex justify-end gap-4">
+                <button id="confirmCancelBtn" class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400" data-i18n="cancel_button">Annuler</button>
+                <button id="confirmOkBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" data-i18n="confirm_button">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/i18n.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/stock-adjustment.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+</body>
+</html>

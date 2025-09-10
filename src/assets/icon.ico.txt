@@ -1,0 +1,9 @@
+
+Cette icône sera remplacée par une icône personnalisée.
+Pour l'instant, electron-builder utilisera l'icône par défaut d'Electron.
+
+Pour créer une icône personnalisée :
+1. Créez une image 256x256 pixels
+2. Convertissez-la en format ICO
+3. Remplacez ce fichier par votre icône
+4. Relancez la génération de l'installateur

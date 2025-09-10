@@ -1,0 +1,548 @@
+{
+  "main_menu_dashboard": "لوحة التحكم",
+  "main_menu_cash_register": "الصندوق",
+  "main_menu_products": "المنتجات والمخزون",
+  "main_menu_suppliers": "الموردين",
+  "main_menu_price_adjustment": "تعديل الأسعار",
+  "main_menu_stock_adjustment": "تعديل المخزون",
+  "main_menu_clients": "العملاء",
+  "main_menu_history": "السجل",
+
+  "main_menu_credits": "إدارة الديون",
+  "main_menu_quotes": "إدارة عروض الأسعار",
+  "main_menu_invoices": "الفوترة",
+  "main_menu_returns": "المرتجعات",
+  "main_menu_expenses": "المصروفات",
+  "main_menu_settings": "الإعدادات",
+  "main_menu_backup": "النسخ الاحتياطي",
+  "main_menu_seller_history": "مبيعاتي اليومية",
+
+  "add": "إضافة",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "search": "بحث...",
+  "product_name": "اسم المنتج",
+  "product_category": "الفئة",
+  "add_product_button": "إضافة منتج",
+  "search_by_name_or_barcode": "البحث بالاسم أو بالرمز الشريطي...",
+  "product_name_header": "الاسم",
+  "barcode_header": "الرمز الشريطي",
+  "retail_price_header": "سعر التجزئة",
+  "wholesale_price_header": "سعر الجملة",
+  "stock_header": "المخزون",
+  "actions_header": "إجراءات",
+  "no_product_found": "لم يتم العثور على أي منتج.",
+  "add_product_modal_title": "إضافة منتج",
+  "edit_product_modal_title": "تعديل المنتج",
+  "choose_image_button": "اختر صورة...",
+  "product_name_label": "اسم المنتج",
+  "barcode_label": "الرمز الشريطي",
+  "category_label": "الفئة",
+  "purchase_price_label": "سعر الشراء",
+  "retail_price_label": "سعر التجزئة",
+  "wholesale_price_label": "سعر الجملة",
+  "carton_price_label": "سعر الكرتون",
+  "pieces_per_carton_label": "عدد القطع في الكرتون",
+  "calculate_carton_price": "احسب",
+  "calculate_carton_price_help": "💡 اضغط على \"ح\" للحساب: سعر الجملة × عدد القطع في الكرتون",
+  "calculate_carton_price_tooltip": "احسب سعر الكرتون تلقائياً (سعر الجملة × عدد القطع في الكرتون)",
+  "carton_price_calculated": "تم حساب سعر الكرتون",
+  "error_price_wholesale_required": "يرجى إدخال سعر جملة صحيح",
+  "error_pieces_per_carton_required": "يرجى إدخال عدد صحيح للقطع في الكرتون",
+  "error_price_wholesale_and_pieces_required": "يرجى إدخال سعر الجملة وعدد القطع في الكرتون",
+  "stock_label": "المخزون",
+  "alert_threshold_label": "عتبة التنبيه",
+  "save_button": "حفظ",
+  "cancel_button": "إلغاء",
+  "confirm_button": "تأكيد",
+  "confirm_delete_product": "هل أنت متأكد أنك تريد حذف هذا المنتج؟ هذا الإجراء لا يمكن التراجع عنه.",
+  "delete_failed": "فشل الحذف",
+  "error_loading_products": "خطأ أثناء تحميل المنتجات",
+  "error_saving_product": "خطأ أثناء حفظ المنتج",
+  "error_barcode_unique": "خطأ: هذا الرمز الشريطي مستخدم بالفعل من قبل منتج آخر.",
+  "operation_failed": "فشلت العملية",
+  "error_name_price_required": "اسم المنتج وسعر التجزئة مطلوبان.",
+  "clients_page_title": "إدارة العملاء",
+  "add_client_button": "إضافة عميل",
+  "search_by_name_phone_ice": "البحث بالاسم، الهاتف، أو المعرف...",
+  "name_header": "الاسم",
+  "phone_header": "الهاتف",
+  "ice_header": "المعرف الضريبي",
+  "address_header": "العنوان",
+  "credit_header": "الدين",
+  "no_client_found": "لم يتم العثور على أي عميل.",
+  "add_client_modal_title": "إضافة عميل",
+  "edit_client_modal_title": "تعديل العميل",
+  "client_name_label": "اسم العميل",
+  "client_phone_label": "الهاتف",
+  "client_ice_label": "المعرف الضريبي",
+  "client_address_label": "العنوان",
+  "confirm_delete_client": "هل أنت متأكد أنك تريد حذف هذا العميل؟ سيتم أرشفة العميل مع الاحتفاظ ببيانات ديونه وسجل معاملاته.",
+  "cash_register_page_title": "الصندوق",
+  "search_product_placeholder": "البحث عن منتج بالاسم أو الرمز الشريطي...",
+  "all_categories": "الكل",
+  "cart_title": "السلة",
+  "product_header": "المنتج",
+  "quantity_header": "الكمية",
+  "unit_price_header": "سعر الوحدة",
+  "total_header": "المجموع",
+  "cart_is_empty": "السلة فارغة. انقر على منتج لإضافته.",
+  "default_client": "عميل عابر",
+  "search_client_placeholder": "البحث عن عميل...",
+  "total_amount": "المجموع",
+  "amount_paid": "المبلغ المدفوع",
+  "change_due": "الباقي",
+  "set_total_amount_button": "المبلغ الإجمالي",
+  "cancel_sale_button": "إلغاء البيع",
+  "cash_payment_button": "💰 دفع نقدي",
+  "check_payment_button": "📄 دفع بشيك",
+  "credit_payment_button": "💳 دين / جزئي",
+  "cash_payment_details": "تفاصيل الدفع النقدي:",
+  "total_to_pay": "المبلغ المطلوب دفعه",
+  "amount_received": "المبلغ المستلم من العميل:",
+  "change_to_give": "المبلغ المطلوب إرجاعه",
+  "exact_payment": "المبلغ بالضبط",
+  "insufficient_amount": "المبلغ غير كافي",
+  "payment_valid": "الدفع صحيح",
+  "no_change_needed": "لا حاجة لإرجاع مبلغ",
+  "add_more_money": "أضف المزيد من المال",
+  "exact_amount": "بالضبط",
+  "confirm_payment": "✓ تأكيد الدفع",
+  "validate_payment_button": "✓ تأكيد الدفع",
+  "choose_payment_type": "اختر نوع الدفع:",
+  "partial_payment_details": "تفاصيل الدفع الجزئي:",
+  "credit_amount": "الدين:",
+  "back_button": "← رجوع",
+  "save_correction_button": "💾 حفظ التصحيح",
+  "continue_to_payment_button": "← متابعة إلى الدفع",
+  "edit_payment_step_info": "اختر طريقة الدفع لهذه العملية",
+  "payment_method_header": "طريقة الدفع",
+  "client_up_to_date": "محدث",
+  "filter_all": "الكل",
+  "filter_in_stock": "متوفر",
+  "filter_alert": "تنبيه",
+  "filter_out_of_stock": "نفد",
+  "total_products": "المجموع",
+  "in_stock_products": "متوفر",
+  "alert_products": "تنبيه",
+  "out_of_stock_products": "نفد",
+  "changed_products": "معدل",
+  "average_margin": "متوسط الهامش",
+  "reset_changes": "إعادة تعيين",
+  "apply_bulk_margin": "تطبيق الهامش",
+  "apply_bulk_adjustment": "تطبيق التعديل",
+  "bulk_margin_placeholder": "الهامش %",
+  "bulk_adjustment_placeholder": "القيمة",
+  "margin_based_on": "الهامش على أساس",
+  "margin_retail": "سعر التجزئة",
+  "margin_wholesale": "سعر الجملة",
+  "margin_carton": "سعر الكرتون",
+  "stock_filter_all": "الكل",
+  "stock_filter_in_stock": "متوفر",
+  "stock_filter_alert": "تنبيه",
+  "stock_filter_out_of_stock": "نفد",
+  "stock_total_value": "القيمة الإجمالية",
+  "stock_changed_products": "معدل",
+  "bulk_adjustment_add": "إضافة",
+  "bulk_adjustment_subtract": "طرح",
+  "bulk_adjustment_set": "تحديد",
+  "bulk_threshold_apply": "تطبيق العتبة",
+  "stock_movement": "الحركة",
+  "stock_value": "القيمة",
+  "stock_threshold": "العتبة",
+  "credits_dashboard": "لوحة تحكم الائتمان",
+  "total_clients": "إجمالي العملاء",
+  "debtor_clients": "العملاء المدينون",
+  "total_credit_amount": "إجمالي الائتمان",
+  "monthly_collection": "المحصل هذا الشهر",
+  "overdue_clients": "العملاء المتأخرون",
+  "recovery_rate": "معدل الاسترداد",
+  "credit_risk_low": "مخاطر منخفضة",
+  "credit_risk_medium": "مخاطر متوسطة",
+  "credit_risk_high": "مخاطر عالية",
+  "credit_risk_critical": "مخاطر حرجة",
+  "age_recent": "حديث",
+  "age_medium": "متوسط",
+  "age_old": "قديم",
+  "quick_payment": "دفع سريع",
+  "payment_history": "تاريخ المدفوعات",
+  "credit_adjustment": "تعديل الائتمان",
+  "add_credit": "إضافة ائتمان",
+  "subtract_credit": "خصم ائتمان",
+  "payment_note": "ملاحظة الدفع",
+  "transaction_history": "تاريخ المعاملات",
+  "sale_details": "تفاصيل البيع",
+  "products_sold": "المنتجات المباعة",
+  "sale_number": "رقم البيع",
+  "payment_method": "طريقة الدفع",
+  "credit_sale": "بيع بالائتمان",
+  "unit_price": "السعر الوحدة",
+  "quantity_short": "الكمية",
+  "click_for_details": "انقر للتفاصيل",
+  "no_product_details": "لا توجد تفاصيل منتج متاحة",
+  "loading_history": "جاري تحميل التاريخ...",
+  "no_transactions_found": "لم يتم العثور على معاملات لهذا العميل",
+  "history_load_error": "خطأ في تحميل التاريخ",
+  "last_sale_panel_title": "آخر عملية بيع",
+  "edit_sale_button": "تعديل البيع",
+  "time_left_to_edit": "الوقت المتبقي للتعديل",
+  "expired": "انتهى",
+  "quick_add_client_button": "إضافة سريعة لعميل",
+  "stock_max_reached": "تم الوصول إلى الحد الأقصى للمخزون لهذا المنتج.",
+  "cart_is_empty_alert": "السلة فارغة.",
+  "credit_for_default_client_error": "لا يمكن إضافة دين ل 'عميل عابر'. يرجى تحديد عميل مسجل.",
+  "sale_processed_success": "تم تسجيل عملية البيع #%s بنجاح!",
+  "sale_failed_unknown": "فشلت عملية البيع لسبب غير معروف.",
+  "validation_error": "خطأ في التحقق",
+  "edit_sale_unsupported": "تعديل البيع غير متوافق حاليًا مع البيع بالكرتون.",
+  "edit_details_error": "لا يمكن العثور على تفاصيل البيع.",
+  "edit_mode_error": "حدث خطأ أثناء التحضير للتعديل.",
+  "search_product_label": "البحث عن منتج",
+  "categories_label": "الفئات",
+  "client_label": "العميل",
+  "barcode_scanner_label": "ماسح الرمز الشريطي",
+  "barcode_scanner_placeholder": "امسح أو اكتب الرمز الشريطي...",
+  "scanner_ready": "جاهز",
+  "scanner_scanning": "جاري المسح...",
+  "product_found_by_barcode": "تم العثور على المنتج وإضافته للسلة",
+  "product_not_found_by_barcode": "لم يتم العثور على منتج بهذا الرمز الشريطي",
+  "barcode_scan_error": "خطأ أثناء المسح",
+  "invalid_barcode": "رمز شريطي غير صالح",
+  "barcode_already_exists": "هذا الرمز الشريطي موجود بالفعل",
+  "barcode_valid": "رمز شريطي صالح",
+  "print_ticket_button": "طباعة التذكرة",
+  "print_options_title": "خيارات الطباعة",
+  "print_options_description": "اختر كيف تريد طباعة التذكرة:",
+  "export_pdf_title": "تصدير PDF",
+  "export_pdf_description": "تحميل التذكرة بصيغة PDF",
+  "direct_print_title": "طباعة مباشرة",
+  "direct_print_description": "طباعة مباشرة على الطابعة الحرارية",
+  "ticket_number": "رقم التذكرة",
+  "date_time": "التاريخ",
+  "seller": "البائع",
+  "customer": "العميل",
+  "quantity": "الكمية",
+  "subtotal": "المجموع الفرعي",
+  "discount": "الخصم",
+  "amount_received": "المبلغ المستلم",
+  "change_given": "الباقي",
+  "advance_payment": "الدفعة المقدمة",
+  "remaining_credit": "الدين المتبقي",
+  "thank_you_message": "شكراً لزيارتكم!",
+  "return_policy": "الإرجاع خلال 7 أيام",
+  "company_name": "المتجر العام",
+  "company_address": "123 شارع محمد الخامس، الدار البيضاء",
+  "company_phone": "هاتف: +212 522 123 456",
+  "company_ice": "رقم التسجيل: 001234567890123",
+  "cash": "نقداً",
+  "check": "شيك",
+  "credit": "دين",
+  "dashboard_page_title": "لوحة التحكم - نظام الإدارة",
+  "dashboard_main_title": "لوحة التحكم",
+  "today": "اليوم",
+  "this_week": "هذا الأسبوع",
+  "this_month": "هذا الشهر",
+  "from": "من:",
+  "to": "إلى:",
+  "turnover_sales": "رقم المعاملات (المبيعات)",
+  "net_profit": "صافي الربح",
+  "credits_granted": "الديون الممنوحة",
+  "price_adjustment_page_title": "تعديل الأسعار",
+  "save_changes_button": "حفظ التغييرات",
+  "product_header_simple": "المنتج",
+  "purchase_price_header": "سعر الشراء",
+  "carton_price_header": "سعر الكرتون",
+  "no_changes_to_save": "لا توجد تغييرات في الأسعار للحفظ.",
+  "products_updated_success": "تم تحديث %s منتج(ات) بنجاح!",
+  "error_saving_changes": "حدث خطأ أثناء الحفظ.",
+  "owner_only_access": "الوصول مقتصر على المالك فقط.",
+  "stock_adjustment_page_title": "تعديل المخزون",
+  "stock_adjustment_main_title": "تعديل المخزون (جرد)",
+  "save_adjustments_button": "حفظ التعديلات",
+  "search_product_placeholder_simple": "البحث عن منتج...",
+  "adjustment_reason_placeholder": "سبب التعديل (مثال: جرد سنوي)",
+  "current_stock_header": "المخزون الحالي",
+  "new_stock_header": "المخزون الجديد",
+  "reason_required_alert": "يرجى تقديم سبب للتعديل (مثال: جرد سنوي).",
+  "no_stock_changes_alert": "لم يتم إدخال أي تغيير في المخزون.",
+  "confirm_stock_adjustment": "هل تؤكد %s تعديل(ات) على المخزون؟",
+  "stock_updated_success": "تم تحديث المخزون بنجاح!",
+  "stock_update_failed": "خطأ أثناء تحديث المخزون.",
+  "history_page_title": "سجل المبيعات",
+  "filter_by_client": "التصفية حسب العميل",
+  "type_client_name": "اكتب اسم العميل...",
+  "filter_by_product": "التصفية حسب المنتج",
+  "type_product_name": "اكتب اسم المنتج...",
+  "from_date": "من",
+  "to_date": "إلى",
+  "filter_button": "تصفية",
+  "reset_button": "إعادة تعيين",
+  "date_header": "التاريخ",
+  "sale_id_header": "رقم البيع",
+  "line_total_header": "مجموع السطر",
+  "no_results_found": "لم يتم العثور على نتائج لهذه المعايير.",
+  "error_loading_history": "حدث خطأ أثناء تحميل السجل.",
+  "details_modal_title": "تفاصيل البيع",
+  "credits_page_title": "إدارة الديون",
+  "debtor_clients_title": "العملاء المدينون",
+  "credit_adjustment_button": "تعديل الدين",
+  "client_name_header": "اسم العميل",
+  "due_amount_header": "المبلغ المستحق",
+  "pay_button": "دفع",
+  "no_debtor_clients": "لا يوجد عملاء مدينون.",
+  "record_payment_modal_title": "تسجيل دفعة",
+  "client_label_simple": "العميل:",
+  "current_debt_label": "الدين الحالي:",
+  "payment_amount_label": "مبلغ الدفعة",
+  "manual_credit_modal_title": "تعديل يدوي للدين",
+  "search_client_label": "البحث عن عميل",
+  "selected_client_label": "العميل المحدد:",
+  "no_client_selected": "لا أحد",
+  "amount_to_add_label": "المبلغ المراد إضافته للدين",
+  "reason_label": "السبب (مثال: رصيد قديم)",
+  "add_credit_button": "إضافة الدين",
+  "invalid_amount_alert": "مبلغ غير صالح.",
+  "payment_recorded_success": "تم تسجيل الدفعة!",
+  "payment_record_failed": "خطأ",
+  "all_fields_required_alert": "يرجى تحديد عميل وملء جميع الحقول بقيم صالحة.",
+  "add_credit_success": "تمت إضافة الدين بنجاح!",
+  "add_credit_failed": "خطأ أثناء إضافة الدين",
+  "invoicing_page_title": "الفوترة",
+  "invoices_main_title": "الفواتير",
+  "new_invoice_button": "فاتورة جديدة",
+  "invoice_no_header": "رقم الفاتورة",
+  "amount_header": "المبلغ",
+  "view_print_action": "عرض / طباعة",
+  "no_invoice_found": "لم يتم العثور على أي فاتورة.",
+  "error_loading_invoices": "خطأ في التحميل.",
+  "create_invoice_title": "إنشاء فاتورة",
+  "print_pdf_button": "طباعة/PDF",
+  "invoice_details_title": "تفاصيل الفاتورة",
+  "add_line_button": "+ إضافة سطر",
+  "error_creating_invoice_editor": "خطأ أثناء إنشاء محرر الفاتورة.",
+  "generic_error_alert": "حدث خطأ ما.",
+  "add_item_to_invoice_alert": "يرجى إضافة عنصر واحد على الأقل إلى الفاتورة.",
+  "invoice_saved_success": "تم تسجيل الفاتورة بنجاح!",
+  "error_saving_invoice": "خطأ أثناء التسجيل",
+  "error_generating_invoice": "لا يمكن إنشاء الفاتورة.",
+  "error_generating_pdf": "خطأ أثناء إنشاء ملف PDF.",
+  "subtotal_ht_label": "المجموع الفرعي بدون ضريبة",
+  "tva_rate_label": "معدل الضريبة (%)",
+  "tva_amount_label": "مبلغ الضريبة",
+  "total_ttc_label": "المجموع شامل الضريبة",
+  "invoice_tva_section": "حسابات الضريبة",
+  "tva_rate_0": "0% (معفى)",
+  "tva_rate_10": "10% (معدل مخفض)",
+  "tva_rate_20": "20% (معدل عادي)",
+  "tva_rate_custom": "مخصص",
+  "settings_page_title": "الإعدادات",
+  "appearance_section_title": "المظهر",
+  "app_theme_label": "سمة التطبيق",
+  "theme_light": "فاتح",
+  "theme_dark": "داكن",
+  "theme_system": "النظام",
+  "app_language_label": "لغة التطبيق",
+  "company_info_section_title": "معلومات الشركة",
+  "company_name_label": "اسم الشركة",
+  "company_address_label": "العنوان",
+  "company_phone_label": "الهاتف",
+  "company_ice_label": "المعرف الضريبي (ICE)",
+  "company_email_label": "البريد الإلكتروني",
+  "company_website_label": "الموقع الإلكتروني",
+  "save_info_button": "حفظ المعلومات",
+  "owner_account_security_title": "أمان حساب المالك",
+  "username_label": "اسم المستخدم",
+  "current_password_label": "كلمة المرور الحالية (مطلوبة لأي تعديل)",
+  "new_password_label": "كلمة مرور جديدة (اتركها فارغة لعدم التغيير)",
+  "confirm_new_password_label": "تأكيد كلمة المرور الجديدة",
+  "update_button": "تحديث",
+  "sellers_management_title": "إدارة البائعين",
+  "password_label": "كلمة المرور",
+  "add_seller_button": "إضافة بائع",
+  "username_header": "اسم المستخدم",
+  "change_password_button": "تغيير كلمة المرور",
+  "passwords_do_not_match": "كلمتا المرور الجديدتان غير متطابقتين.",
+  "update_credentials_success": "تم تحديث معلوماتك بنجاح.",
+  "update_credentials_failed": "فشل التحديث",
+  "fill_all_fields_alert": "يرجى ملء جميع الحقول.",
+  "seller_added_success": "تمت إضافة البائع '%s' بنجاح!",
+  "add_seller_failed": "فشلت الإضافة",
+  "confirm_delete_seller": "هل أنت متأكد أنك تريد حذف هذا البائع؟",
+  "seller_deleted_success": "تم حذف البائع بنجاح.",
+  "delete_seller_failed": "فشل الحذف",
+  "enter_new_password_for": "أدخل كلمة المرور الجديدة للبائع '%s':",
+  "password_updated_success": "تم تحديث كلمة المرور ل '%s' بنجاح.",
+  "password_update_failed": "فشل تحديث كلمة المرور",
+  "filter_debtors": "المدينون",
+  "clear_filters": "الكل",
+  "product_analytics": "تحليلات المنتجات",
+  "top_profitable_products": "المنتجات الأكثر ربحية",
+  "top_selling_products": "المنتجات الأكثر مبيعاً",
+  "performance_overview": "نظرة عامة على الأداء",
+  "quick_insights": "التوصيات",
+  "profit": "الربح",
+  "margin": "الهامش",
+  "quantity_sold": "الكمية المباعة",
+  "revenue": "الإيرادات",
+  "sales_frequency": "تكرار المبيعات",
+  "loading_analytics": "جاري تحميل التحليلات...",
+  "no_data_available": "لا توجد بيانات متاحة لهذه الفترة",
+  "view_details": "عرض التفاصيل",
+  "export_data": "تصدير البيانات",
+
+  "backup_restore_title": "النسخ الاحتياطي والاستعادة",
+  "backup_restore_description": "إدارة النسخ الاحتياطية لحماية بياناتك المهمة",
+  "export_backup_title": "تصدير / نسخ احتياطي",
+  "export_description": "إنشاء نسخة احتياطية كاملة من بياناتك",
+  "export_options": "خيارات التصدير",
+  "export_products": "المنتجات والمخزون",
+  "export_clients": "العملاء",
+  "export_sales": "سجل المبيعات",
+  "export_invoices": "الفواتير",
+  "export_settings": "الإعدادات",
+  "export_format": "تنسيق التصدير",
+  "export_complete": "نسخة احتياطية كاملة",
+  "export_partial": "تصدير انتقائي",
+  "import_restore_title": "استيراد / استعادة",
+  "import_description": "استعادة بياناتك من نسخة احتياطية",
+  "drop_file_here": "اسحب ملف النسخة الاحتياطية هنا",
+  "or_click_to_select": "أو انقر للاختيار",
+  "select_file": "اختيار ملف",
+  "import_options": "خيارات الاستيراد",
+  "replace_all": "استبدال جميع البيانات",
+  "merge_data": "دمج مع البيانات الموجودة",
+  "add_only": "إضافة فقط (بدون استبدال)",
+  "backup_warning": "تنبيه: سيتم إنشاء نسخة احتياطية تلقائية قبل الاستيراد",
+  "start_import": "بدء الاستيراد",
+  "auto_backup_title": "النسخ الاحتياطية التلقائية",
+  "enable_auto_backup": "تفعيل",
+  "backup_frequency": "التكرار",
+  "daily": "يومي",
+  "weekly": "أسبوعي",
+  "monthly": "شهري",
+  "backup_time": "الوقت",
+  "backup_retention": "الاحتفاظ",
+  "days_7": "7 أيام",
+  "days_30": "30 يوم",
+  "days_90": "90 يوم",
+  "days_365": "سنة واحدة",
+  "backup_history_title": "سجل النسخ الاحتياطية",
+  "refresh": "تحديث",
+  "backup_date": "التاريخ",
+  "backup_type": "النوع",
+  "backup_size": "الحجم",
+  "backup_status": "الحالة",
+  "actions": "الإجراءات",
+
+  "returns_page_title": "إدارة المرتجعات - نظام الإدارة",
+  "returns_main_title": "إدارة المرتجعات",
+  "returns_stats_btn": "الإحصائيات",
+  "returns_history_btn": "السجل",
+  "returns_search_title": "البحث عن مبيعة",
+  "returns_search_ticket": "رقم التذكرة",
+  "returns_search_client": "اسم العميل",
+  "returns_search_date_from": "تاريخ البداية",
+  "returns_search_date_to": "تاريخ النهاية",
+  "returns_search_btn": "بحث",
+  "returns_clear_search_btn": "مسح",
+  "returns_search_results": "نتائج البحث",
+  "returns_table_ticket": "التذكرة",
+  "returns_table_date": "التاريخ",
+  "returns_table_client": "العميل",
+  "returns_table_total": "المجموع",
+  "returns_table_status": "الحالة",
+  "returns_table_returns": "المرتجعات",
+  "returns_table_actions": "الإجراءات",
+  "returns_sale_details_title": "تفاصيل المبيعة",
+  "returns_back_to_search": "العودة للبحث",
+  "returns_sale_ticket": "التذكرة",
+  "returns_sale_date": "التاريخ",
+  "returns_sale_client": "العميل",
+  "returns_sale_total": "المجموع",
+  "returns_products_title": "منتجات المبيعة",
+  "returns_proceed_to_config": "تكوين الإرجاع",
+  "returns_config_title": "تكوين الإرجاع",
+  "returns_back_to_details": "العودة للتفاصيل",
+  "returns_selected_products": "المنتجات المراد إرجاعها",
+  "returns_product_condition": "حالة المنتجات",
+  "returns_condition_good": "حالة جيدة (إعادة للمخزون)",
+  "returns_condition_defective": "معيبة (عدم إعادة للمخزون)",
+  "returns_refund_method": "طريقة الاسترداد",
+  "returns_refund_auto": "تلقائي (حسب الدفع الأصلي)",
+  "returns_refund_cash": "نقدي فقط",
+  "returns_refund_credit": "رصيد العميل فقط",
+  "returns_refund_manual": "توزيع يدوي",
+  "returns_refund_cash_amount": "المبلغ النقدي (درهم)",
+  "returns_refund_credit_amount": "مبلغ الرصيد (درهم)",
+  "returns_reason": "سبب الإرجاع",
+  "returns_reason_select": "اختر سبباً",
+  "returns_reason_defective": "منتج معيب",
+  "returns_reason_wrong": "منتج خاطئ",
+  "returns_reason_change": "تغيير رأي العميل",
+  "returns_reason_damaged": "منتج تالف",
+  "returns_reason_other": "أخرى",
+  "returns_notes": "ملاحظات (اختياري)",
+  "returns_proceed_to_summary": "عرض الملخص",
+  "returns_summary_title": "ملخص الإرجاع",
+  "returns_back_to_config": "العودة للتكوين",
+  "returns_original_sale": "المبيعة الأصلية",
+  "returns_products_summary": "المنتجات المراد إرجاعها",
+  "returns_summary_product": "المنتج",
+  "returns_summary_quantity": "الكمية",
+  "returns_summary_unit_price": "السعر الوحدة",
+  "returns_summary_total": "المجموع",
+  "returns_summary_condition": "الحالة",
+  "returns_financial_summary": "الملخص المالي",
+  "returns_total_refund": "إجمالي الاسترداد",
+  "returns_cash_refund": "الاسترداد النقدي",
+  "returns_credit_refund": "رصيد العميل",
+  "returns_reason_label": "السبب",
+  "returns_condition_label": "حالة المنتجات",
+  "returns_notes_label": "الملاحظات",
+  "returns_confirmation_text": "يرجى التحقق من جميع المعلومات قبل معالجة الإرجاع.",
+  "returns_cancel_btn": "إلغاء",
+  "returns_process_btn": "معالجة الإرجاع",
+  "returns_success_title": "تم معالجة الإرجاع بنجاح!",
+  "returns_success_message": "تم تسجيل الإرجاع وتنفيذ الاستردادات.",
+  "returns_print_ticket_btn": "طباعة تذكرة الإرجاع",
+  "returns_new_return_btn": "إرجاع جديد",
+
+  "expenses_title": "إدارة المصروفات",
+  "expenses_dashboard": "لوحة التحكم",
+  "expenses_add_new": "مصروف جديد",
+  "expenses_recurring": "متكررة",
+  "expenses_total_month": "إجمالي هذا الشهر",
+  "expenses_budget_remaining": "الميزانية المتبقية",
+  "expenses_pending": "في الانتظار",
+  "expenses_recurring_count": "متكررة",
+  "expenses_upcoming": "الاستحقاقات القادمة",
+  "expenses_recent": "المصروفات الحديثة",
+  "expenses_all_categories": "جميع الفئات",
+  "expenses_category_fixed": "مصاريف ثابتة",
+  "expenses_category_variable": "مصاريف متغيرة",
+  "expenses_category_exceptional": "استثنائية",
+  "expenses_table_date": "التاريخ",
+  "expenses_table_description": "الوصف",
+  "expenses_table_category": "الفئة",
+  "expenses_table_amount": "المبلغ",
+  "expenses_table_status": "الحالة",
+  "expenses_table_actions": "الإجراءات",
+  "expenses_refresh": "تحديث",
+  "expenses_clear_test": "تنظيف",
+  "expenses_edit_budget": "تعديل",
+  "expenses_edit_budget_title": "تعديل الميزانية الشهرية",
+  "expenses_budget_subtitle": "اضبط ميزانيتك للحصول على تحكم أفضل",
+  "expenses_monthly_budget": "الميزانية الشهرية",
+  "expenses_budget_help": "حدد ميزانيتك الشهرية لتتبع المصروفات",
+  "expenses_current_info": "المعلومات الحالية",
+  "expenses_current_budget": "الميزانية الحالية",
+  "expenses_spent_this_month": "المصروف هذا الشهر",
+  "expenses_remaining_current": "المتبقي الحالي",
+  "expenses_new_budget_simulation": "محاكاة الميزانية الجديدة",
+  "expenses_new_budget": "الميزانية الجديدة",
+  "expenses_new_remaining": "المتبقي الجديد",
+  "expenses_difference": "الفرق",
+  "expenses_save_budget": "حفظ الميزانية"
+}

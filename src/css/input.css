@@ -1,0 +1,795 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== OPTIMISATIONS POUR CAISSE TACTILE ===== */
+
+/* Variables CSS pour la configuration tactile */
+:root {
+  --touch-target-min: 44px;  /* Taille minimale recommandée pour les éléments tactiles */
+  --touch-spacing: 8px;      /* Espacement minimal entre éléments tactiles */
+  --touch-feedback-duration: 150ms; /* Durée du feedback tactile */
+}
+
+/* Détection des appareils tactiles */
+@media (hover: none) and (pointer: coarse) {
+  /* Styles spécifiques aux appareils tactiles */
+
+  /* Augmentation de la taille des boutons pour le tactile */
+  button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 12px 16px;
+    margin: var(--touch-spacing);
+  }
+
+  /* Boutons de la caisse - taille augmentée */
+  #validate-payment-btn,
+  #cancel-sale-btn,
+  #cash-payment-btn,
+  #check-payment-btn,
+  #credit-payment-btn,
+  #confirm-cash-payment-btn,
+  #confirm-partial-btn {
+    min-height: 60px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 16px 24px;
+    margin: 8px 4px;
+  }
+
+  /* Grille de produits optimisée pour tactile */
+  #product-grid .product-card {
+    min-height: 120px;
+    padding: 16px;
+    margin: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--touch-feedback-duration) ease;
+  }
+
+  /* Feedback tactile pour les cartes produits */
+  #product-grid .product-card:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Champs de saisie optimisés */
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    min-height: 48px;
+    font-size: 16px; /* Évite le zoom automatique sur iOS */
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  /* Scanner code-barres - zone tactile élargie */
+  #barcodeInput {
+    min-height: 56px;
+    font-size: 18px;
+    padding: 16px 20px;
+    border-width: 3px;
+  }
+
+  /* Boutons de quantité dans le panier */
+  .quantity-btn {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* Dropdown catégories - éléments plus grands */
+  .category-dropdown-item {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  /* Bouton d'ajout client rapide */
+  #quickAddClientBtn {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 24px;
+  }
+
+  /* Amélioration de la zone de recherche client */
+  #clientSearchInput {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  /* Espacement amélioré pour les éléments de navigation */
+  #main-nav a {
+    min-height: 48px;
+    padding: 12px 16px;
+    margin: 4px 8px;
+    border-radius: 8px;
+  }
+}
+
+/* Optimisations pour tablettes en mode paysage */
+@media (min-width: 768px) and (orientation: landscape) and (hover: none) {
+  /* Layout optimisé pour tablettes */
+  .main-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  /* Grille de produits - plus d'éléments par ligne */
+  #product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  /* Boutons de paiement en ligne pour tablettes */
+  #payment-step-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  #payment-step-2 .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Optimisations pour smartphones en mode portrait */
+@media (max-width: 767px) and (orientation: portrait) and (hover: none) {
+  /* Layout empilé pour mobile */
+  .main-container {
+    flex-direction: column;
+    padding: 8px;
+  }
+
+  .w-1\/2 {
+    width: 100%;
+  }
+
+  /* Boutons pleine largeur sur mobile */
+  #validate-payment-btn,
+  #cancel-sale-btn,
+  #cash-payment-btn,
+  #check-payment-btn,
+  #credit-payment-btn {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  /* Grille de produits - 2 colonnes sur mobile */
+  #product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Réduction de la sidebar sur mobile */
+  aside {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  /* Navigation horizontale sur mobile */
+  #main-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  #main-nav a {
+    white-space: nowrap;
+    margin: 0 4px;
+  }
+}
+
+/* Feedback tactile universel */
+.touch-feedback {
+  transition: all var(--touch-feedback-duration) ease;
+}
+
+.touch-feedback:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.touch-active {
+  transform: scale(0.95) !important;
+  opacity: 0.8 !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Amélioration de la visibilité des états */
+.touch-target:focus {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Indicateurs visuels pour les éléments interactifs */
+.interactive-element {
+  position: relative;
+}
+
+.interactive-element::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  transition: border-color var(--touch-feedback-duration) ease;
+}
+
+.interactive-element:focus::after {
+  border-color: #3b82f6;
+}
+
+/* Optimisation des modales pour tactile */
+.modal {
+  padding: 24px;
+}
+
+.modal button {
+  min-height: 48px;
+  margin: 8px 4px;
+}
+
+/* Amélioration du contraste pour la lisibilité */
+@media (hover: none) and (pointer: coarse) {
+  .text-gray-500 {
+    color: #4b5563; /* Contraste amélioré */
+  }
+
+  .text-gray-400 {
+    color: #6b7280; /* Contraste amélioré */
+  }
+}
+
+/* Gestion des orientations */
+@media (orientation: landscape) and (hover: none) {
+  /* Optimisations spécifiques au mode paysage */
+  .landscape-optimized {
+    display: flex;
+    flex-direction: row;
+  }
+}
+
+@media (orientation: portrait) and (hover: none) {
+  /* Optimisations spécifiques au mode portrait */
+  .portrait-optimized {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Gestion du clavier virtuel */
+.keyboard-open {
+  height: 50vh !important;
+  overflow: auto !important;
+}
+
+.keyboard-open main {
+  height: 50vh !important;
+  overflow-y: auto !important;
+}
+
+.keyboard-open .main-container {
+  padding: 8px !important;
+  gap: 8px !important;
+}
+
+/* ===== MENU HAMBURGER RESPONSIVE ===== */
+
+/* Bouton hamburger */
+.hamburger-menu-btn {
+  position: fixed;
+  top: 25px;
+  left: 20px;
+  z-index: 1000;
+  width: 48px;
+  height: 48px;
+  background: #1f2937;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none; /* Masqué par défaut, affiché via JS selon la taille d'écran */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.hamburger-menu-btn:hover {
+  background: #374151;
+  transform: scale(1.05);
+}
+
+.hamburger-menu-btn:active {
+  transform: scale(0.95);
+}
+
+.hamburger-menu-btn.hidden {
+  display: none !important;
+}
+
+/* Icône hamburger animée */
+.hamburger-icon {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Animation de l'icône hamburger vers X */
+.hamburger-menu-btn.active .hamburger-line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-menu-btn.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-menu-btn.active .hamburger-line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Overlay pour fermer le menu */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.menu-overlay:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sidebar responsive */
+.responsive-sidebar {
+  transition: transform 0.3s ease;
+}
+
+/* Comportement sur écrans moyens et petits (15 pouces et moins) */
+@media (max-width: 1440px) {
+  .hamburger-menu-btn {
+    display: flex !important;
+  }
+
+  .sidebar-responsive {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar-responsive.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Ajuster le contenu principal pour éviter la superposition */
+  .sidebar-responsive ~ main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-left: 80px !important; /* Espace pour le bouton hamburger */
+    transition: padding-left 0.3s ease;
+  }
+
+  /* Décaler spécifiquement les titres et contenus principaux */
+  .sidebar-responsive ~ main h1,
+  .sidebar-responsive ~ main .main-title,
+  .sidebar-responsive ~ main .page-header {
+    margin-left: 0;
+    padding-left: 0;
+    transition: all 0.3s ease;
+  }
+
+  /* Ajustement pour les conteneurs de contenu */
+  .sidebar-responsive ~ main .container,
+  .sidebar-responsive ~ main .content-wrapper {
+    padding-left: 0;
+  }
+}
+
+/* Styles spécifiques pour écrans moyens (laptops 15 pouces) */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .hamburger-menu-btn {
+    top: 30px;
+    left: 24px;
+    width: 50px;
+    height: 50px;
+    background: #1f2937;
+    border: 2px solid #374151;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .hamburger-menu-btn:hover {
+    background: #374151;
+    border-color: #4b5563;
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar-responsive {
+    width: 280px; /* Légèrement plus large sur écrans moyens */
+  }
+
+  /* Header de sidebar pour écrans moyens */
+  .sidebar-responsive .sidebar-header {
+    padding: 20px 24px;
+    min-height: 75px;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar-responsive .sidebar-logo {
+    margin-right: 12px; /* Plus d'espace depuis le bord droit */
+  }
+
+  .sidebar-responsive .sidebar-logo-text {
+    font-size: 18px;
+  }
+
+  .sidebar-responsive .sidebar-close-btn {
+    width: 38px;
+    height: 38px;
+    margin-right: 16px; /* Plus d'espace entre bouton et logo */
+  }
+
+  /* Ajustement du padding pour écrans moyens */
+  .sidebar-responsive ~ main {
+    padding-left: 90px !important; /* Plus d'espace pour le bouton plus grand */
+  }
+
+  /* Zone de navigation dédiée pour écrans moyens */
+  .sidebar-responsive ~ main::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 90px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.05) 0%, rgba(55, 65, 81, 0.02) 100%);
+    border-bottom-right-radius: 20px;
+    z-index: 999;
+    pointer-events: none;
+  }
+}
+
+/* Header de la sidebar avec bouton fermeture à gauche et logo à droite */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 70px;
+  position: relative;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  flex: 1;
+  justify-content: flex-end; /* Pousser le logo vers la droite */
+  margin-right: 8px; /* Petit espace depuis le bord droit */
+}
+
+.sidebar-logo-icon {
+  margin-right: 8px; /* Réduire l'espace entre icône et texte */
+  font-size: 22px;
+}
+
+.sidebar-logo-text {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* Bouton de fermeture dans la sidebar - À gauche du header */
+.sidebar-close-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  display: none; /* Masqué par défaut */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1001;
+  flex-shrink: 0;
+  order: -1; /* Forcer le bouton à apparaître en premier (à gauche) */
+  margin-right: 12px; /* Espace entre bouton et logo */
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-close-btn:active {
+  transform: scale(0.95);
+}
+
+/* Afficher le bouton quand la sidebar est responsive */
+.sidebar-responsive .sidebar-close-btn {
+  display: flex;
+}
+
+/* Afficher le bouton quand le menu est ouvert */
+.sidebar-open .sidebar-close-btn {
+  display: flex;
+}
+
+/* Styles spécifiques pour écrans moyens et petits */
+@media (max-width: 1440px) {
+  .sidebar-close-btn {
+    display: flex; /* Toujours visible sur écrans 15 pouces et moins */
+  }
+}
+
+/* Styles spécifiques pour petits écrans (tablettes et mobiles) */
+@media (max-width: 1023px) {
+  .hamburger-menu-btn {
+    top: 20px;
+    left: 16px;
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Ajustement du padding pour petits écrans */
+  .sidebar-responsive ~ main {
+    padding-left: 75px !important;
+  }
+
+  /* Header adapté pour petits écrans */
+  .sidebar-responsive .sidebar-header {
+    padding: 16px 18px;
+    min-height: 65px;
+  }
+
+  .sidebar-responsive .sidebar-logo {
+    margin-right: 8px; /* Espace réduit sur petits écrans */
+  }
+
+  .sidebar-responsive .sidebar-logo-text {
+    font-size: 16px;
+  }
+
+  /* Bouton plus grand sur tactile */
+  .sidebar-responsive .sidebar-close-btn {
+    width: 40px;
+    height: 40px;
+    margin-right: 14px; /* Espace adapté pour tactile */
+  }
+}
+
+/* Styles spécifiques pour très petits écrans (smartphones) */
+@media (max-width: 768px) {
+  .hamburger-menu-btn {
+    top: 15px;
+    left: 12px;
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Padding réduit pour smartphones */
+  .sidebar-responsive ~ main {
+    padding-left: 65px !important;
+  }
+
+  /* Header optimisé pour smartphones */
+  .sidebar-responsive .sidebar-header {
+    padding: 14px 16px;
+    min-height: 60px;
+  }
+
+  .sidebar-responsive .sidebar-logo {
+    margin-right: 6px; /* Espace minimal sur smartphones */
+  }
+
+  .sidebar-responsive .sidebar-logo-icon {
+    margin-right: 8px;
+    font-size: 20px;
+  }
+
+  .sidebar-responsive .sidebar-logo-text {
+    font-size: 15px;
+  }
+
+  .sidebar-responsive .sidebar-close-btn {
+    width: 38px;
+    height: 38px;
+    margin-right: 12px; /* Espace compact pour smartphones */
+  }
+
+  /* Ajustement des titres sur mobile */
+  .sidebar-responsive ~ main h1 {
+    font-size: 1.5rem; /* Réduction légère pour compenser l'espace */
+    line-height: 1.3;
+  }
+}
+
+/* Prévenir le scroll du body quand le menu est ouvert */
+.menu-open {
+  overflow: hidden;
+}
+
+/* Zone de navigation dédiée - Amélioration visuelle */
+@media (max-width: 1440px) {
+  /* Indicateur visuel de la zone de navigation */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 70px;
+    background: linear-gradient(135deg,
+      rgba(59, 130, 246, 0.03) 0%,
+      rgba(99, 102, 241, 0.02) 50%,
+      rgba(168, 85, 247, 0.01) 100%);
+    border-bottom-right-radius: 16px;
+    z-index: 998;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Afficher l'indicateur quand le hamburger est visible */
+  .hamburger-menu-btn:not(.hidden) ~ body::before,
+  body:has(.hamburger-menu-btn:not(.hidden))::before {
+    opacity: 1;
+  }
+
+  /* Amélioration du contraste du bouton */
+  .hamburger-menu-btn {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Animation d'apparition du bouton */
+  .hamburger-menu-btn:not(.hidden) {
+    animation: hamburgerAppear 0.4s ease-out;
+  }
+
+  @keyframes hamburgerAppear {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Transition fluide du contenu */
+  main {
+    transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Amélioration de la lisibilité des titres */
+  .sidebar-responsive ~ main h1,
+  .sidebar-responsive ~ main .main-title {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Amélioration de la navigation tactile dans la sidebar */
+@media (max-width: 1023px) and (hover: none) {
+  .responsive-sidebar nav a {
+    min-height: 56px;
+    padding: 16px 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    margin: 2px 8px;
+  }
+
+  .responsive-sidebar nav a:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
+  }
+}
+
+/* Styles améliorés pour l'affichage des codes-barres */
+.barcode-input {
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+}
+
+.barcode-display {
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #212529;
+    text-transform: uppercase;
+}
+
+.barcode-valid {
+    border-color: #28a745 !important;
+    background-color: #d4edda !important;
+}
+
+.barcode-invalid {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+}
+
+.barcode-scanning {
+    border-color: #007bff !important;
+    background-color: #cce7ff !important;
+    animation: pulse 1s infinite;
+}
+
+/* Animation pour le scanning */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Styles de base pour le mode sombre */
+.dark body {
+    background-color: #111827; /* gray-900 */
+    color: #d1d5db; /* gray-300 */
+}
+.dark input, .dark textarea, .dark select {
+    background-color: #374151; /* gray-700 */
+    border-color: #4b5563; /* gray-600 */
+    color: #f3f4f6; /* gray-100 */
+}

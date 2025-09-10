@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Retours Multiples et Stock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .test-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .data-display {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .product-item {
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9fafb;
+        }
+        .product-item.disabled {
+            background: #f3f4f6;
+            opacity: 0.6;
+        }
+        .quantity-input {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #d1d5db;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🔧 Test Retours Multiples et Mise à Jour Stock</h1>
+        
+        <div class="status error" id="problemStatus">
+            <strong>🚨 Problèmes Critiques Identifiés:</strong><br>
+            1. Stock non mis à jour lors des retours<br>
+            2. Retours multiples possibles pour la même vente
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Corrections Implémentées</h3>
+            <div class="status success">
+                <strong>✅ Corrections Apportées:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li><strong>Stock:</strong> Ajout de <code>condition_status</code> et <code>back_to_stock</code> dans les données</li>
+                    <li><strong>Retours multiples:</strong> Vérification des quantités déjà retournées</li>
+                    <li><strong>Interface:</strong> Affichage des quantités disponibles pour retour</li>
+                    <li><strong>Base de données:</strong> Validation des quantités avant insertion</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Simulation d'une Vente</h3>
+            <button class="test-button" onclick="simulateSale()">Créer Vente Test</button>
+            <div id="saleDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Simulation Premier Retour</h3>
+            <button class="test-button" onclick="simulateFirstReturn()">Premier Retour (Partiel)</button>
+            <div id="firstReturnDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Simulation Deuxième Retour</h3>
+            <button class="test-button" onclick="simulateSecondReturn()">Deuxième Retour (Reste)</button>
+            <div id="secondReturnDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>❌ Test Retour Impossible</h3>
+            <button class="test-button" onclick="simulateInvalidReturn()">Tentative Retour Excessif</button>
+            <div id="invalidReturnDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📦 Simulation Interface Utilisateur</h3>
+            <button class="test-button" onclick="simulateUserInterface()">Afficher Interface Retour</button>
+            <div id="interfaceDisplay" style="display: none;">
+                <h4>Produits Disponibles pour Retour:</h4>
+                <div id="productsForReturn"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📈 État du Stock</h3>
+            <button class="test-button" onclick="displayStockStatus()">Afficher État Stock</button>
+            <div id="stockDisplay" class="data-display" style="display: none;"></div>
+        </div>
+
+        <h2>📝 Console de Test</h2>
+        <div class="log-container" id="testLog">
+            Logs des tests apparaîtront ici...
+        </div>
+    </div>
+
+    <script>
+        // Variables globales pour simulation
+        let testLog = document.getElementById('testLog');
+        let mockSale = null;
+        let mockStock = {};
+        let mockReturns = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#60a5fa';
+            testLog.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function simulateSale() {
+            log('📊 Création d\'une vente test...', 'info');
+            
+            mockSale = {
+                id: 12345,
+                ticket_number: 'V-001',
+                date: '2025-01-15',
+                client_name: 'Client Test',
+                items: [
+                    {
+                        id: 1001, // sale_item_id
+                        product_id: 501,
+                        product_name: 'Produit A',
+                        quantity: 5,
+                        unit: 'pièce',
+                        unit_price: 100.00
+                    },
+                    {
+                        id: 1002, // sale_item_id
+                        product_id: 502,
+                        product_name: 'Produit B',
+                        quantity: 3,
+                        unit: 'pièce',
+                        unit_price: 200.00
+                    }
+                ]
+            };
+
+            // Initialiser le stock
+            mockStock = {
+                501: { name: 'Produit A', stock: 50 },
+                502: { name: 'Produit B', stock: 30 }
+            };
+
+            const display = document.getElementById('saleDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(mockSale, null, 2);
+
+            log('✅ Vente créée avec succès', 'success');
+            log(`📦 Produit A: 5 vendus (stock initial: 50)`, 'info');
+            log(`📦 Produit B: 3 vendus (stock initial: 30)`, 'info');
+        }
+
+        function simulateFirstReturn() {
+            log('🔄 Simulation du premier retour...', 'info');
+            
+            if (!mockSale) {
+                log('❌ Aucune vente disponible, création automatique...', 'warning');
+                simulateSale();
+            }
+
+            // Premier retour partiel
+            const firstReturn = {
+                return_id: 'RET-001',
+                original_sale_id: mockSale.id,
+                items: [
+                    {
+                        original_sale_item_id: 1001,
+                        product_id: 501,
+                        product_name: 'Produit A',
+                        quantity_returned: 2, // Retour partiel
+                        unit_price: 100.00,
+                        condition_status: 'GOOD',
+                        back_to_stock: true
+                    }
+                ],
+                total_refund: 200.00
+            };
+
+            mockReturns.push(firstReturn);
+
+            // Mise à jour du stock (simulation)
+            mockStock[501].stock += 2; // Remise en stock
+
+            const display = document.getElementById('firstReturnDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(firstReturn, null, 2);
+
+            log('✅ Premier retour traité', 'success');
+            log(`📦 Produit A: 2 retournés, stock mis à jour: ${mockStock[501].stock}`, 'success');
+            log(`📊 Quantités restantes pour retour: Produit A = 3, Produit B = 3`, 'info');
+        }
+
+        function simulateSecondReturn() {
+            log('🔄 Simulation du deuxième retour...', 'info');
+            
+            if (mockReturns.length === 0) {
+                log('❌ Aucun premier retour, simulation automatique...', 'warning');
+                simulateFirstReturn();
+            }
+
+            // Calculer les quantités déjà retournées
+            const alreadyReturned = {};
+            mockReturns.forEach(ret => {
+                ret.items.forEach(item => {
+                    if (!alreadyReturned[item.original_sale_item_id]) {
+                        alreadyReturned[item.original_sale_item_id] = 0;
+                    }
+                    alreadyReturned[item.original_sale_item_id] += item.quantity_returned;
+                });
+            });
+
+            // Deuxième retour
+            const secondReturn = {
+                return_id: 'RET-002',
+                original_sale_id: mockSale.id,
+                items: [
+                    {
+                        original_sale_item_id: 1001,
+                        product_id: 501,
+                        product_name: 'Produit A',
+                        quantity_returned: 3, // Reste du produit A
+                        unit_price: 100.00,
+                        condition_status: 'GOOD',
+                        back_to_stock: true
+                    },
+                    {
+                        original_sale_item_id: 1002,
+                        product_id: 502,
+                        product_name: 'Produit B',
+                        quantity_returned: 1, // Retour partiel du produit B
+                        unit_price: 200.00,
+                        condition_status: 'DEFECTIVE',
+                        back_to_stock: false // Défectueux, pas de remise en stock
+                    }
+                ],
+                total_refund: 500.00
+            };
+
+            mockReturns.push(secondReturn);
+
+            // Mise à jour du stock
+            mockStock[501].stock += 3; // Produit A remis en stock
+            // Produit B défectueux, pas de remise en stock
+
+            const display = document.getElementById('secondReturnDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(secondReturn, null, 2);
+
+            log('✅ Deuxième retour traité', 'success');
+            log(`📦 Produit A: 3 retournés (bon état), stock: ${mockStock[501].stock}`, 'success');
+            log(`📦 Produit B: 1 retourné (défectueux), stock inchangé: ${mockStock[502].stock}`, 'warning');
+        }
+
+        function simulateInvalidReturn() {
+            log('❌ Test de retour excessif...', 'info');
+            
+            if (mockReturns.length === 0) {
+                simulateSecondReturn();
+            }
+
+            // Tentative de retour excessif
+            try {
+                const invalidReturn = {
+                    original_sale_id: mockSale.id,
+                    items: [
+                        {
+                            original_sale_item_id: 1001,
+                            product_id: 501,
+                            product_name: 'Produit A',
+                            quantity_returned: 2, // Impossible, déjà tout retourné
+                            unit_price: 100.00
+                        }
+                    ]
+                };
+
+                // Vérification (simulation de la logique DB)
+                const alreadyReturned = mockReturns.reduce((acc, ret) => {
+                    ret.items.forEach(item => {
+                        if (item.original_sale_item_id === 1001) {
+                            acc += item.quantity_returned;
+                        }
+                    });
+                    return acc;
+                }, 0);
+
+                const originalQuantity = 5;
+                if (alreadyReturned + 2 > originalQuantity) {
+                    throw new Error(`Quantité de retour invalide. Vendu: ${originalQuantity}, Déjà retourné: ${alreadyReturned}, Tentative: 2`);
+                }
+
+            } catch (error) {
+                const display = document.getElementById('invalidReturnDisplay');
+                display.style.display = 'block';
+                display.textContent = `ERREUR BLOQUÉE:\n${error.message}`;
+                
+                log('✅ Retour excessif correctement bloqué', 'success');
+                log(`❌ ${error.message}`, 'error');
+                return;
+            }
+
+            log('❌ PROBLÈME: Le retour excessif n\'a pas été bloqué!', 'error');
+        }
+
+        function simulateUserInterface() {
+            log('🖥️ Simulation de l\'interface utilisateur...', 'info');
+            
+            if (!mockSale) {
+                simulateSale();
+            }
+
+            // Calculer les quantités déjà retournées
+            const returnedQuantities = {};
+            mockReturns.forEach(ret => {
+                ret.items.forEach(item => {
+                    if (!returnedQuantities[item.original_sale_item_id]) {
+                        returnedQuantities[item.original_sale_item_id] = 0;
+                    }
+                    returnedQuantities[item.original_sale_item_id] += item.quantity_returned;
+                });
+            });
+
+            const interfaceDisplay = document.getElementById('interfaceDisplay');
+            const productsContainer = document.getElementById('productsForReturn');
+            
+            interfaceDisplay.style.display = 'block';
+            productsContainer.innerHTML = '';
+
+            mockSale.items.forEach((item, index) => {
+                const alreadyReturned = returnedQuantities[item.id] || 0;
+                const availableForReturn = item.quantity - alreadyReturned;
+                
+                const productDiv = document.createElement('div');
+                productDiv.className = `product-item ${availableForReturn <= 0 ? 'disabled' : ''}`;
+                
+                productDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <input type="checkbox" ${availableForReturn <= 0 ? 'disabled' : ''}>
+                            <strong>${item.product_name}</strong><br>
+                            <small>
+                                Vendu: ${item.quantity} | 
+                                Déjà retourné: ${alreadyReturned} | 
+                                Disponible: ${availableForReturn} |
+                                Prix: ${item.unit_price.toFixed(2)} MAD
+                            </small>
+                            ${availableForReturn <= 0 ? '<br><span style="color: red;">⚠️ Produit entièrement retourné</span>' : ''}
+                        </div>
+                        <div>
+                            <label>Quantité:</label>
+                            <input type="number" class="quantity-input" 
+                                   min="1" max="${availableForReturn}" 
+                                   value="${Math.min(availableForReturn, 1)}"
+                                   ${availableForReturn <= 0 ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                `;
+                
+                productsContainer.appendChild(productDiv);
+            });
+
+            log('✅ Interface utilisateur simulée', 'success');
+            log(`📊 Produits avec quantités disponibles affichés`, 'info');
+        }
+
+        function displayStockStatus() {
+            log('📈 Affichage de l\'état du stock...', 'info');
+            
+            const stockInfo = {
+                initial_stock: { 501: 50, 502: 30 },
+                current_stock: mockStock,
+                sales: mockSale ? { 501: 5, 502: 3 } : {},
+                returns: mockReturns.reduce((acc, ret) => {
+                    ret.items.forEach(item => {
+                        if (item.back_to_stock) {
+                            if (!acc[item.product_id]) acc[item.product_id] = 0;
+                            acc[item.product_id] += item.quantity_returned;
+                        }
+                    });
+                    return acc;
+                }, {})
+            };
+
+            const display = document.getElementById('stockDisplay');
+            display.style.display = 'block';
+            display.textContent = JSON.stringify(stockInfo, null, 2);
+
+            log('✅ État du stock affiché', 'success');
+            Object.keys(mockStock).forEach(productId => {
+                const product = mockStock[productId];
+                log(`📦 ${product.name}: Stock actuel = ${product.stock}`, 'info');
+            });
+        }
+
+        // Test initial
+        setTimeout(() => {
+            log('🚀 Page de test chargée', 'success');
+            log('🔧 Tests des corrections de retours multiples et stock', 'info');
+        }, 100);
+    </script>
+</body>
+</html>

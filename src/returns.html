@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title data-i18n="returns_page_title">Gestion des Retours - Système de Gestion</title>
+
+    <!-- Pré-chargement des traductions pour éviter le flash -->
+    <script src="./js/lang-preloader.js"></script>
+
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        /* Design moderne pour la page de retours */
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Conteneur principal avec design moderne */
+        .returns-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .dark .returns-container {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        /* Ajustements pour le menu latéral */
+        main {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .dark main {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        /* Cards avec design glassmorphism */
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: var(--shadow-medium);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dark .section-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* En-têtes de section avec design moderne */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid transparent;
+            background: var(--gradient-primary);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: transparent;
+            background: var(--gradient-primary);
+            background-clip: text;
+            -webkit-background-clip: text;
+            display: flex;
+            align-items: center;
+        }
+
+        .dark .section-title {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        /* Indicateurs d'étapes avec design circulaire moderne */
+        .section-step {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .section-step:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Barre de progression moderne */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        }
+
+        /* Formulaires avec design moderne */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .dark .form-label {
+            color: #d1d5db;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .dark .form-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-success:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Tableaux avec design moderne */
+        .search-results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .dark .search-results-table {
+            background: #374151;
+        }
+
+        .search-results-table th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-
+            letter-spacing: 0.05em;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dark .search-results-table th {
+            background: #4b5563;
+            color: #d1d5db;
+            border-bottom-color: #6b7280;
+        }
+
+        .search-results-table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .dark .search-results-table td {
+            color: #d1d5db;
+            border-bottom-color: #4b5563;
+        }
+
+        .search-results-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .dark .search-results-table tbody tr:hover {
+            background: #4b5563;
+        }
+
+        /* Éléments de produits avec design de cartes */
+        .product-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark .product-item {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        .product-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .product-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .product-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .dark .product-item.selected {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Badges et statuts avec design moderne */
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-
+            letter-spacing: 0.05em;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        
+
+        }
+
+        }
+
+        /* Responsive design amélioré */
+        @media (max-width: 768px) {
+            .returns-container {
+                padding: 1rem 0.5rem;
+            }
+
+            .section-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+
+            .section-step {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Effets de focus améliorés pour l'accessibilité */
+        .btn:focus,
+        .form-input:focus,
+        .product-item:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Loading states */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+        }
+
+        }
+
+        /* Classes utilitaires supplémentaires pour le nouveau design */
+        .quantity-input {
+            width: 5rem;
+            padding: 0.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .dark .quantity-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        .quantity-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .refund-summary {
+            background: rgba(16, 185, 129, 0.05);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .dark .refund-summary {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .quantity-returned {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .dark .quantity-returned {
+            color: #fca5a5;
+        }
+
+        .quantity-available {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .dark .quantity-available {
+            color: #34d399;
+        }
+
+        /* Styles pour modal d'historique supprimés */
+
+        /* Styles pour tableau d'historique supprimés */
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <!-- Menu latéral identique au dashboard -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 overflow-y-auto">
+        <div class="returns-container">
+    <!-- Navigation moderne avec glassmorphism -->
+    <nav class="section-card" style="margin-bottom: 1rem; border-radius: 20px;">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="flex items-center">
+                    <div class="section-step">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m5 5v1a4 4 0 01-4 4H8m0 0l3 3m-3-3l3-3" />
+                        </svg>
+                    </div>
+                    <h1 class="section-title" data-i18n="returns_main_title">
+                        Gestion des Retours
+                    </h1>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- Boutons Historique et Statistiques supprimés pour simplifier l'interface -->
+            </div>
+        </div>
+
+        <!-- Barre de progression moderne -->
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 25%;"></div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal avec design moderne -->
+    <div class="max-w-7xl mx-auto">
+        <!-- Section 1: Recherche de Vente -->
+        <div id="searchSection" class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-step">1</span>
+                    <span data-i18n="returns_search_title">Rechercher une Vente</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="form-group">
+                    <label class="form-label" data-i18n="returns_search_ticket">
+                        Numéro de Ticket
+                    </label>
+                    <input type="text" id="searchTicket" placeholder="V-20250120-0001"
+                           class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="returns_search_client">
+                        Nom du Client
+                    </label>
+                    <input type="text" id="searchClient" placeholder="Nom du client"
+                           class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="returns_search_date_from">
+                        Date de Début
+                    </label>
+                    <input type="date" id="searchDateFrom" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="returns_search_date_to">
+                        Date de Fin
+                    </label>
+                    <input type="date" id="searchDateTo" class="form-input">
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+                <button id="searchBtn" class="btn btn-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span data-i18n="returns_search_btn">Rechercher</span>
+                </button>
+                <button id="clearSearchBtn" class="btn btn-secondary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span data-i18n="returns_clear_search_btn">Effacer</span>
+                </button>
+            </div>
+            
+            <!-- Résultats de recherche -->
+            <div id="searchResults" class="hidden">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4" data-i18n="returns_search_results">
+                    Résultats de la Recherche
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="search-results-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="returns_table_ticket">Ticket</th>
+                                <th data-i18n="returns_table_date">Date</th>
+                                <th data-i18n="returns_table_client">Client</th>
+                                <th data-i18n="returns_table_total">Total</th>
+                                <th data-i18n="returns_table_status">Statut</th>
+                                <th data-i18n="returns_table_returns">Retours</th>
+                                <th data-i18n="returns_table_actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody">
+                            <!-- Résultats dynamiques -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Détails de la Vente Sélectionnée -->
+        <div id="saleDetailsSection" class="section-card hidden">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-step">2</span>
+                    <span data-i18n="returns_sale_details_title">Détails de la Vente</span>
+                </h2>
+                <button id="backToSearchBtn" class="btn-secondary">
+                    <span data-i18n="returns_back_to_search">Retour à la Recherche</span>
+                </button>
+            </div>
+
+            <!-- Informations de la vente -->
+            <div id="saleInfo" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_sale_ticket">Ticket:</span>
+                        <div id="saleTicketNumber" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_sale_date">Date:</span>
+                        <div id="saleDate" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_sale_client">Client:</span>
+                        <div id="saleClient" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_sale_total">Total:</span>
+                        <div id="saleTotal" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des produits -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4" data-i18n="returns_products_title">
+                    Produits de la Vente
+                </h3>
+                <div id="productsList" class="space-y-3">
+                    <!-- Produits dynamiques -->
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button id="proceedToConfigBtn" class="btn-primary disabled" disabled>
+                    <span data-i18n="returns_proceed_to_config">Configurer le Retour</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Configuration du Retour -->
+        <div id="returnConfigSection" class="section-card hidden">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-step">3</span>
+                    <span data-i18n="returns_config_title">Configuration du Retour</span>
+                </h2>
+                <button id="backToDetailsBtn" class="btn-secondary">
+                    <span data-i18n="returns_back_to_details">Retour aux Détails</span>
+                </button>
+            </div>
+
+            <!-- Résumé des produits sélectionnés -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4" data-i18n="returns_selected_products">
+                    Produits à Retourner
+                </h3>
+                <div id="selectedProductsList" class="space-y-3">
+                    <!-- Produits sélectionnés dynamiques -->
+                </div>
+            </div>
+
+            <!-- Configuration des conditions et remboursement -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Conditions des produits -->
+                <div>
+                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-3" data-i18n="returns_product_condition">
+                        État des Produits
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="radio" name="productCondition" value="GOOD" checked
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_condition_good">
+                                Bon état (remettre en stock)
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="productCondition" value="DEFECTIVE"
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_condition_defective">
+                                Défectueux (ne pas remettre en stock)
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Mode de remboursement -->
+                <div>
+                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-3" data-i18n="returns_refund_method">
+                        Mode de Remboursement
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="radio" name="refundMethod" value="auto" checked
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_refund_auto">
+                                Automatique (selon paiement original)
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="refundMethod" value="cash"
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_refund_cash">
+                                Espèces uniquement
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="refundMethod" value="credit"
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_refund_credit">
+                                Crédit client uniquement
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="refundMethod" value="manual"
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="text-gray-700 dark:text-gray-300" data-i18n="returns_refund_manual">
+                                Répartition manuelle
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Répartition manuelle -->
+                    <div id="manualRefundDiv" class="mt-4 space-y-3 hidden">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="returns_refund_cash_amount">
+                                Montant Espèces (MAD)
+                            </label>
+                            <input type="number" id="refundCashAmount" min="0" step="0.01"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="returns_refund_credit_amount">
+                                Montant Crédit (MAD)
+                            </label>
+                            <input type="number" id="refundCreditAmount" min="0" step="0.01"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raison et notes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="returns_reason">
+                        Raison du Retour
+                    </label>
+                    <select id="returnReason" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        <option value="" data-i18n="returns_reason_select">Sélectionner une raison</option>
+                        <option value="defective" data-i18n="returns_reason_defective">Produit défectueux</option>
+                        <option value="wrong_item" data-i18n="returns_reason_wrong">Mauvais article</option>
+                        <option value="customer_change" data-i18n="returns_reason_change">Changement d'avis client</option>
+                        <option value="damaged" data-i18n="returns_reason_damaged">Produit endommagé</option>
+                        <option value="other" data-i18n="returns_reason_other">Autre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n="returns_notes">
+                        Notes (optionnel)
+                    </label>
+                    <textarea id="returnNotes" rows="3" placeholder="Notes additionnelles..."
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button id="proceedToSummaryBtn" class="btn-primary">
+                    <span data-i18n="returns_proceed_to_summary">Voir le Récapitulatif</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 4: Récapitulatif et Validation -->
+        <div id="returnSummarySection" class="section-card hidden">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-step">4</span>
+                    <span data-i18n="returns_summary_title">Récapitulatif du Retour</span>
+                </h2>
+                <button id="backToConfigBtn" class="btn-secondary">
+                    <span data-i18n="returns_back_to_config">Retour à la Configuration</span>
+                </button>
+            </div>
+
+            <!-- Récapitulatif de la vente originale -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3" data-i18n="returns_original_sale">
+                    Vente Originale
+                </h3>
+                <div id="originalSaleSummary" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <!-- Résumé dynamique -->
+                </div>
+            </div>
+
+            <!-- Récapitulatif des produits à retourner -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3" data-i18n="returns_products_summary">
+                    Produits à Retourner
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="returns_summary_product">
+                                    Produit
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="returns_summary_quantity">
+                                    Quantité
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="returns_summary_unit_price">
+                                    Prix Unitaire
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="returns_summary_total">
+                                    Total
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="returns_summary_condition">
+                                    État
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryProductsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                            <!-- Produits dynamiques -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Récapitulatif financier -->
+            <div class="refund-summary mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3" data-i18n="returns_financial_summary">
+                    Récapitulatif Financier
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white" id="totalRefundAmount">0.00 MAD</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400" data-i18n="returns_total_refund">Total à Rembourser</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="productCount">0</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400" data-i18n="returns_product_count">Produits à Retourner</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="totalQuantity">0</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400" data-i18n="returns_total_quantity">Quantité Totale</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations additionnelles -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_reason_label">Raison:</span>
+                        <div id="summaryReason" class="text-gray-900 dark:text-white">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_condition_label">État des Produits:</span>
+                        <div id="summaryCondition" class="text-gray-900 dark:text-white">-</div>
+                    </div>
+                </div>
+                <div class="mt-3" id="summaryNotesDiv" style="display: none;">
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="returns_notes_label">Notes:</span>
+                    <div id="summaryNotes" class="text-gray-900 dark:text-white">-</div>
+                </div>
+            </div>
+
+            <!-- Actions finales -->
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <span data-i18n="returns_confirmation_text">
+                        Veuillez vérifier toutes les informations avant de traiter le retour.
+                    </span>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="cancelReturnBtn" class="btn-danger">
+                        <span data-i18n="returns_cancel_btn">Annuler</span>
+                    </button>
+                    <button id="processReturnBtn" class="btn-success">
+                        <span data-i18n="returns_process_btn">Traiter le Retour</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section de Succès -->
+        <div id="returnSuccessSection" class="section-card hidden">
+            <div class="text-center py-8">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-4">
+                    <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="returns_success_title">
+                    Retour Traité avec Succès !
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-6" data-i18n="returns_success_message">
+                    Le retour a été enregistré et les remboursements ont été effectués.
+                </p>
+                <div id="returnSuccessInfo" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
+                    <!-- Informations du retour traité -->
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="printReturnTicketBtn" class="btn-primary">
+                        <span data-i18n="returns_print_ticket_btn">Imprimer Ticket de Retour</span>
+                    </button>
+                    <button id="newReturnBtn" class="btn-secondary">
+                        <span data-i18n="returns_new_return_btn">Nouveau Retour</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <!-- Modal Historique supprimée pour simplifier l'interface -->
+
+    <!-- Scripts -->
+    <script src="./js/lang-init.js"></script>
+    <script src="./js/i18n.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/returns.js"></script>
+</body>
+</html>

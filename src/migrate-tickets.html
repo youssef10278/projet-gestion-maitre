@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title>Migration des Numéros de Tickets</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        .log-container {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-warning { color: #f59e0b; }
+        .log-info { color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-4xl mx-auto py-8 px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    Migration des Numéros de Tickets
+                </h1>
+                <button id="backBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                    Retour
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                    <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                        À propos de cette migration
+                    </h2>
+                    <p class="text-blue-800 dark:text-blue-200 mb-2">
+                        Cette migration attribue des numéros de tickets uniques aux ventes existantes qui n'en ont pas.
+                        Ceci est nécessaire pour utiliser le système de retours avec les ventes anciennes.
+                    </p>
+                    <ul class="list-disc list-inside text-blue-800 dark:text-blue-200 space-y-1">
+                        <li>Les numéros sont générés au format V-YYYYMMDD-XXXX</li>
+                        <li>La migration respecte l'ordre chronologique des ventes</li>
+                        <li>Aucune donnée existante ne sera supprimée</li>
+                        <li>Cette opération peut être exécutée plusieurs fois sans risque</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div id="statusCard" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                        État de la Migration
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div id="totalSales" class="text-2xl font-bold text-gray-900 dark:text-white">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Total des Ventes</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="salesWithTickets" class="text-2xl font-bold text-green-600">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Avec Tickets</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="salesWithoutTickets" class="text-2xl font-bold text-red-600">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Sans Tickets</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        Actions
+                    </h3>
+                    <div class="space-x-3">
+                        <button id="checkStatusBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            Vérifier l'État
+                        </button>
+                        <button id="startMigrationBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" disabled>
+                            Démarrer la Migration
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                    Journal de Migration
+                </h3>
+                <div id="logContainer" class="log-container">
+                    Cliquez sur "Vérifier l'État" pour commencer...
+                </div>
+            </div>
+            
+            <div id="progressSection" class="hidden mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                    Progression
+                </h3>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                    <div id="progressBar" class="bg-green-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    <span id="progressText">0 / 0</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let migrationInProgress = false;
+        let migrationStats = {
+            total: 0,
+            withTickets: 0,
+            withoutTickets: 0
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            checkMigrationStatus();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('backBtn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            document.getElementById('checkStatusBtn').addEventListener('click', checkMigrationStatus);
+            document.getElementById('startMigrationBtn').addEventListener('click', startMigration);
+        }
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = `log-${type}`;
+            
+            logContainer.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '';
+        }
+
+        async function checkMigrationStatus() {
+            try {
+                log('🔍 Vérification de l\'état de la migration...', 'info');
+                
+                // Simuler l'appel API - à remplacer par l'API réelle
+                const stats = await getMigrationStats();
+                
+                migrationStats = stats;
+                updateStatusDisplay();
+                
+                log(`📊 Total des ventes: ${stats.total}`, 'info');
+                log(`✅ Ventes avec tickets: ${stats.withTickets}`, 'success');
+                log(`❌ Ventes sans tickets: ${stats.withoutTickets}`, stats.withoutTickets > 0 ? 'warning' : 'success');
+                
+                // Activer le bouton de migration si nécessaire
+                const startBtn = document.getElementById('startMigrationBtn');
+                if (stats.withoutTickets > 0) {
+                    startBtn.disabled = false;
+                    startBtn.textContent = `Migrer ${stats.withoutTickets} ventes`;
+                    log('🚀 Migration nécessaire - Bouton activé', 'warning');
+                } else {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'Migration Complète';
+                    log('✅ Aucune migration nécessaire', 'success');
+                }
+                
+            } catch (error) {
+                log(`❌ Erreur lors de la vérification: ${error.message}`, 'error');
+            }
+        }
+
+        function updateStatusDisplay() {
+            document.getElementById('totalSales').textContent = migrationStats.total;
+            document.getElementById('salesWithTickets').textContent = migrationStats.withTickets;
+            document.getElementById('salesWithoutTickets').textContent = migrationStats.withoutTickets;
+        }
+
+        async function startMigration() {
+            if (migrationInProgress) {
+                log('⚠️ Migration déjà en cours...', 'warning');
+                return;
+            }
+
+            if (migrationStats.withoutTickets === 0) {
+                log('✅ Aucune migration nécessaire', 'success');
+                return;
+            }
+
+            migrationInProgress = true;
+            const startBtn = document.getElementById('startMigrationBtn');
+            const originalText = startBtn.textContent;
+            
+            try {
+                startBtn.disabled = true;
+                startBtn.textContent = 'Migration en cours...';
+                
+                log('🔄 Début de la migration...', 'info');
+                showProgress();
+                
+                // Simuler la migration - à remplacer par l'API réelle
+                await performMigration();
+                
+                log('🎉 Migration terminée avec succès !', 'success');
+                
+                // Vérifier à nouveau l'état
+                await checkMigrationStatus();
+                
+            } catch (error) {
+                log(`❌ Erreur lors de la migration: ${error.message}`, 'error');
+                startBtn.disabled = false;
+                startBtn.textContent = originalText;
+            } finally {
+                migrationInProgress = false;
+                hideProgress();
+            }
+        }
+
+        function showProgress() {
+            document.getElementById('progressSection').classList.remove('hidden');
+        }
+
+        function hideProgress() {
+            document.getElementById('progressSection').classList.add('hidden');
+        }
+
+        function updateProgress(current, total) {
+            const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+            
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressText').textContent = `${current} / ${total}`;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+        }
+
+        // Fonctions API réelles
+        async function getMigrationStats() {
+            try {
+                const stats = await window.api.migration.getTicketStats();
+                return stats;
+            } catch (error) {
+                throw new Error(`Erreur lors de la récupération des statistiques: ${error.message}`);
+            }
+        }
+
+        async function performMigration() {
+            try {
+                updateProgress(0, migrationStats.withoutTickets);
+                log(`🔄 Début de la migration de ${migrationStats.withoutTickets} ventes...`, 'info');
+
+                const result = await window.api.migration.migrateTicketNumbers();
+
+                if (result.success) {
+                    updateProgress(result.migratedCount, migrationStats.withoutTickets);
+                    log(`✅ ${result.message}`, 'success');
+
+                    // Mettre à jour les statistiques
+                    migrationStats.withTickets += result.migratedCount;
+                    migrationStats.withoutTickets -= result.migratedCount;
+                    updateStatusDisplay();
+
+                    return result;
+                } else {
+                    throw new Error(result.message || 'Migration échouée');
+                }
+            } catch (error) {
+                throw new Error(`Erreur lors de la migration: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

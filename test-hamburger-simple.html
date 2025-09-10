@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Test Menu Hamburger</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: sans-serif; }
+        .test-content { padding: 20px; }
+        .size-indicator { 
+            position: fixed; 
+            top: 10px; 
+            right: 10px; 
+            background: #333; 
+            color: white; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            font-size: 12px;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <!-- Indicateur de taille d'écran -->
+    <div class="size-indicator" id="sizeIndicator">Largeur: <span id="widthDisplay">0</span>px</div>
+
+    <!-- Sidebar de test -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro Test</div>
+        <nav id="main-nav" class="flex-grow p-4">
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">🏠 Dashboard</a>
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">💰 Caisse</a>
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">📦 Produits</a>
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">👥 Clients</a>
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">📄 Factures</a>
+            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 mb-2">⚙️ Paramètres</a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <div class="test-content">
+            <h1 class="text-3xl font-bold mb-6">Test du Menu Hamburger</h1>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h2 class="text-lg font-semibold text-blue-800 mb-2">Instructions de Test</h2>
+                <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                    <li>Réduisez la largeur de votre navigateur en dessous de 1024px</li>
+                    <li>Le bouton hamburger devrait apparaître en haut à gauche</li>
+                    <li>Cliquez sur le bouton pour ouvrir/fermer le menu</li>
+                    <li>Testez le swipe depuis le bord gauche (sur tactile)</li>
+                    <li>Testez la fermeture en cliquant en dehors du menu</li>
+                </ol>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">État du Menu</h3>
+                    <div id="menuStatus" class="space-y-2">
+                        <p>Largeur d'écran: <span id="screenWidth" class="font-mono">0</span>px</p>
+                        <p>Menu hamburger: <span id="hamburgerVisible" class="font-mono">Non détecté</span></p>
+                        <p>Menu ouvert: <span id="menuOpen" class="font-mono">Non</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">Actions de Test</h3>
+                    <div class="space-y-3">
+                        <button onclick="testOpenMenu()" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                            Ouvrir Menu (JS)
+                        </button>
+                        <button onclick="testCloseMenu()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                            Fermer Menu (JS)
+                        </button>
+                        <button onclick="testToggleMenu()" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                            Toggle Menu (JS)
+                        </button>
+                        <button onclick="checkMenuState()" class="w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+                            Vérifier État
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Console de Debug</h3>
+                <div id="debugConsole" class="bg-white border rounded p-3 h-32 overflow-y-auto font-mono text-sm">
+                    <div class="text-gray-500">Console de debug initialisée...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        // Script de test et monitoring
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            document.getElementById('widthDisplay').textContent = width;
+            document.getElementById('screenWidth').textContent = width;
+            
+            // Vérifier la visibilité du bouton hamburger
+            const hamburgerBtn = document.getElementById('hamburger-menu-btn');
+            const isVisible = hamburgerBtn && !hamburgerBtn.classList.contains('hidden');
+            document.getElementById('hamburgerVisible').textContent = isVisible ? 'Visible' : 'Masqué';
+            
+            // Vérifier si le menu est ouvert
+            const isOpen = document.body.classList.contains('menu-open');
+            document.getElementById('menuOpen').textContent = isOpen ? 'Oui' : 'Non';
+        }
+
+        function logToConsole(message) {
+            const console = document.getElementById('debugConsole');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-gray-400">[${time}]</span> ${message}`;
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function testOpenMenu() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.openMenu();
+                logToConsole('✅ Menu ouvert via JS');
+            } else {
+                logToConsole('❌ hamburgerMenu non disponible');
+            }
+        }
+
+        function testCloseMenu() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.closeMenu();
+                logToConsole('✅ Menu fermé via JS');
+            } else {
+                logToConsole('❌ hamburgerMenu non disponible');
+            }
+        }
+
+        function testToggleMenu() {
+            if (window.hamburgerMenu) {
+                window.hamburgerMenu.toggleMenu();
+                logToConsole('✅ Menu toggle via JS');
+            } else {
+                logToConsole('❌ hamburgerMenu non disponible');
+            }
+        }
+
+        function checkMenuState() {
+            updateScreenInfo();
+            logToConsole('📊 État mis à jour');
+            
+            if (window.hamburgerMenu) {
+                logToConsole(`🍔 Menu hamburger: ${window.hamburgerMenu.isOpen ? 'Ouvert' : 'Fermé'}`);
+                logToConsole(`📏 Breakpoint: ${window.hamburgerMenu.breakpoint}px`);
+            }
+        }
+
+        // Mise à jour automatique
+        window.addEventListener('resize', updateScreenInfo);
+        window.addEventListener('load', () => {
+            updateScreenInfo();
+            logToConsole('🚀 Page chargée');
+            
+            setTimeout(() => {
+                if (window.hamburgerMenu) {
+                    logToConsole('✅ Menu hamburger initialisé');
+                } else {
+                    logToConsole('❌ Menu hamburger non initialisé');
+                }
+                checkMenuState();
+            }, 1000);
+        });
+
+        // Écouter les événements du menu
+        document.addEventListener('DOMContentLoaded', () => {
+            // Observer les changements de classe sur le body
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        updateScreenInfo();
+                        if (document.body.classList.contains('menu-open')) {
+                            logToConsole('📱 Menu ouvert détecté');
+                        } else {
+                            logToConsole('📱 Menu fermé détecté');
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+</body>
+</html>

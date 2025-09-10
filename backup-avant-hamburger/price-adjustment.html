@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title data-i18n="price_adjustment_page_title">Ajustement des Prix - Système de Gestion</title>
+    <link href="./css/output.css" rel="stylesheet">
+    <style>
+        /* Styles pour les champs de prix */
+        .price-input { transition: all 0.2s ease-in-out; }
+        .price-input:focus { ring: 2px; ring-color: #3b82f6; border-color: #3b82f6; transform: scale(1.02); }
+        .price-input.changed { background-color: #fef3c7; border-color: #f59e0b; }
+        .dark .price-input.changed { background-color: #451a03; border-color: #f59e0b; }
+
+        /* Styles pour les lignes modifiées */
+        .row-changed { background-color: #fef3c7 !important; border-left: 4px solid #f59e0b; }
+        .dark .row-changed { background-color: #451a03 !important; }
+
+        /* Styles pour les badges de marge */
+        .margin-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .margin-badge.high { background-color: #dcfce7; color: #166534; }
+        .margin-badge.medium { background-color: #fef3c7; color: #92400e; }
+        .margin-badge.low { background-color: #fee2e2; color: #991b1b; }
+        .dark .margin-badge.high { background-color: #14532d; color: #bbf7d0; }
+        .dark .margin-badge.medium { background-color: #451a03; color: #fde68a; }
+        .dark .margin-badge.low { background-color: #450a0a; color: #fecaca; }
+
+        /* Animation pour les lignes du tableau */
+        tbody tr { transition: all 0.2s ease-in-out; }
+        tbody tr:hover { background-color: #f8fafc; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dark tbody tr:hover { background-color: #1e293b; }
+
+        /* Styles pour les outils d'ajustement en masse */
+        .bulk-tool { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+        .dark .bulk-tool { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); }
+
+        /* Animation de chargement */
+        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); background-size: 200% 100%; }
+
+        /* Styles pour les notifications de changement */
+        .change-indicator { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background-color: #f59e0b; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Styles pour les boutons d'action */
+        .action-button { transition: all 0.2s ease-in-out; }
+        .action-button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.2); }
+        .action-button:disabled { transform: none; box-shadow: none; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <main class="flex-1 p-8 flex flex-col overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4 flex-shrink-0">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2" data-i18n="price_adjustment_page_title">Ajustement des Prix</h1>
+                <div id="priceStats" class="flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Total: <span id="totalProducts" class="font-semibold text-gray-800 dark:text-white">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Modifiés: <span id="changedProducts" class="font-semibold text-yellow-600">0</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Marge moy.: <span id="averageMargin" class="font-semibold text-green-600">0%</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="resetChangesBtn" class="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Réinitialiser
+                </button>
+                <button id="saveChangesBtn" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" data-i18n="save_changes_button" disabled>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Enregistrer les Modifications
+                </button>
+            </div>
+        </div>
+        
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Barre de recherche améliorée -->
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-i18n-placeholder="search_product_placeholder_simple" placeholder="Rechercher un produit...">
+                </div>
+
+                <!-- Filtre de type de marge -->
+                <div class="flex flex-wrap gap-2">
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Marge basée sur:</label>
+                        <select id="marginTypeFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-2 focus:ring-blue-500">
+                            <option value="retail">Prix Détail</option>
+                            <option value="wholesale">Prix Gros</option>
+                            <option value="carton">Prix Carton</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Ajust.:</label>
+                        <select id="bulkAdjustmentType" class="px-2 py-1 text-sm border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500">
+                            <option value="percentage">%</option>
+                            <option value="fixed">MAD</option>
+                        </select>
+                        <input type="number" id="bulkAdjustmentValue" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500" placeholder="0">
+                        <button id="applyBulkAdjustmentBtn" class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600 transition-colors">
+                            Appliquer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 sticky top-0 z-10">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="product_header_simple">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Produit
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="purchase_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                                Prix d'Achat
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="retail_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                Prix Détail
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="wholesale_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Prix Gros
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" data-i18n="carton_price_header">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Prix Carton
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            <div class="flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Marge
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="priceAdjustmentTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                </tbody>
+            </table>
+        </div>
+    </main>
+    
+    <script src="./js/i18n.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/price-adjustment.js"></script>
+</body>
+</html>

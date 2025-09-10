@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Performance Interface - GestionPro</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .performance-metric {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+        
+        .metric-good { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
+        .metric-warning { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); }
+        .metric-bad { background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); }
+        
+        .test-section {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .product-item, .client-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+        
+        .results-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">
+            🚀 Test de Performance Interface - GestionPro
+        </h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Section Métriques -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">📊 Métriques de Performance</h2>
+                <div id="metrics-container">
+                    <div class="performance-metric">
+                        <div class="flex justify-between">
+                            <span>Temps de chargement initial</span>
+                            <span id="load-time">Calcul...</span>
+                        </div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="flex justify-between">
+                            <span>Mémoire utilisée</span>
+                            <span id="memory-usage">Calcul...</span>
+                        </div>
+                    </div>
+                    <div class="performance-metric">
+                        <div class="flex justify-between">
+                            <span>FPS moyen</span>
+                            <span id="fps-counter">Calcul...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Test Produits -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">📦 Test Produits (1000 items)</h2>
+                <button id="load-products-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Charger 1000 Produits
+                </button>
+                <div id="products-metrics" class="mt-4"></div>
+                
+                <div class="search-container">
+                    <input type="text" id="product-search" placeholder="Rechercher un produit..." 
+                           class="w-full p-2 border rounded" disabled>
+                    <div id="product-search-time" class="text-sm text-gray-600 mt-1"></div>
+                </div>
+                
+                <div id="products-container" class="results-container mt-4" style="display: none;">
+                    <!-- Les produits seront affichés ici -->
+                </div>
+            </div>
+            
+            <!-- Section Test Clients -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">👥 Test Clients (1000 items)</h2>
+                <button id="load-clients-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Charger 1000 Clients
+                </button>
+                <div id="clients-metrics" class="mt-4"></div>
+                
+                <div class="search-container">
+                    <input type="text" id="client-search" placeholder="Rechercher un client..." 
+                           class="w-full p-2 border rounded" disabled>
+                    <div id="client-search-time" class="text-sm text-gray-600 mt-1"></div>
+                </div>
+                
+                <div id="clients-container" class="results-container mt-4" style="display: none;">
+                    <!-- Les clients seront affichés ici -->
+                </div>
+            </div>
+            
+            <!-- Section Test Scroll -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">📜 Test Performance Scroll</h2>
+                <button id="test-scroll-btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Tester Scroll Performance
+                </button>
+                <div id="scroll-metrics" class="mt-4"></div>
+                
+                <div id="scroll-container" class="results-container mt-4" style="display: none; height: 200px;">
+                    <!-- Contenu de test pour le scroll -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section Résultats Globaux -->
+        <div class="test-section mt-6">
+            <h2 class="text-xl font-semibold mb-4">🎯 Résultats Globaux</h2>
+            <div id="global-results">
+                <p class="text-gray-600">Lancez les tests pour voir les résultats...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let startTime = Date.now();
+        let products = [];
+        let clients = [];
+        let fpsCounter = 0;
+        let lastFrameTime = Date.now();
+        
+        // Générer des données de test
+        function generateTestProducts(count = 1000) {
+            const categories = ['Alimentaire', 'Boissons', 'Hygiène', 'Électronique', 'Vêtements'];
+            const products = [];
+            
+            for (let i = 1; i <= count; i++) {
+                products.push({
+                    id: i,
+                    barcode: `BAR${String(i).padStart(6, '0')}`,
+                    name: `Produit Test ${i}`,
+                    price_retail: Math.round((Math.random() * 100 + 10) * 100) / 100,
+                    stock: Math.floor(Math.random() * 100),
+                    category: categories[i % categories.length]
+                });
+            }
+            
+            return products;
+        }
+        
+        function generateTestClients(count = 1000) {
+            const prefixes = ['Mohamed', 'Ahmed', 'Fatima', 'Aicha', 'Hassan'];
+            const clients = [];
+            
+            for (let i = 1; i <= count; i++) {
+                clients.push({
+                    id: i,
+                    name: `${prefixes[i % prefixes.length]} Client ${i}`,
+                    phone: `06${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
+                    credit_balance: Math.round((Math.random() * 1000 - 500) * 100) / 100
+                });
+            }
+            
+            return clients;
+        }
+        
+        // Mesurer les performances
+        function measurePerformance(label, fn) {
+            const start = performance.now();
+            const result = fn();
+            const end = performance.now();
+            const duration = Math.round(end - start);
+            
+            console.log(`${label}: ${duration}ms`);
+            return { result, duration };
+        }
+        
+        // Afficher une métrique
+        function displayMetric(containerId, label, value, duration) {
+            const container = document.getElementById(containerId);
+            const metricClass = duration < 100 ? 'metric-good' : duration < 500 ? 'metric-warning' : 'metric-bad';
+            
+            container.innerHTML += `
+                <div class="performance-metric ${metricClass}">
+                    <div class="flex justify-between">
+                        <span>${label}</span>
+                        <span>${value} (${duration}ms)</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Test de chargement des produits
+        function testLoadProducts() {
+            const btn = document.getElementById('load-products-btn');
+            btn.innerHTML = '<span class="loading"></span> Chargement...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const { result, duration } = measurePerformance('Génération 1000 produits', () => {
+                    return generateTestProducts(1000);
+                });
+                
+                products = result;
+                
+                const { duration: renderDuration } = measurePerformance('Rendu 1000 produits', () => {
+                    const container = document.getElementById('products-container');
+                    container.innerHTML = products.slice(0, 100).map(product => `
+                        <div class="product-item">
+                            <div>
+                                <strong>${product.name}</strong><br>
+                                <small>${product.barcode} - ${product.category}</small>
+                            </div>
+                            <div class="text-right">
+                                <strong>${product.price_retail} MAD</strong><br>
+                                <small>Stock: ${product.stock}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                    container.style.display = 'block';
+                });
+                
+                displayMetric('products-metrics', 'Génération données', '1000 produits', duration);
+                displayMetric('products-metrics', 'Rendu interface', '100 premiers', renderDuration);
+                
+                // Activer la recherche
+                document.getElementById('product-search').disabled = false;
+                
+                btn.innerHTML = '✅ Produits Chargés';
+                btn.disabled = false;
+            }, 100);
+        }
+        
+        // Test de chargement des clients
+        function testLoadClients() {
+            const btn = document.getElementById('load-clients-btn');
+            btn.innerHTML = '<span class="loading"></span> Chargement...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const { result, duration } = measurePerformance('Génération 1000 clients', () => {
+                    return generateTestClients(1000);
+                });
+                
+                clients = result;
+                
+                const { duration: renderDuration } = measurePerformance('Rendu 1000 clients', () => {
+                    const container = document.getElementById('clients-container');
+                    container.innerHTML = clients.slice(0, 100).map(client => `
+                        <div class="client-item">
+                            <div>
+                                <strong>${client.name}</strong><br>
+                                <small>${client.phone}</small>
+                            </div>
+                            <div class="text-right">
+                                <strong>${client.credit_balance} MAD</strong>
+                            </div>
+                        </div>
+                    `).join('');
+                    container.style.display = 'block';
+                });
+                
+                displayMetric('clients-metrics', 'Génération données', '1000 clients', duration);
+                displayMetric('clients-metrics', 'Rendu interface', '100 premiers', renderDuration);
+                
+                // Activer la recherche
+                document.getElementById('client-search').disabled = false;
+                
+                btn.innerHTML = '✅ Clients Chargés';
+                btn.disabled = false;
+            }, 100);
+        }
+        
+        // Test de recherche avec debounce
+        function setupSearch() {
+            let searchTimeout;
+            
+            // Recherche produits
+            document.getElementById('product-search').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const query = e.target.value.toLowerCase();
+                    if (query.length < 2) return;
+                    
+                    const { result, duration } = measurePerformance('Recherche produits', () => {
+                        return products.filter(p => 
+                            p.name.toLowerCase().includes(query) || 
+                            p.barcode.includes(query)
+                        );
+                    });
+                    
+                    document.getElementById('product-search-time').textContent = 
+                        `${result.length} résultats en ${duration}ms`;
+                    
+                    // Afficher les résultats
+                    const container = document.getElementById('products-container');
+                    container.innerHTML = result.slice(0, 50).map(product => `
+                        <div class="product-item">
+                            <div>
+                                <strong>${product.name}</strong><br>
+                                <small>${product.barcode} - ${product.category}</small>
+                            </div>
+                            <div class="text-right">
+                                <strong>${product.price_retail} MAD</strong><br>
+                                <small>Stock: ${product.stock}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                }, 300);
+            });
+            
+            // Recherche clients
+            document.getElementById('client-search').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const query = e.target.value.toLowerCase();
+                    if (query.length < 2) return;
+                    
+                    const { result, duration } = measurePerformance('Recherche clients', () => {
+                        return clients.filter(c => 
+                            c.name.toLowerCase().includes(query) || 
+                            c.phone.includes(query)
+                        );
+                    });
+                    
+                    document.getElementById('client-search-time').textContent = 
+                        `${result.length} résultats en ${duration}ms`;
+                    
+                    // Afficher les résultats
+                    const container = document.getElementById('clients-container');
+                    container.innerHTML = result.slice(0, 50).map(client => `
+                        <div class="client-item">
+                            <div>
+                                <strong>${client.name}</strong><br>
+                                <small>${client.phone}</small>
+                            </div>
+                            <div class="text-right">
+                                <strong>${client.credit_balance} MAD</strong>
+                            </div>
+                        </div>
+                    `).join('');
+                }, 300);
+            });
+        }
+        
+        // Test de performance de scroll
+        function testScrollPerformance() {
+            const btn = document.getElementById('test-scroll-btn');
+            btn.innerHTML = '<span class="loading"></span> Test en cours...';
+            btn.disabled = true;
+            
+            // Générer beaucoup de contenu
+            const container = document.getElementById('scroll-container');
+            const items = Array.from({length: 1000}, (_, i) => `
+                <div class="p-2 border-b">Item de test ${i + 1}</div>
+            `).join('');
+            
+            container.innerHTML = items;
+            container.style.display = 'block';
+            
+            // Mesurer les performances de scroll
+            let scrollCount = 0;
+            let scrollStartTime = performance.now();
+            
+            const scrollHandler = () => {
+                scrollCount++;
+                if (scrollCount >= 100) {
+                    const scrollDuration = performance.now() - scrollStartTime;
+                    const avgScrollTime = scrollDuration / scrollCount;
+                    
+                    displayMetric('scroll-metrics', 'Performance scroll', `${scrollCount} événements`, Math.round(avgScrollTime));
+                    
+                    container.removeEventListener('scroll', scrollHandler);
+                    btn.innerHTML = '✅ Test Terminé';
+                    btn.disabled = false;
+                }
+            };
+            
+            container.addEventListener('scroll', scrollHandler);
+            
+            // Auto-scroll pour tester
+            let scrollPos = 0;
+            const autoScroll = setInterval(() => {
+                scrollPos += 10;
+                container.scrollTop = scrollPos;
+                
+                if (scrollPos >= container.scrollHeight - container.clientHeight) {
+                    clearInterval(autoScroll);
+                }
+            }, 50);
+        }
+        
+        // Calculer les métriques initiales
+        function calculateInitialMetrics() {
+            const loadTime = Date.now() - startTime;
+            document.getElementById('load-time').textContent = `${loadTime}ms`;
+            
+            // Mémoire (si disponible)
+            if (performance.memory) {
+                const memoryMB = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                document.getElementById('memory-usage').textContent = `${memoryMB} MB`;
+            } else {
+                document.getElementById('memory-usage').textContent = 'Non disponible';
+            }
+            
+            // FPS Counter
+            function updateFPS() {
+                const now = Date.now();
+                const delta = now - lastFrameTime;
+                const fps = Math.round(1000 / delta);
+                
+                fpsCounter = (fpsCounter + fps) / 2; // Moyenne mobile
+                document.getElementById('fps-counter').textContent = `${Math.round(fpsCounter)} FPS`;
+                
+                lastFrameTime = now;
+                requestAnimationFrame(updateFPS);
+            }
+            
+            requestAnimationFrame(updateFPS);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateInitialMetrics();
+            setupSearch();
+            
+            document.getElementById('load-products-btn').addEventListener('click', testLoadProducts);
+            document.getElementById('load-clients-btn').addEventListener('click', testLoadClients);
+            document.getElementById('test-scroll-btn').addEventListener('click', testScrollPerformance);
+        });
+    </script>
+</body>
+</html>

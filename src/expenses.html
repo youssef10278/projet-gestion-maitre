@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Dépenses - Système de Caisse</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <style>
+        :root {
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --success-500: #10b981;
+            --warning-500: #f59e0b;
+            --error-500: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+            --shadow-medium: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn {
+            @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+        }
+
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+        }
+
+        .btn-secondary {
+            @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+        }
+
+        .btn-success {
+            @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+        }
+
+        .btn-outline {
+            @apply border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700;
+        }
+
+        .form-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: var(--shadow-medium);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dark .section-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .expense-category {
+            @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+        }
+
+        .category-fixed { @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200; }
+        .category-variable { @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200; }
+        .category-exceptional { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200; }
+
+        .stat-card {
+            @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Animations pour les modals */
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        #deleteConfirmationModal {
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        #deleteConfirmationModal > div {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        /* Style pour le bouton de suppression */
+        .btn-danger {
+            @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 transition-all duration-200;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Styles pour les modals */
+        .modal-overlay {
+            @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+        }
+
+        .modal-content {
+            @apply bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-screen overflow-y-auto;
+        }
+
+        .modal-header {
+            @apply flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700;
+        }
+
+        .modal-title {
+            @apply text-lg font-semibold text-gray-900 dark:text-white;
+        }
+
+        .modal-close {
+            @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors;
+        }
+
+        .modal-body {
+            @apply p-6;
+        }
+
+        .modal-footer {
+            @apply flex justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700;
+        }
+
+        /* ===== DESIGN MODERNE MODAL BUDGET - RESET COMPLET ===== */
+
+        /* Overlay du modal */
+        .budget-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .budget-modal-overlay:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Container principal du modal */
+        .budget-modal-container {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .budget-modal-overlay:not(.hidden) .budget-modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        .dark .budget-modal-container {
+            background: #1f2937;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header du modal */
+        .budget-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .budget-modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .budget-header-content {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Icône avec effet glow */
+        .budget-icon-wrapper {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .budget-icon-circle {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .budget-icon {
+            width: 32px;
+            height: 32px;
+            color: white;
+            stroke-width: 2.5;
+        }
+
+        .budget-icon-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* Titres du header */
+        .budget-title-section {
+            flex: 1;
+        }
+
+        .budget-modal-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: -0.025em;
+        }
+
+        .budget-modal-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        /* Bouton de fermeture */
+        .budget-close-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .budget-close-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .budget-close-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2.5;
+        }
+
+        /* Corps du modal */
+        .budget-modal-body {
+            padding: 40px;
+            background: #ffffff;
+            overflow-y: auto;
+            max-height: calc(90vh - 200px);
+        }
+
+        .dark .budget-modal-body {
+            background: #1f2937;
+        }
+
+        /* Section de saisie du budget */
+        .budget-input-section {
+            margin-bottom: 40px;
+        }
+
+        .budget-field-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .budget-field-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .budget-field-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+            stroke-width: 2;
+        }
+
+        .budget-field-title {
+            flex: 1;
+        }
+
+        .budget-field-label {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.025em;
+        }
+
+        .dark .budget-field-label {
+            color: #f9fafb;
+        }
+
+        .budget-field-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .dark .budget-field-description {
+            color: #9ca3af;
+        }
+
+        /* Container de saisie */
+        .budget-input-container {
+            position: relative;
+        }
+
+        .budget-input-wrapper {
+            position: relative;
+            background: #f8fafc;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dark .budget-input-wrapper {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        .budget-input-wrapper:focus-within {
+            border-color: #3b82f6;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .dark .budget-input-wrapper:focus-within {
+            background: #1f2937;
+            border-color: #3b82f6;
+        }
+
+        /* Champ de saisie */
+        .budget-input-field {
+            width: 100%;
+            padding: 24px 120px 24px 32px;
+            font-size: 32px;
+            font-weight: 800;
+            color: #1f2937;
+            background: transparent;
+            border: none;
+            outline: none;
+            letter-spacing: -0.025em;
+        }
+
+        .dark .budget-input-field {
+            color: #f9fafb;
+        }
+
+        .budget-input-field::placeholder {
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        /* Indicateur de devise */
+        .budget-currency-indicator {
+            position: absolute;
+            top: 50%;
+            right: 24px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .budget-currency-text {
+            display: block;
+        }
+
+        /* Décoration sous le champ */
+        .budget-input-decoration {
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            margin-top: 16px;
+            border-radius: 2px;
+            opacity: 0;
+            transform: scaleX(0);
+            transition: all 0.3s ease;
+        }
+
+        .budget-input-wrapper:focus-within .budget-input-decoration {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        /* Section des informations */
+        .budget-info-section {
+            margin-bottom: 40px;
+        }
+
+        .budget-info-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .budget-info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .budget-info-icon svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+            stroke-width: 2;
+        }
+
+        .budget-info-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .dark .budget-info-title {
+            color: #f9fafb;
+        }
+
+        /* Grille des statistiques */
+        .budget-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        /* Cartes de statistiques */
+        .budget-stat-card {
+            background: #ffffff;
+            border: 2px solid #f1f5f9;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dark .budget-stat-card {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        .budget-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .budget-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        .budget-stat-primary::before {
+            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .budget-stat-danger::before {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .budget-stat-success::before {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .budget-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .budget-stat-primary .budget-stat-icon {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .budget-stat-danger .budget-stat-icon {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+
+        .budget-stat-success .budget-stat-icon {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+        }
+
+        .dark .budget-stat-primary .budget-stat-icon {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            color: #93c5fd;
+        }
+
+        .dark .budget-stat-danger .budget-stat-icon {
+            background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+            color: #fca5a5;
+        }
+
+        .dark .budget-stat-success .budget-stat-icon {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+            color: #6ee7b7;
+        }
+
+        .budget-stat-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+
+        .budget-stat-content {
+            text-align: center;
+        }
+
+        .budget-stat-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dark .budget-stat-label {
+            color: #9ca3af;
+        }
+
+        .budget-stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1f2937;
+            letter-spacing: -0.025em;
+        }
+
+        .dark .budget-stat-value {
+            color: #f9fafb;
+        }
+
+        /* Section de simulation */
+        .budget-simulation-section {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 3px solid #10b981;
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark .budget-simulation-section {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            border-color: #10b981;
+        }
+
+        .budget-simulation-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            animation: rotate-glow 8s linear infinite;
+        }
+
+        @keyframes rotate-glow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .budget-simulation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .budget-simulation-icon {
+            width: 48px;
+            height: 48px;
+            background: #10b981;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .budget-simulation-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+            stroke-width: 2.5;
+        }
+
+        .budget-simulation-title-wrapper {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .budget-simulation-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #064e3b;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .dark .budget-simulation-title {
+            color: #6ee7b7;
+        }
+
+        .budget-simulation-badge {
+            background: #10b981;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 16px;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .budget-simulation-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .budget-simulation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        /* Cartes de simulation */
+        .budget-simulation-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .dark .budget-simulation-card {
+            background: rgba(31, 41, 55, 0.8);
+            border-color: rgba(75, 85, 99, 0.5);
+        }
+
+        .budget-simulation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .budget-sim-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .budget-sim-primary .budget-sim-icon {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .budget-sim-success .budget-sim-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .budget-sim-difference .budget-sim-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .budget-sim-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        .budget-sim-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dark .budget-sim-label {
+            color: #9ca3af;
+        }
+
+        .budget-sim-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1f2937;
+            letter-spacing: -0.025em;
+        }
+
+        .dark .budget-sim-value {
+            color: #f9fafb;
+        }
+
+        .budget-difference-value {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Footer du modal */
+        .budget-modal-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 32px 40px;
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+
+        .dark .budget-modal-footer {
+            background: #111827;
+            border-top-color: #374151;
+        }
+
+        /* Boutons */
+        .budget-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .budget-btn-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .budget-btn-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke-width: 2.5;
+        }
+
+        .budget-btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Bouton Annuler */
+        .budget-btn-cancel {
+            background: #ffffff;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .dark .budget-btn-cancel {
+            background: #374151;
+            color: #9ca3af;
+            border-color: #4b5563;
+        }
+
+        .budget-btn-cancel:hover {
+            background: #f9fafb;
+            color: #374151;
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .budget-btn-cancel:hover {
+            background: #4b5563;
+            color: #f3f4f6;
+            border-color: #6b7280;
+        }
+
+        /* Bouton Enregistrer */
+        .budget-btn-save {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .budget-btn-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .budget-btn-save:hover::before {
+            left: 100%;
+        }
+
+        .budget-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .budget-btn-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .budget-btn-save:hover .budget-btn-glow {
+            opacity: 1;
+        }
+
+        /* États de chargement */
+        .budget-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .budget-btn.loading .budget-btn-text {
+            opacity: 0;
+        }
+
+        .budget-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid currentColor;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .budget-modal-container {
+                margin: 10px;
+                max-height: 95vh;
+            }
+
+            .budget-modal-header {
+                padding: 24px;
+            }
+
+            .budget-modal-title {
+                font-size: 24px;
+            }
+
+            .budget-modal-subtitle {
+                font-size: 14px;
+            }
+
+            .budget-modal-body {
+                padding: 24px;
+            }
+
+            .budget-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .budget-simulation-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .budget-modal-footer {
+                padding: 24px;
+                flex-direction: column;
+            }
+
+            .budget-btn {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .budget-input-field {
+                font-size: 24px;
+                padding: 20px 100px 20px 24px;
+            }
+
+            .budget-currency-indicator {
+                right: 16px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* Animations d'entrée */
+        .budget-modal-overlay:not(.hidden) .budget-stat-card {
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .budget-modal-overlay:not(.hidden) .budget-stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .budget-modal-overlay:not(.hidden) .budget-stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .budget-modal-overlay:not(.hidden) .budget-stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== FIN DES STYLES MODAL BUDGET ===== */
+
+        /* Solution défilement menu - Ajout overflow et hauteur max */
+        #main-nav {
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Hauteur écran moins header */
+        }
+
+        /* Styles optionnels pour améliorer la scrollbar (webkit) */
+        #main-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #main-nav::-webkit-scrollbar-track {
+            background: #374151; /* Couleur de fond de la track */
+        }
+
+        #main-nav::-webkit-scrollbar-thumb {
+            background: #6b7280; /* Couleur du thumb */
+            border-radius: 3px;
+        }
+
+        #main-nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* Couleur au survol */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex h-screen">
+    <!-- Menu latéral identique au dashboard -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-2xl font-bold border-b border-gray-700">GestionPro</div>
+        <nav id="main-nav" class="flex-grow"></nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 overflow-y-auto">
+        <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white font-bold text-sm">💰</span>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white" data-i18n="expenses_title">
+                            Gestion des Dépenses
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="addExpenseBtn" class="btn btn-primary">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span data-i18n="expenses_add_new">Nouvelle Dépense</span>
+                    </button>
+                    <button id="recurringBtn" class="btn btn-outline">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span data-i18n="expenses_recurring">Récurrentes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="section-card">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white" data-i18n="expenses_dashboard">
+                    Tableau de Bord
+                </h2>
+                <div class="flex space-x-2">
+                    <button id="refreshDashboardBtn" class="btn btn-outline text-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span data-i18n="expenses_refresh">Actualiser</span>
+                    </button>
+                    <button id="clearTestDataBtn" class="btn btn-outline text-sm text-red-600 hover:bg-red-50" title="Supprimer toutes les données de test">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        <span data-i18n="expenses_clear_test">Nettoyer</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="expenses_total_month">Total ce mois</p>
+                            <p id="totalMonthAmount" class="text-2xl font-bold text-gray-900 dark:text-white">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="expenses_budget_remaining">Budget restant</p>
+                                <button id="editBudgetBtn" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center" title="Modifier le budget mensuel">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    <span data-i18n="expenses_edit_budget">Modifier</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center">
+                                <p id="budgetRemaining" class="text-2xl font-bold text-gray-900 dark:text-white">Chargement...</p>
+                                <p id="currentBudgetDisplay" class="text-xs text-gray-500 dark:text-gray-400 ml-2">/ 0 MAD</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="expenses_pending">En attente</p>
+                            <p id="pendingCount" class="text-2xl font-bold text-gray-900 dark:text-white">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="expenses_recurring_count">Récurrentes</p>
+                            <p id="recurringCount" class="text-2xl font-bold text-gray-900 dark:text-white">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Expenses -->
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+                <h3 class="text-lg font-medium text-yellow-800 dark:text-yellow-200 mb-3">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span data-i18n="expenses_upcoming">Prochaines Échéances</span>
+                </h3>
+                <div id="upcomingExpenses" class="space-y-2">
+                    <!-- Upcoming expenses will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Expenses List Section -->
+        <section id="expensesListSection" class="section-card">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white" data-i18n="expenses_recent">
+                    Dépenses Récentes
+                </h2>
+                <div class="flex space-x-3">
+                    <select id="filterCategory" class="form-input">
+                        <option value="" data-i18n="expenses_all_categories">Toutes les catégories</option>
+                        <option value="fixed" data-i18n="expenses_category_fixed">Charges fixes</option>
+                        <option value="variable" data-i18n="expenses_category_variable">Charges variables</option>
+                        <option value="exceptional" data-i18n="expenses_category_exceptional">Exceptionnelles</option>
+                    </select>
+                    <input type="date" id="filterDate" class="form-input">
+                </div>
+            </div>
+
+            <!-- Expenses Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_date">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_description">
+                                Description
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_category">
+                                Catégorie
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_amount">
+                                Montant
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_status">
+                                Statut
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="expenses_table_actions">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Expenses will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Modification du Budget - Design Moderne -->
+    <div id="editBudgetModal" class="budget-modal-overlay hidden">
+        <div class="budget-modal-container">
+            <!-- Header avec design moderne -->
+            <div class="budget-modal-header">
+                <div class="budget-header-content">
+                    <div class="budget-icon-wrapper">
+                        <div class="budget-icon-circle">
+                            <svg class="budget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                        <div class="budget-icon-glow"></div>
+                    </div>
+                    <div class="budget-title-section">
+                        <h2 class="budget-modal-title" data-i18n="expenses_edit_budget_title">Modifier le Budget Mensuel</h2>
+                        <p class="budget-modal-subtitle" data-i18n="expenses_budget_subtitle">Ajustez votre budget pour un meilleur contrôle</p>
+                    </div>
+                </div>
+                <button id="closeBudgetModal" class="budget-close-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Corps du modal avec design moderne -->
+            <form id="editBudgetForm" class="budget-modal-body">
+                <!-- Section de saisie du budget -->
+                <div class="budget-input-section">
+                    <div class="budget-field-header">
+                        <div class="budget-field-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div class="budget-field-title">
+                            <label for="monthlyBudgetInput" class="budget-field-label" data-i18n="expenses_monthly_budget">Budget Mensuel</label>
+                            <p class="budget-field-description" data-i18n="expenses_budget_help">Définissez votre budget mensuel pour le suivi des dépenses</p>
+                        </div>
+                    </div>
+
+                    <div class="budget-input-container">
+                        <div class="budget-input-wrapper">
+                            <input
+                                type="number"
+                                id="monthlyBudgetInput"
+                                name="monthlyBudget"
+                                step="0.01"
+                                min="0"
+                                class="budget-input-field"
+                                placeholder="10000.00"
+                                required
+                            >
+                            <div class="budget-currency-indicator">
+                                <span class="budget-currency-text">MAD</span>
+                            </div>
+                        </div>
+                        <div class="budget-input-decoration"></div>
+                    </div>
+                </div>
+
+                <!-- Section des informations actuelles -->
+                <div class="budget-info-section">
+                    <div class="budget-info-header">
+                        <div class="budget-info-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="budget-info-title" data-i18n="expenses_current_info">Informations Actuelles</h3>
+                    </div>
+
+                    <div class="budget-stats-grid">
+                        <div class="budget-stat-card budget-stat-primary">
+                            <div class="budget-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                </svg>
+                            </div>
+                            <div class="budget-stat-content">
+                                <div class="budget-stat-label" data-i18n="expenses_current_budget">Budget actuel</div>
+                                <div id="currentBudgetInfo" class="budget-stat-value">0 MAD</div>
+                            </div>
+                        </div>
+
+                        <div class="budget-stat-card budget-stat-danger">
+                            <div class="budget-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+                                </svg>
+                            </div>
+                            <div class="budget-stat-content">
+                                <div class="budget-stat-label" data-i18n="expenses_spent_this_month">Dépensé ce mois</div>
+                                <div id="currentSpentInfo" class="budget-stat-value">0 MAD</div>
+                            </div>
+                        </div>
+
+                        <div class="budget-stat-card budget-stat-success">
+                            <div class="budget-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </div>
+                            <div class="budget-stat-content">
+                                <div class="budget-stat-label" data-i18n="expenses_remaining_current">Restant actuel</div>
+                                <div id="currentRemainingInfo" class="budget-stat-value">0 MAD</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section de simulation -->
+                <div id="budgetSimulation" class="budget-simulation-section hidden">
+                    <div class="budget-simulation-header">
+                        <div class="budget-simulation-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="budget-simulation-title-wrapper">
+                            <h3 class="budget-simulation-title" data-i18n="expenses_new_budget_simulation">Simulation Nouveau Budget</h3>
+                            <div class="budget-simulation-badge">
+                                <span data-i18n="budget_preview">Aperçu</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="budget-simulation-content">
+                        <div class="budget-simulation-grid">
+                            <div class="budget-simulation-card budget-sim-primary">
+                                <div class="budget-sim-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                    </svg>
+                                </div>
+                                <div class="budget-sim-content">
+                                    <div class="budget-sim-label" data-i18n="expenses_new_budget">Nouveau budget</div>
+                                    <div id="newBudgetInfo" class="budget-sim-value">0 MAD</div>
+                                </div>
+                            </div>
+
+                            <div class="budget-simulation-card budget-sim-success">
+                                <div class="budget-sim-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                    </svg>
+                                </div>
+                                <div class="budget-sim-content">
+                                    <div class="budget-sim-label" data-i18n="expenses_new_remaining">Nouveau restant</div>
+                                    <div id="newRemainingInfo" class="budget-sim-value">0 MAD</div>
+                                </div>
+                            </div>
+
+                            <div class="budget-simulation-card budget-sim-difference">
+                                <div class="budget-sim-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                                    </svg>
+                                </div>
+                                <div class="budget-sim-content">
+                                    <div class="budget-sim-label" data-i18n="expenses_difference">Différence</div>
+                                    <div id="budgetDifferenceInfo" class="budget-sim-value budget-difference-value">0 MAD</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Footer avec boutons d'action -->
+                <div class="budget-modal-footer">
+                    <button type="button" id="cancelBudgetEdit" class="budget-btn budget-btn-cancel" data-i18n="common_cancel">
+                        <div class="budget-btn-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </div>
+                        <span class="budget-btn-text">Annuler</span>
+                    </button>
+                    <button type="submit" class="budget-btn budget-btn-save" data-i18n="expenses_save_budget">
+                        <div class="budget-btn-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <span class="budget-btn-text">Enregistrer le Budget</span>
+                        <div class="budget-btn-glow"></div>
+                    </button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./js/i18n.js"></script>
+    <script src="./js/hamburger-menu.js"></script>
+    <script src="./js/layout.js"></script>
+    <script src="./js/expenses.js"></script>
+</body>
+</html>

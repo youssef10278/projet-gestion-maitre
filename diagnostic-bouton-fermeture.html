@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Diagnostic Bouton Fermeture</title>
+    <link href="./src/css/output.css" rel="stylesheet">
+    <style>
+        .diagnostic-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 2000;
+            font-size: 12px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .status-ok { color: #059669; font-weight: bold; }
+        .status-error { color: #dc2626; font-weight: bold; }
+        .status-warning { color: #d97706; font-weight: bold; }
+        .test-section { margin: 10px 0; padding: 8px; border-left: 3px solid #ccc; }
+        .highlight-element { outline: 3px solid red !important; background: rgba(255,0,0,0.1) !important; }
+    </style>
+</head>
+<body>
+    <!-- Panel de diagnostic -->
+    <div class="diagnostic-panel">
+        <h3 style="margin: 0 0 15px 0; color: #333;">🔍 Diagnostic Bouton Fermeture</h3>
+        
+        <div class="test-section">
+            <strong>1. Structure HTML</strong>
+            <div id="html-status">Vérification...</div>
+        </div>
+        
+        <div class="test-section">
+            <strong>2. JavaScript</strong>
+            <div id="js-status">Vérification...</div>
+        </div>
+        
+        <div class="test-section">
+            <strong>3. CSS</strong>
+            <div id="css-status">Vérification...</div>
+        </div>
+        
+        <div class="test-section">
+            <strong>4. DOM</strong>
+            <div id="dom-status">Vérification...</div>
+        </div>
+        
+        <div class="test-section">
+            <strong>5. Actions</strong>
+            <button onclick="forceCreateButton()" style="margin: 2px; padding: 4px 8px; font-size: 11px;">Forcer Création</button>
+            <button onclick="highlightSidebar()" style="margin: 2px; padding: 4px 8px; font-size: 11px;">Surligner Sidebar</button>
+            <button onclick="showAllButtons()" style="margin: 2px; padding: 4px 8px; font-size: 11px;">Montrer Boutons</button>
+            <button onclick="debugCSS()" style="margin: 2px; padding: 4px 8px; font-size: 11px;">Debug CSS</button>
+        </div>
+        
+        <div class="test-section">
+            <strong>6. Console</strong>
+            <div id="mini-console" style="background: #f5f5f5; padding: 8px; height: 100px; overflow-y: auto; font-family: monospace; font-size: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar de test -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col flex-shrink-0">
+        <div class="p-4 text-xl font-bold border-b border-gray-700">
+            🔍 Test Sidebar
+        </div>
+        <nav class="flex-grow p-4">
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                🏠 Dashboard
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                💰 Caisse
+            </a>
+            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700 mb-2 text-white no-underline">
+                📦 Produits
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-8 ml-64">
+        <h1 class="text-2xl font-bold mb-4">Diagnostic du Bouton de Fermeture</h1>
+        <p>Réduisez la largeur à moins de 1024px pour activer le menu hamburger.</p>
+        
+        <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+            <h3 class="font-bold">Instructions:</h3>
+            <ol class="list-decimal list-inside mt-2 space-y-1">
+                <li>Réduisez la largeur du navigateur</li>
+                <li>Cliquez sur le bouton hamburger</li>
+                <li>Vérifiez si le bouton X apparaît dans la sidebar</li>
+                <li>Consultez le panel de diagnostic à droite</li>
+            </ol>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./src/js/hamburger-menu.js"></script>
+    
+    <script>
+        let diagnosticLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            diagnosticLog.push(logEntry);
+            
+            const console = document.getElementById('mini-console');
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? '#dc2626' : type === 'warning' ? '#d97706' : '#374151';
+            div.textContent = logEntry;
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+            
+            // Limiter à 20 entrées
+            if (console.children.length > 20) {
+                console.removeChild(console.firstChild);
+            }
+        }
+
+        function runDiagnostic() {
+            log('🔍 Démarrage diagnostic complet');
+            
+            // 1. Vérifier la structure HTML
+            checkHTMLStructure();
+            
+            // 2. Vérifier JavaScript
+            checkJavaScript();
+            
+            // 3. Vérifier CSS
+            checkCSS();
+            
+            // 4. Vérifier DOM
+            checkDOM();
+            
+            log('✅ Diagnostic terminé');
+        }
+
+        function checkHTMLStructure() {
+            const sidebar = document.querySelector('aside');
+            const htmlStatus = document.getElementById('html-status');
+            
+            if (sidebar) {
+                htmlStatus.innerHTML = '<span class="status-ok">✅ Sidebar trouvée</span>';
+                log('✅ Sidebar HTML trouvée');
+                
+                // Vérifier la structure interne
+                const header = sidebar.querySelector('.p-4');
+                if (header) {
+                    log('✅ Header sidebar trouvé');
+                } else {
+                    log('⚠️ Header sidebar non trouvé', 'warning');
+                }
+                
+                const nav = sidebar.querySelector('nav');
+                if (nav) {
+                    log('✅ Navigation trouvée');
+                } else {
+                    log('⚠️ Navigation non trouvée', 'warning');
+                }
+                
+            } else {
+                htmlStatus.innerHTML = '<span class="status-error">❌ Sidebar non trouvée</span>';
+                log('❌ Sidebar HTML non trouvée', 'error');
+            }
+        }
+
+        function checkJavaScript() {
+            const jsStatus = document.getElementById('js-status');
+            let status = [];
+            
+            // Vérifier la classe HamburgerMenu
+            if (typeof HamburgerMenu !== 'undefined') {
+                status.push('<span class="status-ok">✅ Classe HamburgerMenu</span>');
+                log('✅ Classe HamburgerMenu disponible');
+            } else {
+                status.push('<span class="status-error">❌ Classe HamburgerMenu</span>');
+                log('❌ Classe HamburgerMenu non disponible', 'error');
+            }
+            
+            // Vérifier l'instance
+            if (window.hamburgerMenu) {
+                status.push('<span class="status-ok">✅ Instance créée</span>');
+                log('✅ Instance window.hamburgerMenu créée');
+                
+                // Vérifier les propriétés
+                if (window.hamburgerMenu.sidebar) {
+                    status.push('<span class="status-ok">✅ Sidebar référencée</span>');
+                    log('✅ Sidebar référencée dans l\'instance');
+                } else {
+                    status.push('<span class="status-error">❌ Sidebar non référencée</span>');
+                    log('❌ Sidebar non référencée dans l\'instance', 'error');
+                }
+                
+            } else {
+                status.push('<span class="status-error">❌ Instance non créée</span>');
+                log('❌ Instance window.hamburgerMenu non créée', 'error');
+            }
+            
+            jsStatus.innerHTML = status.join('<br>');
+        }
+
+        function checkCSS() {
+            const cssStatus = document.getElementById('css-status');
+            let status = [];
+            
+            // Vérifier si les styles sont chargés
+            const testElement = document.createElement('div');
+            testElement.className = 'sidebar-close-btn';
+            testElement.style.position = 'absolute';
+            testElement.style.left = '-9999px';
+            document.body.appendChild(testElement);
+            
+            const computedStyle = window.getComputedStyle(testElement);
+            
+            if (computedStyle.position === 'absolute') {
+                status.push('<span class="status-ok">✅ CSS chargé</span>');
+                log('✅ CSS de base chargé');
+            } else {
+                status.push('<span class="status-error">❌ CSS non chargé</span>');
+                log('❌ CSS de base non chargé', 'error');
+            }
+            
+            // Vérifier les styles spécifiques du bouton
+            const sidebarCloseBtn = document.querySelector('.sidebar-close-btn');
+            if (sidebarCloseBtn) {
+                const btnStyle = window.getComputedStyle(sidebarCloseBtn);
+                status.push('<span class="status-ok">✅ Bouton trouvé</span>');
+                log('✅ Bouton .sidebar-close-btn trouvé dans le DOM');
+                
+                // Vérifier la visibilité
+                if (btnStyle.display === 'none') {
+                    status.push('<span class="status-warning">⚠️ Display: none</span>');
+                    log('⚠️ Bouton masqué par display: none', 'warning');
+                } else if (btnStyle.visibility === 'hidden') {
+                    status.push('<span class="status-warning">⚠️ Visibility: hidden</span>');
+                    log('⚠️ Bouton masqué par visibility: hidden', 'warning');
+                } else if (btnStyle.opacity === '0') {
+                    status.push('<span class="status-warning">⚠️ Opacity: 0</span>');
+                    log('⚠️ Bouton masqué par opacity: 0', 'warning');
+                } else {
+                    status.push('<span class="status-ok">✅ Bouton visible</span>');
+                    log('✅ Bouton devrait être visible');
+                }
+                
+                // Vérifier la position
+                log(`📍 Position: ${btnStyle.position}, Top: ${btnStyle.top}, Right: ${btnStyle.right}`);
+                log(`📏 Taille: ${btnStyle.width} x ${btnStyle.height}`);
+                log(`🎨 Z-index: ${btnStyle.zIndex}`);
+                
+            } else {
+                status.push('<span class="status-error">❌ Bouton non trouvé</span>');
+                log('❌ Bouton .sidebar-close-btn non trouvé dans le DOM', 'error');
+            }
+            
+            document.body.removeChild(testElement);
+            cssStatus.innerHTML = status.join('<br>');
+        }
+
+        function checkDOM() {
+            const domStatus = document.getElementById('dom-status');
+            let status = [];
+            
+            // Vérifier tous les boutons dans la sidebar
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                const allButtons = sidebar.querySelectorAll('button');
+                status.push(`<span class="status-ok">📊 ${allButtons.length} bouton(s) trouvé(s)</span>`);
+                log(`📊 ${allButtons.length} bouton(s) trouvé(s) dans la sidebar`);
+                
+                allButtons.forEach((btn, index) => {
+                    log(`🔘 Bouton ${index + 1}: classe="${btn.className}", id="${btn.id}"`);
+                });
+                
+                // Vérifier spécifiquement le bouton de fermeture
+                const closeBtn = sidebar.querySelector('.sidebar-close-btn');
+                if (closeBtn) {
+                    status.push('<span class="status-ok">✅ Bouton fermeture trouvé</span>');
+                    log('✅ Bouton de fermeture trouvé dans la sidebar');
+                    
+                    // Vérifier le parent
+                    log(`👨‍👩‍👧‍👦 Parent: ${closeBtn.parentElement.tagName}.${closeBtn.parentElement.className}`);
+                    
+                } else {
+                    status.push('<span class="status-error">❌ Bouton fermeture manquant</span>');
+                    log('❌ Bouton de fermeture manquant dans la sidebar', 'error');
+                }
+            }
+            
+            domStatus.innerHTML = status.join('<br>');
+        }
+
+        function forceCreateButton() {
+            log('🔧 Tentative de création forcée du bouton');
+            
+            const sidebar = document.querySelector('aside');
+            if (!sidebar) {
+                log('❌ Impossible: sidebar non trouvée', 'error');
+                return;
+            }
+            
+            // Supprimer l'ancien bouton s'il existe
+            const oldBtn = sidebar.querySelector('.sidebar-close-btn');
+            if (oldBtn) {
+                oldBtn.remove();
+                log('🗑️ Ancien bouton supprimé');
+            }
+            
+            // Créer un nouveau bouton
+            const closeButton = document.createElement('button');
+            closeButton.className = 'sidebar-close-btn touch-target';
+            closeButton.setAttribute('aria-label', 'Fermer le menu');
+            closeButton.style.cssText = `
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                width: 32px !important;
+                height: 32px !important;
+                background: rgba(255, 255, 255, 0.2) !important;
+                border: none !important;
+                border-radius: 6px !important;
+                color: white !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 1001 !important;
+            `;
+            closeButton.innerHTML = `
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            `;
+            
+            // Ajouter l'événement
+            closeButton.addEventListener('click', () => {
+                if (window.hamburgerMenu) {
+                    window.hamburgerMenu.closeMenu();
+                    log('🔄 Menu fermé via bouton forcé');
+                }
+            });
+            
+            // Insérer dans la sidebar
+            const sidebarHeader = sidebar.querySelector('.p-4') || sidebar.firstElementChild;
+            if (sidebarHeader) {
+                sidebarHeader.style.position = 'relative';
+                sidebarHeader.appendChild(closeButton);
+                log('✅ Bouton forcé créé et inséré');
+            } else {
+                sidebar.appendChild(closeButton);
+                log('✅ Bouton forcé créé (ajouté à la fin)');
+            }
+            
+            // Relancer le diagnostic
+            setTimeout(runDiagnostic, 100);
+        }
+
+        function highlightSidebar() {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.add('highlight-element');
+                log('🔦 Sidebar surlignée');
+                setTimeout(() => {
+                    sidebar.classList.remove('highlight-element');
+                }, 3000);
+            }
+        }
+
+        function showAllButtons() {
+            const allButtons = document.querySelectorAll('button');
+            log(`🔘 ${allButtons.length} bouton(s) total(s) sur la page:`);
+            
+            allButtons.forEach((btn, index) => {
+                btn.style.outline = '2px solid red';
+                log(`  ${index + 1}. ID: "${btn.id}", Classe: "${btn.className}"`);
+                
+                setTimeout(() => {
+                    btn.style.outline = '';
+                }, 3000);
+            });
+        }
+
+        function debugCSS() {
+            log('🎨 Debug CSS approfondi');
+            
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                const style = window.getComputedStyle(sidebar);
+                log(`Sidebar - Position: ${style.position}, Z-index: ${style.zIndex}`);
+                log(`Sidebar - Overflow: ${style.overflow}, Transform: ${style.transform}`);
+            }
+            
+            // Vérifier les media queries
+            const isSmallScreen = window.matchMedia('(max-width: 1023px)').matches;
+            log(`📱 Écran petit (< 1024px): ${isSmallScreen}`);
+            
+            // Vérifier les classes responsive
+            if (sidebar) {
+                log(`🏷️ Classes sidebar: ${sidebar.className}`);
+                log(`📱 Classe responsive: ${sidebar.classList.contains('sidebar-responsive')}`);
+                log(`📱 Classe open: ${sidebar.classList.contains('sidebar-open')}`);
+            }
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            log('🚀 Page chargée, démarrage diagnostic');
+            setTimeout(runDiagnostic, 1000);
+        });
+
+        // Observer les changements
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1 && node.classList && node.classList.contains('sidebar-close-btn')) {
+                            log('👀 Bouton de fermeture détecté (ajouté au DOM)');
+                            setTimeout(runDiagnostic, 100);
+                        }
+                    });
+                }
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+</body>
+</html>

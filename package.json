@@ -1,0 +1,107 @@
+{
+  "name": "projet-gestion-maitre",
+  "version": "2.1.0",
+  "description": "Application de bureau Maître pour la gestion complète.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "watch:css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
+    "dev:electron": "nodemon --exec \"electron .\"",
+    "dev": "concurrently \"npm:watch:css\" \"npm:dev:electron\"",
+    "rebuild": "electron-rebuild",
+    "fix-modules": "npm rebuild && electron-rebuild",
+    "postinstall": "electron-rebuild",
+    "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify",
+    "prebuild": "npm run build-css",
+    "build:mac": "npm run prebuild && electron-builder --mac",
+    "build:mac-dmg": "npm run prebuild && electron-builder --mac --publish=never",
+    "dist": "npm run prebuild && electron-builder"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "database/*",
+      "src/css/output.css"
+    ],
+    "delay": 1500
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^12.2.0",
+    "node-fetch": "^3.3.2",
+    "node-machine-id": "^1.1.12"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "electron-rebuild": "^3.2.9",
+    "nodemon": "^3.1.4",
+    "tailwindcss": "^3.4.4"
+  },
+  "build": {
+    "appId": "com.gestionpro.app",
+    "productName": "GestionPro",
+    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "database.js",
+      "config.js",
+      "license-manager-electron.js",
+      "expenses-db.js",
+      "login.html",
+      "login.js",
+      "activation.html",
+      "activation.js",
+      "startup.html",
+      "src/**/*",
+      "database/main-clean.db",
+      "node_modules/**/*",
+      "!node_modules/.cache/**/*",
+      "!database/main.db",
+      "!database/main.db-shm",
+      "!database/main.db-wal"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "publisherName": "GestionPro",
+      "verifyUpdateCodeSignature": false
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "target": [
+        {
+          "target": "dir",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "artifactName": "GestionPro-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "GestionPro",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "menuCategory": "Business",
+      "artifactName": "GestionPro-Setup-${version}.${ext}",
+      "license": "LICENSE.txt"
+    }
+  }
+}

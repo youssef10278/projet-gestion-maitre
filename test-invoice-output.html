@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture Test Template</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.4; color: #000; background: #fff; }
+        .invoice-container { max-width: 210mm; margin: 0 auto; padding: 15mm; background: white; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; border-radius: 8px; }
+        .company-name { font-size: 24px; font-weight: bold; margin-bottom: 5px; color: white; }
+        .invoice-title { font-size: 24px; font-weight: bold; color: white; margin-bottom: 10px; }
+        .invoice-number { font-size: 16px; font-weight: bold; color: #f97316; background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; }
+        .client-section { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #2659ab; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+        .items-table th { background: #2659ab; color: white; padding: 12px 8px; text-align: left; font-weight: bold; border: 1px solid #2659ab; }
+        .items-table td { padding: 10px 8px; border: 1px solid #ddd; vertical-align: top; }
+        .totals-table { width: 300px; border-collapse: collapse; }
+        .totals-table .label { background: #f8f9fa; font-weight: bold; text-align: right; width: 60%; }
+        .total-ttc .label, .total-ttc .amount { background: #2659ab; color: white; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-info">
+                <div class="company-name">ATLAS DISTRIBUTION</div>
+                <div class="company-details">123 Rue de Test<br>Casablanca, Maroc<br>Tél: +212 123 456 789</div>
+            </div>
+            <div class="invoice-title-section">
+                <div class="invoice-title">FACTURE</div>
+                <div class="invoice-number">N° FAC-2024-001</div>
+            </div>
+        </div>
+        
+        <div class="client-section">
+            <div class="client-title">FACTURÉ À</div>
+            <div>Client Test<br>Adresse Client<br>Ville, Pays</div>
+        </div>
+        
+        <table class="items-table">
+            <thead>
+                <tr><th>Description</th><th>Qté</th><th>Prix Unit.</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Article de test</td><td>2</td><td>100.00 MAD</td><td>200.00 MAD</td></tr>
+                <tr><td>Service de test</td><td>1</td><td>150.00 MAD</td><td>150.00 MAD</td></tr>
+            </tbody>
+        </table>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <table class="totals-table">
+                <tr><td class="label">Sous-total HT:</td><td class="amount">350.00 MAD</td></tr>
+                <tr><td class="label">TVA (20%):</td><td class="amount">70.00 MAD</td></tr>
+                <tr class="total-ttc"><td class="label">TOTAL TTC:</td><td class="amount">420.00 MAD</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
