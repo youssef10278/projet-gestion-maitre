@@ -8,7 +8,6 @@
     "watch:css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
     "dev:electron": "nodemon --exec \"electron .\"",
     "dev": "concurrently \"npm:watch:css\" \"npm:dev:electron\"",
-
     "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify",
     "prebuild": "npm run build-css",
     "build:mac": "npm run prebuild && electron-builder --mac",
