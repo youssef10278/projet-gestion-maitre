@@ -1,0 +1,36 @@
+{
+  "name": "projet-gestion-maitre",
+  "version": "2.1.0",
+  "description": "Application de bureau Maître pour la gestion complète.",
+  "main": "main-simple.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac --publish=never"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "24.13.3",
+    "7zip-bin": "5.2.0"
+  },
+  "build": {
+    "appId": "com.gestionpro.maitre",
+    "productName": "GestionPro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "node_modules/electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.business",
+      "target": [
+        {
+          "target": "default",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    }
+  }
+}
