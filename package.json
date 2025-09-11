@@ -8,6 +8,7 @@
     "watch:css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
     "dev:electron": "nodemon --exec \"electron .\"",
     "dev": "concurrently \"npm:watch:css\" \"npm:dev:electron\"",
+    "postinstall": "electron-builder install-app-deps",
     "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify",
     "prebuild": "npm run build-css",
     "build:mac": "npm run prebuild && electron-builder --mac",
@@ -35,7 +36,8 @@
     "electron-builder": "24.13.3",
     "@electron/rebuild": "^3.6.0",
     "nodemon": "^3.1.4",
-    "tailwindcss": "^3.4.4"
+    "tailwindcss": "^3.4.4",
+    "7zip-bin": "^5.2.0"
   },
   "build": {
     "appId": "com.gestionpro.app",
