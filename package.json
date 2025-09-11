@@ -2,14 +2,12 @@
   "name": "projet-gestion-maitre",
   "version": "2.1.0",
   "description": "Application de bureau Maître pour la gestion complète.",
-  "main": "main.js",
+  "main": "main-simple.js",
   "scripts": {
     "start": "electron .",
     "watch:css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
     "dev:electron": "nodemon --exec \"electron .\"",
     "dev": "concurrently \"npm:watch:css\" \"npm:dev:electron\"",
-    "rebuild": "@electron/rebuild -f -w better-sqlite3,bcrypt",
-    "fix-modules": "npm rebuild && electron-rebuild",
     "postinstall": "electron-builder install-app-deps",
     "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify",
     "prebuild": "npm run build-css",
@@ -29,8 +27,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.10.0",
-    "bcrypt": "^5.1.1",
-    "better-sqlite3": "^12.2.0",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12"
   },
